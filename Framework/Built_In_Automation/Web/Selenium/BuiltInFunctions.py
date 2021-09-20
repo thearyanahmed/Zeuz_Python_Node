@@ -16,6 +16,7 @@
 import sys, os, time, inspect, shutil, subprocess
 import socket
 import requests
+from pathlib import Path
 
 sys.path.append("..")
 from selenium import webdriver
@@ -288,7 +289,6 @@ def start_appium_server():
         )
 
 
-
 @logger
 def Open_Browser(dependency, window_size_X=None, window_size_Y=None):
     """ Launch browser and create instance """
@@ -353,7 +353,9 @@ def Open_Browser(dependency, window_size_X=None, window_size_Y=None):
                 ConfigModule.add_config_value("Selenium_driver_paths", "chrome_path", chrome_path)
             options = Options()
             options.add_argument("--no-sandbox")
-            options.add_argument("--disable-extensions")
+            # options.add_argument("--disable-extensions")
+            extension_path = str(Path("~/Downloads/MetaMask_v10.1.0.crx").expanduser())
+            options.add_extension(extension_path)
             options.add_argument('--ignore-certificate-errors')
             options.add_argument('--ignore-ssl-errors')
             options.add_experimental_option("useAutomationExtension", False)
