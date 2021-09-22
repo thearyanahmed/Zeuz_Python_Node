@@ -2954,10 +2954,10 @@ def get_global_variable(data_set):
         key = None
 
         for left, mid, right in data_set:
-            if "action" in mid.lower():
-                key = right
             if "timeout" in left.lower():
                 timeout = int(right.strip())
+            elif "action" in mid.lower():
+                key = right
 
         if key is None:
             CommonUtil.ExecLog(
@@ -2995,11 +2995,11 @@ def set_global_variable(data_set):
         value = None
 
         for left, mid, right in data_set:
-            if "parameter" in mid.lower():
-                key = left
-                value = CommonUtil.parse_value_into_object(right)
             if "timeout" in left.lower():
                 timeout = int(right.strip())
+            elif "parameter" in mid.lower():
+                key = left
+                value = CommonUtil.parse_value_into_object(right)
 
         if key is None or value is None:
             CommonUtil.ExecLog(
@@ -3041,10 +3041,10 @@ def remove_global_variable(data_set):
         key = None
 
         for left, mid, right in data_set:
-            if "action" in mid.lower():
-                key = right
             if "timeout" in left.lower():
                 timeout = int(right.strip())
+            elif "action" in mid.lower():
+                key = right
 
         if MainDriverApi.remove_global_variable(
             sModuleInfo,
