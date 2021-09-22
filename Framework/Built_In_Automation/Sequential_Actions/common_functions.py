@@ -2938,17 +2938,23 @@ def voice_command_response(step_data):
         return "zeuz_failed"
 
 
+def encode_key_with_run_id(run_id: str, key: str):
+    return f"{run_id}||{key}"
+
+
 # Gloabal variable actions
 @logger
 def get_global_variable(data_set):
     sModuleInfo = inspect.currentframe().f_code.co_name + " : " + MODULE_NAME
+
+    run_id = sr.Get_Shared_Variables("run_id")
 
     try:
         for left, mid, right in data_set:
             if "action" in mid.lower():
                 key = right
 
-                value = MainDriverApi.get_global_variable(key)
+                value = MainDriverApi.get_global_variable(encode_key_with_run_id(run_id, right))
                 sr.Set_Shared_Variables(key, CommonUtil.parse_value_into_object(value))
                 CommonUtil.ExecLog(
                     sModuleInfo, "Fetched global variable `%s` = `%s`" % (key, value), 1
@@ -2963,6 +2969,8 @@ def get_global_variable(data_set):
 def set_global_variable(data_set):
     sModuleInfo = inspect.currentframe().f_code.co_name + " : " + MODULE_NAME
 
+    run_id = sr.Get_Shared_Variables("run_id")
+
     try:
         for left, mid, right in data_set:
             if "parameter" in mid.lower():
@@ -2973,7 +2981,7 @@ def set_global_variable(data_set):
                     value = "'%d'" % value
 
                 # call main driver to send var to server
-                MainDriverApi.set_global_variable(key, value)
+                MainDriverApi.set_global_variable(encode_key_with_run_id(run_id, key), value)
 
                 CommonUtil.ExecLog(
                     sModuleInfo,
@@ -2990,11 +2998,13 @@ def set_global_variable(data_set):
 def remove_global_variable(data_set):
     sModuleInfo = inspect.currentframe().f_code.co_name + " : " + MODULE_NAME
 
+    run_id = sr.Get_Shared_Variables("run_id")
+
     try:
         for left, mid, right in data_set:
             if "action" in mid.lower():
                 key = right
-                MainDriverApi.remove_global_variable(key)
+                MainDriverApi.remove_global_variable(encode_key_with_run_id(run_id, key))
 
                 CommonUtil.ExecLog(
                     sModuleInfo,
