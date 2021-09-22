@@ -21,7 +21,7 @@ def form_uri(resource_path):
     if len(resource_path) > 0:
         if resource_path[0] == "/":
             resource_path = resource_path[1:]
-        base_server_address += "/" + resource_path 
+        base_server_address += "/" + resource_path
 
     return base_server_address
 
@@ -44,14 +44,16 @@ def Post(resource_path, payload=None):
 def Get(resource_path, payload=None,**kwargs):
     if payload is None:  # Removing default mutable argument
         payload = {}
+
+    response = requests.get(
+        form_uri(resource_path),
+        params=json.dumps(payload),
+        timeout=REQUEST_TIMEOUT,
+        verify=False,
+        **kwargs
+    )
     try:
-        return requests.get(
-            form_uri(resource_path ),
-            params=json.dumps(payload),
-            timeout=REQUEST_TIMEOUT,
-            verify=False,
-            **kwargs
-        ).json()
+        return response.json()
 
     except requests.exceptions.RequestException:
         print(
@@ -63,7 +65,7 @@ def Get(resource_path, payload=None,**kwargs):
 
     except Exception as e:
         print("Get Exception: {}".format(e))
-        return {}
+        return response
 
 
 # here params are passed as a plain dictionary for better catching get parameter values

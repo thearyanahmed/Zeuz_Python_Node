@@ -51,9 +51,9 @@ declarations = (
     { "name": "check latest mail",                           "function": "check_latest_mail",                     "screenshot": "none" },
 
     # Global Variable Actions
-    { "name": "get global list variable",                    "function": "get_global_list_variable",              "screenshot": "none" },
-    { "name": "append to global list variable",              "function": "append_to_global_list_variable",        "screenshot": "none" },
-    { "name": "remove item from global list variable",       "function": "remove_item_from_global_list_variable", "screenshot": "none" },
+    { "name": "get global variable",                         "function": "get_global_variable",                   "screenshot": "none" },
+    { "name": "set global variable",                         "function": "set_global_variable",                   "screenshot": "none" },
+    { "name": "remove global variable",                      "function": "remove_global_variable",                "screenshot": "none" },
 
     # Excel actions
     { "name": "write into single cell in excel",             "function": "write_into_single_cell_in_excel",       "screenshot": "none" },

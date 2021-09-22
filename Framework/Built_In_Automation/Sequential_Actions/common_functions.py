@@ -2940,27 +2940,19 @@ def voice_command_response(step_data):
 
 # Gloabal variable actions
 @logger
-def get_global_list_variable(data_set):
-    # get the global list variable content
+def get_global_variable(data_set):
     sModuleInfo = inspect.currentframe().f_code.co_name + " : " + MODULE_NAME
+
     try:
-        run_id = sr.Get_Shared_Variables("run_id")
+        for left, mid, right in data_set:
+            if "action" in mid.lower():
+                key = right
 
-        for row in data_set:
-            if (
-                str(row[1]).strip().lower() == "element parameter"
-                or "parameter" in str(row[1]).strip().lower()
-            ):
-                key = str(row[0]).strip()
-
-                value = MainDriverApi.get_global_list_variable(key)
-                sr.Set_Shared_Variables(key, value)
+                value = MainDriverApi.get_global_variable(key)
+                sr.Set_Shared_Variables(key, CommonUtil.parse_value_into_object(value))
                 CommonUtil.ExecLog(
-                    sModuleInfo, "Got global variable %s='%s'" % (key, value), 1
+                    sModuleInfo, "Fetched global variable `%s` = `%s`" % (key, value), 1
                 )
-                # for key in dict:
-                #     sr.Set_Shared_Variables(key, dict[key])
-                #     CommonUtil.ExecLog(sModuleInfo, "Got server variable %s='%s'" % (key, dict[key]), 1)
 
         return "passed"
     except Exception:
@@ -2968,24 +2960,24 @@ def get_global_list_variable(data_set):
 
 
 @logger
-def append_to_global_list_variable(data_set):
-    # append an item to global list variable
+def set_global_variable(data_set):
     sModuleInfo = inspect.currentframe().f_code.co_name + " : " + MODULE_NAME
-    try:
-        run_id = sr.Get_Shared_Variables("run_id")
 
-        for row in data_set:
-            if (
-                str(row[1]).strip().lower() == "element parameter"
-                or "parameter" in str(row[1]).strip().lower()
-            ):
-                key = str(row[0]).strip()
-                value = str(row[2]).strip()
+    try:
+        for left, mid, right in data_set:
+            if "parameter" in mid.lower():
+                key = left
+                value = CommonUtil.parse_value_into_object(right)
+
+                if type(value) in (int, float, bool):
+                    value = "'%d'" % value
+
                 # call main driver to send var to server
-                MainDriverApi.append_to_global_list_variable(key, value)
+                MainDriverApi.set_global_variable(key, value)
+
                 CommonUtil.ExecLog(
                     sModuleInfo,
-                    f"append value : {value} to global variable {key} complete",
+                    f"Global variable `{key}` set to `{value}`",
                     1,
                 )
 
@@ -2995,24 +2987,18 @@ def append_to_global_list_variable(data_set):
 
 
 @logger
-def remove_item_from_global_list_variable(data_set):
-    # remove an item from a global list variable
+def remove_global_variable(data_set):
     sModuleInfo = inspect.currentframe().f_code.co_name + " : " + MODULE_NAME
-    try:
-        run_id = sr.Get_Shared_Variables("run_id")
 
-        for row in data_set:
-            if (
-                str(row[1]).strip().lower() == "element parameter"
-                or "parameter" in str(row[1]).strip().lower()
-            ):
-                key = str(row[0]).strip()
-                value = str(row[2]).strip()
-                # call main driver to send var to server
-                MainDriverApi.remove_item_from_global_list_variable(key, value)
+    try:
+        for left, mid, right in data_set:
+            if "action" in mid.lower():
+                key = right
+                MainDriverApi.remove_global_variable(key)
+
                 CommonUtil.ExecLog(
                     sModuleInfo,
-                    f"remove value : {value} from global variable {key} complete",
+                    f"Removed global variable `{key}`",
                     1,
                 )
 
@@ -3511,10 +3497,10 @@ def text_write(data_set):
 @logger
 def modify_datetime(data_set):
     """
-    This action allows you to modify the date and time of a given datetime 
+    This action allows you to modify the date and time of a given datetime
     object or today's date.
     """
-    
+
     sModuleInfo = inspect.currentframe().f_code.co_name + " : " + MODULE_NAME
 
     from datetime import datetime, timedelta

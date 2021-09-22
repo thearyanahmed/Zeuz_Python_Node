@@ -94,25 +94,25 @@ def get_server_variable(run_id, key):
 
 
 # get global list variable
-def get_global_list_variable(name):
+def get_global_variable(name):
     return RequestFormatter.Get(
-        "set_or_get_global_server_list_variable_api", {"name": name}
+        "get_global_variable_api", {"name": name}
     )
 
 
 # append to global list variable
-def append_to_global_list_variable(name, value):
+def set_global_variable(name, value):
     return RequestFormatter.Get(
-        "append_value_to_global_server_list_variable_api",
+        "set_global_variable_api",
         {"name": name, "value": value},
     )
 
 
 # remove item from global list variable
-def remove_item_from_global_list_variable(name, value):
+def remove_global_variable(name):
     return RequestFormatter.Get(
-        "delete_global_server_list_variable_by_value_api",
-        {"name": name, "value": value},
+        "remove_global_variable_api",
+        {"name": name},
     )
 
 
