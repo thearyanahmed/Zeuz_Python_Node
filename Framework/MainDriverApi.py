@@ -94,26 +94,54 @@ def get_server_variable(run_id, key):
 
 
 # get global list variable
-def get_global_variable(name):
-    return RequestFormatter.Get(
-        "get_global_variable_api", {"name": name}
-    )
+def get_global_variable(sModuleInfo, name, timeout=60):
+    try:
+        return RequestFormatter.Get(
+            "get_global_variable_api", payload={"name": name}, timeout=timeout
+        )
+    except requests.exceptions.ReadTimeout:
+        CommonUtil.ExecLog(
+            sModuleInfo,
+            "Timed out waiting for global variable.",
+            3,
+        )
+        return False
 
 
 # append to global list variable
-def set_global_variable(name, value):
-    return RequestFormatter.Get(
-        "set_global_variable_api",
-        {"name": name, "value": value},
-    )
+def set_global_variable(sModuleInfo, name, value, timeout=60):
+    try:
+        RequestFormatter.Get(
+            "set_global_variable_api",
+            {"name": name, "value": value},
+            timeout=timeout,
+        )
+        return True
+    except requests.exceptions.ReadTimeout:
+        CommonUtil.ExecLog(
+            sModuleInfo,
+            "Timed out waiting for global variable.",
+            3,
+        )
+        return False
 
 
 # remove item from global list variable
-def remove_global_variable(name):
-    return RequestFormatter.Get(
-        "remove_global_variable_api",
-        {"name": name},
-    )
+def remove_global_variable(sModuleInfo, name, timeout=60):
+    try:
+        RequestFormatter.Get(
+            "remove_global_variable_api",
+            {"name": name},
+            timeout=timeout,
+        )
+        return True
+    except requests.exceptions.ReadTimeout:
+        CommonUtil.ExecLog(
+            sModuleInfo,
+            "Timed out waiting for global variable.",
+            3,
+        )
+        return False
 
 
 # get all server variable

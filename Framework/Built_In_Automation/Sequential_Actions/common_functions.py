@@ -2950,15 +2950,33 @@ def get_global_variable(data_set):
     run_id = sr.Get_Shared_Variables("run_id")
 
     try:
+        timeout = None
+        key = None
+
         for left, mid, right in data_set:
             if "action" in mid.lower():
                 key = right
+            if "timeout" in left.lower():
+                timeout = int(right.strip())
 
-                value = MainDriverApi.get_global_variable(encode_key_with_run_id(run_id, right))
-                sr.Set_Shared_Variables(key, CommonUtil.parse_value_into_object(value))
-                CommonUtil.ExecLog(
-                    sModuleInfo, "Fetched global variable `%s` = `%s`" % (key, value), 1
-                )
+        if key is None:
+            CommonUtil.ExecLog(
+                sModuleInfo, "key parameter must be provided", 3
+            )
+            return "zeuz_failed"
+
+        value = MainDriverApi.get_global_variable(
+            sModuleInfo,
+            encode_key_with_run_id(run_id, right),
+            timeout,
+        )
+        if value:
+            sr.Set_Shared_Variables(key, CommonUtil.parse_value_into_object(value))
+            CommonUtil.ExecLog(
+                sModuleInfo, "Fetched global variable `%s` = `%s`" % (key, value), 1
+            )
+        else:
+            return "zeuz_failed"
 
         return "passed"
     except Exception:
@@ -2972,22 +2990,40 @@ def set_global_variable(data_set):
     run_id = sr.Get_Shared_Variables("run_id")
 
     try:
+        timeout = None
+        key = None
+        value = None
+
         for left, mid, right in data_set:
             if "parameter" in mid.lower():
                 key = left
                 value = CommonUtil.parse_value_into_object(right)
+            if "timeout" in left.lower():
+                timeout = int(right.strip())
 
-                if type(value) in (int, float, bool):
-                    value = "'%d'" % value
+        if key is None or value is None:
+            CommonUtil.ExecLog(
+                sModuleInfo, "Both key and value parameter must be provided", 3
+            )
+            return "zeuz_failed"
 
-                # call main driver to send var to server
-                MainDriverApi.set_global_variable(encode_key_with_run_id(run_id, key), value)
+        if type(value) in (int, float, bool):
+            value = "'%d'" % value
 
-                CommonUtil.ExecLog(
-                    sModuleInfo,
-                    f"Global variable `{key}` set to `{value}`",
-                    1,
-                )
+        # call main driver to send var to server
+        if MainDriverApi.set_global_variable(
+            sModuleInfo,
+            encode_key_with_run_id(run_id, key),
+            value,
+            timeout,
+        ):
+            CommonUtil.ExecLog(
+                sModuleInfo,
+                f"Global variable `{key}` set to `{value}`",
+                1,
+            )
+        else:
+            return "zeuz_failed"
 
         return "passed"
     except Exception:
@@ -3001,16 +3037,27 @@ def remove_global_variable(data_set):
     run_id = sr.Get_Shared_Variables("run_id")
 
     try:
+        timeout = None
+        key = None
+
         for left, mid, right in data_set:
             if "action" in mid.lower():
                 key = right
-                MainDriverApi.remove_global_variable(encode_key_with_run_id(run_id, key))
+            if "timeout" in left.lower():
+                timeout = int(right.strip())
 
-                CommonUtil.ExecLog(
-                    sModuleInfo,
-                    f"Removed global variable `{key}`",
-                    1,
-                )
+        if MainDriverApi.remove_global_variable(
+            sModuleInfo,
+            encode_key_with_run_id(run_id, key),
+            timeout,
+        ):
+            CommonUtil.ExecLog(
+                sModuleInfo,
+                f"Removed global variable `{key}`",
+                1,
+            )
+        else:
+            return "zeuz_failed"
 
         return "passed"
     except Exception:

@@ -41,14 +41,16 @@ def Post(resource_path, payload=None):
         return {}
 
 
-def Get(resource_path, payload=None,**kwargs):
+def Get(resource_path, payload=None, **kwargs):
     if payload is None:  # Removing default mutable argument
         payload = {}
+
+    if "timeout" not in kwargs:
+        kwargs["timeout"] = REQUEST_TIMEOUT
 
     response = requests.get(
         form_uri(resource_path),
         params=json.dumps(payload),
-        timeout=REQUEST_TIMEOUT,
         verify=False,
         **kwargs
     )
