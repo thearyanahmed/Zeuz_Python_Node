@@ -609,7 +609,7 @@ def _switch(step_data_set):
     except Exception:
         return CommonUtil.Exception_Handler(sys.exc_info())
 
-end = 6
+end = 1
 def _get_xpath_or_css_element(element_query, css_xpath, index_number=None, Filter="", return_all_elements=False):
     """
     Here, we actually execute the query based on css/xpath and then analyze if there are multiple.
@@ -712,9 +712,11 @@ def _get_xpath_or_css_element(element_query, css_xpath, index_number=None, Filte
             time.sleep(1)
         # end of while loop
 
-        if exception_cnd or len(all_matching_elements_visible_invisible)== 0:
+        i = 0 if index_number is None else index_number
+        if exception_cnd or len(all_matching_elements_visible_invisible) <= i:
+            generic_driver.switch_to.default_content()
             iframes = generic_driver.find_elements_by_tag_name('iframe') #find all the iframes in the default frame
-            all_matching_elements_visible_invisible = auto_frame_switch(len(iframes),all_matching_elements_visible_invisible,unique_element,element_query,css_xpath)
+            all_matching_elements_visible_invisible = auto_frame_switch(len(iframes), [],unique_element,element_query,css_xpath, i)
 
         #flag ==1 means function returned the unique element
         if flag == 1:
@@ -727,6 +729,11 @@ def _get_xpath_or_css_element(element_query, css_xpath, index_number=None, Filte
         else:
             displayed_len = len(all_matching_elements)
             hidden_len = len(all_matching_elements_visible_invisible) - displayed_len
+
+        tot_len = len(all_matching_elements_visible_invisible)
+        if (Filter == "allow hidden" and (index_number is None and tot_len == 0) or (index_number is not None and tot_len <= index_number))\
+        or ((index_number is None and displayed_len == 0) or (index_number is not None and displayed_len <= index_number)):
+            pass
 
         if return_all_elements:
             if Filter == "allow hidden":
@@ -1184,7 +1191,7 @@ def _scale_image(file_name, size_w, size_h):
         return CommonUtil.Exception_Handler(sys.exc_info(), None, "Error scaling image")
 
 
-def auto_frame_switch(number_of_iframes,all_matching_elements_visible_invisible,unique_element,element_query,css_xpath):
+def auto_frame_switch(number_of_iframes,all_matching_elements_visible_invisible,unique_element,element_query,css_xpath, element_index):
     try:
         for idx in range(number_of_iframes):
             generic_driver.switch_to.frame(idx)
@@ -1253,11 +1260,9 @@ def auto_frame_switch(number_of_iframes,all_matching_elements_visible_invisible,
                                 By.XPATH, "//*[@%s='%s']" % (unique_key, unique_value)
                             )
                     if unique_element != None:
-                        generic_driver.switch_to.default_content()
                         return unique_element
                 except:
                     pass
-
 
             elif css_xpath == "xpath" and driver_type != "xml":
                 all_matching_elements_visible_invisible += generic_driver.find_elements(By.XPATH, element_query)
@@ -1266,22 +1271,25 @@ def auto_frame_switch(number_of_iframes,all_matching_elements_visible_invisible,
             elif css_xpath == "css":
                 all_matching_elements_visible_invisible += generic_driver.find_elements(By.CSS_SELECTOR, element_query)
 
-            #Check if there is any iframe in the remaining iframe & save it into variable if found
+            if len(all_matching_elements_visible_invisible) > element_index:
+                return all_matching_elements_visible_invisible
+
             iframes = generic_driver.find_elements_by_tag_name('iframe')
             # if there is nested iframes it will call the function recursively
-            if len(iframes)!= 0 :
-                auto_frame_switch(len(iframes),all_matching_elements_visible_invisible,unique_element,element_query,css_xpath)
+            if len(iframes) != 0:
+                auto_frame_switch(len(iframes), all_matching_elements_visible_invisible, unique_element, element_query, css_xpath)
+                if len(all_matching_elements_visible_invisible) > element_index:
+                    generic_driver.switch_to.parent_frame()
+                    return all_matching_elements_visible_invisible
                 generic_driver.switch_to.parent_frame()
-
             else:
                 generic_driver.switch_to.parent_frame()
 
-        #end of for loop
         return all_matching_elements_visible_invisible
 
     except:
         generic_driver.switch_to.default_content()
-        return CommonUtil.Exception_Handler(sys.exc_info(), None, "Element is not found using given parameters")
+        return CommonUtil.Exception_Handler(sys.exc_info(), None, "Exception Occured during auto iframe switch")
 
 """
 #Sample sibling Example1:
