@@ -609,7 +609,7 @@ def _switch(step_data_set):
     except Exception:
         return CommonUtil.Exception_Handler(sys.exc_info())
 
-end = 7
+end = 6
 def _get_xpath_or_css_element(element_query, css_xpath, index_number=None, Filter="", return_all_elements=False):
     """
     Here, we actually execute the query based on css/xpath and then analyze if there are multiple.
@@ -618,14 +618,14 @@ def _get_xpath_or_css_element(element_query, css_xpath, index_number=None, Filte
     If return_all_elements = True then we return all elements.
     """
     try:
-        all_matching_elements_visible_invisible = False
+        all_matching_elements_visible_invisible = []
         sModuleInfo = inspect.currentframe().f_code.co_name + " : " + MODULE_NAME
-
         exception_msg = ""
         exception_cnd = False
         start = time.time()
         #end = start + int(sr.Get_Shared_Variables("element_wait"))
-
+        unique_element = None
+        flag=0
         x = 0
         #while time.time() < end:
         while x < end:
@@ -633,6 +633,7 @@ def _get_xpath_or_css_element(element_query, css_xpath, index_number=None, Filte
             if css_xpath == "unique" and (
                 driver_type == "appium" or driver_type == "selenium"
             ):  # for unique id
+                flag=1
                 try:
                     unique_key = element_query[0]
                     unique_value = element_query[1]
@@ -693,9 +694,10 @@ def _get_xpath_or_css_element(element_query, css_xpath, index_number=None, Filte
                             unique_element = generic_driver.find_element(
                                 By.XPATH, "//*[@%s='%s']" % (unique_key, unique_value)
                             )
-                    return unique_element
-                except Exception as e:
-                    exception_msg = e
+                    if unique_element != None:
+                        return unique_element
+                except :
+                    #exception_msg = e
                     exception_cnd = True
                     continue
             elif css_xpath == "xpath" and driver_type != "xml":
@@ -705,13 +707,18 @@ def _get_xpath_or_css_element(element_query, css_xpath, index_number=None, Filte
             elif css_xpath == "css":
                 all_matching_elements_visible_invisible = generic_driver.find_elements(By.CSS_SELECTOR, element_query)
 
-            if all_matching_elements_visible_invisible and len(filter_elements(all_matching_elements_visible_invisible, "")) > 0:
+            if len(all_matching_elements_visible_invisible) > 0 and len(filter_elements(all_matching_elements_visible_invisible, "")) > 0:
                 break
             time.sleep(1)
         # end of while loop
 
-        if exception_cnd:
-            return False
+        if exception_cnd or len(all_matching_elements_visible_invisible)== 0:
+            iframes = generic_driver.find_elements_by_tag_name('iframe') #find all the iframes in the default frame
+            all_matching_elements_visible_invisible = auto_frame_switch(len(iframes),all_matching_elements_visible_invisible,unique_element,element_query,css_xpath)
+
+        #flag ==1 means function returned the unique element
+        if flag == 1:
+            return all_matching_elements_visible_invisible
 
         all_matching_elements = filter_elements(all_matching_elements_visible_invisible, Filter)
         if Filter == "allow hidden":
@@ -1176,6 +1183,105 @@ def _scale_image(file_name, size_w, size_h):
     except:
         return CommonUtil.Exception_Handler(sys.exc_info(), None, "Error scaling image")
 
+
+def auto_frame_switch(number_of_iframes,all_matching_elements_visible_invisible,unique_element,element_query,css_xpath):
+    try:
+        for idx in range(number_of_iframes):
+            generic_driver.switch_to.frame(idx)
+
+            if css_xpath == "unique" and (
+                driver_type == "appium" or driver_type == "selenium"
+            ):  # for unique id
+                try:
+                    unique_key = element_query[0]
+                    unique_value = element_query[1]
+                    if driver_type == "appium" and (
+                        unique_key == "accessibility id"
+                        or unique_key == "accessibility-id"
+                        or unique_key == "content-desc"
+                        or unique_key == "content desc"
+                    ):  # content-desc for android, accessibility id for iOS
+                        unique_element = generic_driver.find_element_by_accessibility_id(
+                            unique_value
+                        )
+                    elif unique_key == "id" or (driver_type == "appium" and (unique_key == "resource id" or unique_key == "resource-id" or unique_key == "name")):  # name for iOS
+                        unique_element = generic_driver.find_element(By.ID, unique_value)
+                    elif unique_key == "name":
+                        unique_element = generic_driver.find_element(By.NAME, unique_value)
+                    elif unique_key == "class":
+                        unique_element = generic_driver.find_element(
+                            By.CLASS_NAME, unique_value
+                        )
+                    elif unique_key == "tag":
+                        unique_element = generic_driver.find_element(
+                            By.TAG_NAME, unique_value
+                        )
+                    elif unique_key == "css":
+                        unique_element = generic_driver.find_element(
+                            By.CSS_SELECTOR, unique_value
+                        )
+                    elif unique_key == "xpath":
+                        unique_element = generic_driver.find_element(By.XPATH, unique_value)
+                    elif unique_key in ["text", "*text"]:
+                        if driver_type == "appium":
+                            if unique_key == "text":
+                                unique_element = generic_driver.find_element(
+                                    By.XPATH, '//*[@text="%s"]' % unique_value
+                                )
+                            else:
+                                unique_element = generic_driver.find_element(
+                                    By.XPATH, '//*[contains(@text,"%s")]' % unique_value
+                                )
+                        else:
+                            if unique_key == "text":
+                                unique_element = generic_driver.find_element(
+                                    By.XPATH, '//*[text()="%s"]' % unique_value
+                                )
+                            else:
+                                unique_element = generic_driver.find_element(
+                                    By.XPATH, '//*[contains(text(),"%s")]' % unique_value
+                                )
+                    else:
+                        if "*" in unique_key:
+                            unique_key = unique_key[1:]  # drop the asterisk
+                            unique_element = generic_driver.find_element(
+                                By.XPATH,
+                                "//*[contains(@%s,'%s')]" % (unique_key, unique_value),
+                            )
+                        else:
+                            unique_element = generic_driver.find_element(
+                                By.XPATH, "//*[@%s='%s']" % (unique_key, unique_value)
+                            )
+                    if unique_element != None:
+                        generic_driver.switch_to.default_content()
+                        return unique_element
+                except:
+                    pass
+
+
+            elif css_xpath == "xpath" and driver_type != "xml":
+                all_matching_elements_visible_invisible += generic_driver.find_elements(By.XPATH, element_query)
+            elif css_xpath == "xpath" and driver_type == "xml":
+                all_matching_elements_visible_invisible += generic_driver.xpath(element_query)
+            elif css_xpath == "css":
+                all_matching_elements_visible_invisible += generic_driver.find_elements(By.CSS_SELECTOR, element_query)
+
+            #Check if there is any iframe in the remaining iframe & save it into variable if found
+            iframes = generic_driver.find_elements_by_tag_name('iframe')
+            # if there is nested iframes it will call the function recursively
+            if len(iframes)!= 0 :
+                auto_frame_switch(len(iframes),all_matching_elements_visible_invisible,unique_element,element_query,css_xpath)
+                generic_driver.switch_to.parent_frame()
+
+            else:
+                generic_driver.switch_to.parent_frame()
+
+        #end of for loop
+        return all_matching_elements_visible_invisible
+
+    except:
+        generic_driver.switch_to.default_content()
+        return CommonUtil.Exception_Handler(sys.exc_info(), None, "Element is not found using given parameters")
 
 """
 #Sample sibling Example1:
