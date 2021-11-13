@@ -359,6 +359,7 @@ def Open_Browser(dependency, window_size_X=None, window_size_Y=None):
             options.add_experimental_option("useAutomationExtension", False)
             d = DesiredCapabilities.CHROME
             d["loggingPrefs"] = {"browser": "ALL"}
+            d['goog:loggingPrefs'] = {'performance': 'ALL'}
             if "chromeheadless" in browser:
                 options.add_argument(
                     "--headless"
@@ -448,7 +449,7 @@ def Open_Browser(dependency, window_size_X=None, window_size_Y=None):
             CommonUtil.set_screenshot_vars(Shared_Resources.Shared_Variable_Export())
             return "passed"
 
-        elif browser == "edge":
+        elif browser == "microsoft edge chromium":
             edge_path = ConfigModule.get_config_value("Selenium_driver_paths", "edge_path")
             if not edge_path:
                 edge_path = EdgeChromiumDriverManager().install()
@@ -3332,6 +3333,18 @@ def switch_iframe(step_data):
                     return "zeuz_failed"
                 if idx < 0:
                     idx = len(iframes) + idx
+                try:
+                    frame_attribute = iframes[idx].get_attribute('outerHTML')
+                    i, c = 0, 0
+                    for i in range(len(frame_attribute)): 
+                        if frame_attribute[i] == '"':
+                            c += 1
+                        if (frame_attribute[i] == ">" and c % 2 == 0):
+                            break
+                    frame_attribute =  frame_attribute[:i+1]
+                    CommonUtil.ExecLog(sModuleInfo, "%s" % (frame_attribute), 5)
+                except:
+                    pass
                 selenium_driver.switch_to.frame(idx)
 
             elif "default" in right.lower():

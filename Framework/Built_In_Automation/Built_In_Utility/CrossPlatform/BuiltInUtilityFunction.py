@@ -1572,7 +1572,7 @@ def Add_Log(step_data):
         list = log_info.split(
             " "
         )  # log level in step data is given as log_1/log_2/log_3 , so to get the level split it by "_"
-        Comment = str(step_data[0][2]).strip()  # get the comment
+        Comment = str(CommonUtil.parse_value_into_object(step_data[0][2])).strip()  # get the comment
         LogLevel = int(list[1])  # get the level
         CommonUtil.ExecLog(sModuleInfo, "%s" % Comment, LogLevel)
         return "passed"
@@ -2198,84 +2198,43 @@ def TimeStamp(format):
 def Upload(step_data):
     sModuleInfo = inspect.currentframe().f_code.co_name + " : " + MODULE_NAME
     try:
-        if _platform == "linux" or _platform == "linux2" or _platform == "darwin":
-            # linux
-            CommonUtil.ExecLog(sModuleInfo, "linux", 1)
-            from_path = (
-                get_home_folder() + str(step_data[0][2]).strip()
-            )  # location of the file/folder to be copied\
-
-            # temp_ini_file = get_home_folder() + "/Desktop/AutomationLog/temp_config.ini"
-
-            temp_ini_file = os.path.join(
-                os.path.join(
-                    os.path.abspath(__file__).split("Framework")[0],
-                    os.path.join(
-                        "AutomationLog",
-                        ConfigModule.get_config_value("Advanced Options", "_file"),
-                    ),
-                )
-            )
-
-            list = from_path.split("/")
-            to_path = (
-                ConfigModule.get_config_value(
-                    "sectionOne", "test_case_folder", temp_ini_file
-                )
-                + "/"
-                + list[len(list) - 1]
-            )  # location where to copy the file/folder
-
-        elif _platform == "win32":
-            # windows
-            CommonUtil.ExecLog(sModuleInfo, "windows", 1)
-            from_path = raw(
-                str(step_data[0][0]).strip()
-            )  # location of the file/folder to be copied
-
-            # temp_ini_file = get_home_folder() + raw("\Desktop\AutomationLog\temp_config.ini")
-            temp_ini_file = os.path.join(
-                os.path.join(
-                    os.path.abspath(__file__).split("Framework")[0],
-                    os.path.join(
-                        "AutomationLog",
-                        ConfigModule.get_config_value("Advanced Options", "_file"),
-                    ),
-                )
-            )
-
-            list = from_path.split("\\")
-            to_path = (
-                ConfigModule.get_config_value(
-                    "sectionOne", "test_case_folder", temp_ini_file
-                )
-                + "\\"
-                + list[len(list) - 1]
-            )
-
-        result = copy_file(from_path, to_path)
-        if result in failed_tag_list:
-            CommonUtil.ExecLog(
-                sModuleInfo,
-                "Could not copy file '%s' to the log uploader '%s'"
-                % (from_path, to_path),
-                3,
-            )
-            return "zeuz_failed"
+        if _platform == "linux" or _platform == "linux2" or _platform == "darwin": # linux
+            from_path = get_home_folder() + str(step_data[0][2]).strip()  # location of the file/folder to be copied\
+        elif _platform == "win32": # windows
+            from_path = raw(str(step_data[0][2]).strip())  # location of the file/folder to be copied
         else:
-            CommonUtil.ExecLog(
-                sModuleInfo,
-                "File '%s' copied to the log uploader '%s' successfully"
-                % (from_path, to_path),
-                1,
+            CommonUtil.ExecLog(sModuleInfo, "Unsupported OS", 3)
+            return "zeuz_failed"
+
+        temp_ini_file = os.path.join(
+            os.path.join(
+                os.path.abspath(__file__).split("Framework")[0],
+                os.path.join(
+                    "AutomationLog",
+                    ConfigModule.get_config_value("Advanced Options", "_file"),
+                ),
             )
-            return "passed"
+        )
+
+        list_of_dirs = from_path.split(os.sep)
+        to_path = ConfigModule.get_config_value("sectionOne", "test_case_folder", temp_ini_file) + os.sep + list_of_dirs[len(list_of_dirs) - 1]
+        # location where to copy the file/folder
+
+        if os.path.isfile(from_path):
+            result = copy_file(from_path, to_path)
+        elif os.path.isdir(from_path):
+            result = copy_folder(from_path, to_path)
+        else:
+            result = "zeuz_failed"
+
+        if result == "zeuz_failed":
+            CommonUtil.ExecLog(sModuleInfo, "Could not copy %s '%s' to the log uploader '%s'" % ("file" if os.path.isfile(from_path) else "folder", from_path, to_path), 3)
+        else:
+            CommonUtil.ExecLog(sModuleInfo, "%s '%s' copied to the log uploader '%s' successfully" % ("File" if os.path.isfile(from_path) else "Folder", from_path, to_path), 1)
+        return result
 
     except Exception:
         return CommonUtil.Exception_Handler(sys.exc_info())
-
-
-# temp_config = os.path.join(os.path.join(get_home_folder(), os.path.join('Desktop', os.path.join('AutomationLog',ConfigModule.get_config_value('Temp', '_file')))))
 
 
 temp_config = os.path.join(

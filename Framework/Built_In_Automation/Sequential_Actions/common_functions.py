@@ -585,55 +585,32 @@ def Wait_For_Element(data_set):
 
     try:
         wait_for_element_to_disappear = False
-
-        # Find the wait time from the data set
+        timeout_duration = None
         for row in data_set:
             if row[1] == "action":
                 if row[0] == "wait disable":
                     wait_for_element_to_disappear = True
-                timeout_duration = int(row[2])
+                timeout_duration = float(row[2])
 
-        # Check for element every second
-        LocateElement.end = 7
-        end_time = time.time() + timeout_duration  # Time at which we should stop looking
-        for i in range(timeout_duration):
-            # Keep testing element until this is reached (likely never hit due to timeout below)
-            # Wait and then test if we are over our alloted time limit
-            if time.time() >= end_time:  # Keep testing element until this is reached (ensures we wait exactly the specified amount of time)
-                break
-            time.sleep(1)
+        if not wait_for_element_to_disappear:
+            Element = LocateElement.Get_Element(data_set, common_driver, element_wait=timeout_duration)
+            if Element not in failed_tag_list:  # Element found
+                CommonUtil.ExecLog(sModuleInfo, "Element appeared", 1)
+                return "passed"
+            else:
+                CommonUtil.ExecLog(sModuleInfo, "Element did not appear", 3)
+                return "zeuz_failed"
 
-            # Test if element exists or not
-            Element = LocateElement.Get_Element(data_set, common_driver, wait_enable=False)
-
-            # Check if element exists or not, depending on the type of wait the user wanted
-            if not wait_for_element_to_disappear:  # Wait for it to appear
-                if Element not in failed_tag_list:  # Element found
-                    CommonUtil.ExecLog(sModuleInfo, "Found element", 1)
-                    LocateElement.end = 7
-                    return "passed"
-                else:  # Element not found, keep waiting
-                    CommonUtil.ExecLog(
-                        sModuleInfo,
-                        "Element does not exist. Sleep and try again - %d" % i,
-                        0,
-                    )
-            else:  # Wait for it to be removed/hidden/disabled
+        else:
+            start = time.time()
+            while time.time() <= start + timeout_duration:
+                Element = LocateElement.Get_Element(data_set, common_driver, element_wait=2.0)
                 if Element in failed_tag_list:  # Element removed
                     CommonUtil.ExecLog(sModuleInfo, "Element disappeared", 1)
-                    LocateElement.end = 7
                     return "passed"
-                else:  # Element found, keep waiting
-                    CommonUtil.ExecLog(
-                        sModuleInfo,
-                        "Element still exists. Sleep and try again - %d" % i,
-                        0,
-                    )
-
-        # Element status not changed after time elapsed, to exit with failure
-        LocateElement.end = 7
-        CommonUtil.ExecLog(sModuleInfo, "Wait for element failed", 3)
-        return "zeuz_failed"
+                time.sleep(timeout_duration/10)
+            CommonUtil.ExecLog(sModuleInfo, "Element did not disappear", 3)
+            return "zeuz_failed"
 
     except Exception:
         return CommonUtil.Exception_Handler(sys.exc_info())
@@ -1175,6 +1152,20 @@ def New_Compare_Variables(step_data):
                             ),
                             2,
                         )
+                    if match_by_index:
+                        if list1 == list2:
+                            CommonUtil.ExecLog(sModuleInfo, "LEFT (%s):\n%s\n\nRIGHT (%s):\n%s" % (datatype1, list1_str, datatype2, list2_str), 1)
+                            CommonUtil.ExecLog(sModuleInfo, "LEFT and RIGHT value matched", 1)
+                            return "passed"
+                        else:
+                            CommonUtil.ExecLog(sModuleInfo, "LEFT (%s):\n%s\n\nRIGHT (%s):\n%s" % (datatype1, list1_str, datatype2, list2_str), 3)
+                            CommonUtil.ExecLog(sModuleInfo, "LEFT and RIGHT value did not match", 3)
+                            return "zeuz_failed"
+                    else:
+                        CommonUtil.ExecLog(sModuleInfo, "Right now we only support 'exact match' for dictionary comparison", 3)
+                        return "zeuz_failed"
+
+
             else:
                 if len(not_found_list1) > 0 or len(not_found_list2) > 0:
                     CommonUtil.ExecLog(sModuleInfo, "LEFT (Simple list):\n%s\n\nRIGHT (Simple list):\n%s" % (list1_str, list2_str), 3)
@@ -2527,6 +2518,8 @@ def excel_read(data_set):
         var_name = None
         cell_range = None
         expand = None
+        structure_of_variable = None
+        key_reference = None
 
         for left, mid, right in data_set:
             left = left.lower()
@@ -2546,15 +2539,37 @@ def excel_read(data_set):
                 cell_range = right.strip()
             if "read from excel" in left:
                 var_name = right.strip()
+            if "structure of variable" in left:
+                structure_of_variable = right.lower().strip()
+                if structure_of_variable not in ("dictionary", "list of lists"):
+                    CommonUtil.ExecLog(sModuleInfo, "Only 'list of lists' and 'dictionary' avaliable", 3)
+                    return "zeuz_failed"
+            if "key reference" in left:
+                key_reference = right.lower().strip().replace(" ", "")
+                if key_reference not in ("row1", "column1"):
+                    CommonUtil.ExecLog(sModuleInfo, "Currently we only support Column 1 and Row 1", 3)
+                    return "zeuz_failed"
 
         wb = xw.Book(filepath)
         sheet = wb.sheets[sheet_name]
-
+        if key_reference is None:
+            key_reference = "row1"
         if expand:
             # expand can be 'table', 'down' and 'right'
             cell_data = sheet.range(cell_range).expand(expand).value
         else:
             cell_data = sheet.range(cell_range).value
+
+        if structure_of_variable == "dictionary":
+            data_dict = {}
+            if key_reference == "row1":
+                row_data = list(map(list, zip(*cell_data)))
+                for cells in row_data:
+                    data_dict[cells[0]] = cells[1:]
+            elif key_reference == "column1":
+                for cells in cell_data:
+                    data_dict[cells[0]] = cells[1:] 
+            cell_data = data_dict
 
         # Save into shared variables
         sr.Set_Shared_Variables(var_name, cell_data)
@@ -3500,29 +3515,61 @@ def text_write(data_set):
     try:
         filepath = None
         value = ""
-        index = 0
+        line_no = None
+        operation = "overwrite"
         for left, _, right in data_set:
             left = left.lower().strip()
             if "file path" == left:
                 filepath = right.strip()
-                # Expand ~ (home directory of user) to absolute path.
-                if "~" in filepath:
-                    filepath = Path(os.path.expanduser(filepath))
-                filepath = Path(filepath)
+
             elif "line no" == left:
-                index = CommonUtil.parse_value_into_object(right.strip())
+                line_no = CommonUtil.parse_value_into_object(right.strip())
             elif "write into text file" == left:
                 value = right
+            elif "operation" == left:
+                Right = right.strip().lower()
+                if Right == "append":
+                    operation = Right
+                elif Right in ("overwrite", "rewrite", "new"):
+                    pass
+                else:
+                    CommonUtil.ExecLog(sModuleInfo, 'We only support "New", "Overwrite" and "Append" operations', 3)
+                    return "zeuz_failed"
 
-        with open(filepath) as text_file:
-            lines = text_file.readlines()
-        if not value.endswith("\n"):
-            value = value + "\n"
-        lines[index] = value
-        with open(filepath, "w") as text_file:
-            text_file.writelines(lines)
+        # Expand ~ (home directory of user) to absolute path.
+        if "~" in filepath:
+            filepath = Path(os.path.expanduser(filepath))
 
-        CommonUtil.ExecLog(sModuleInfo, "%s no line of %s was changed with the given text successfully" % (str(index), str(filepath)), 1)
+        filepath = Path(filepath)
+
+        if line_no is not None:
+            with open(filepath) as text_file:
+                lines = text_file.readlines()
+            if not value.endswith("\n"):
+                value = value + "\n"
+            lines[line_no] = value
+            with open(filepath, "w") as text_file:
+                text_file.writelines(lines)
+            CommonUtil.ExecLog(sModuleInfo, "%s no line of %s was changed with the given text successfully" % (str(line_no), str(filepath)), 1)
+
+        elif operation == "append":
+            exist = os.path.exists(filepath)
+            with open(filepath, 'a') as text_file:
+                text_file.write(value)
+            if exist:
+                CommonUtil.ExecLog(sModuleInfo, "Appended the given text into: %s" % str(filepath), 1)
+            else:
+                CommonUtil.ExecLog(sModuleInfo, "The file does not exist so creating a new file into: %s" % str(filepath), 1)
+
+        elif operation == "overwrite":
+            exist = os.path.exists(filepath)
+            with open(filepath, 'w') as text_file:
+                text_file.write(value)
+            if exist:
+                CommonUtil.ExecLog(sModuleInfo, "Overwritten the given text into: %s" % str(filepath), 1)
+            else:
+                CommonUtil.ExecLog(sModuleInfo, "The file does not exist so creating a new file into: %s" % str(filepath), 1)
+
         return "passed"
 
     except:
@@ -3868,12 +3915,14 @@ def custom_step_duration(data_set):
                value = right.strip()
         dot = value.count(".")
         if dot == 0:
-            value += ".000000"
+            value += ".000"
         elif dot != 1:
             CommonUtil.ExecLog(sModuleInfo, "Please provide in valid time format- HH:MM:SS.mmm", 3)
             return "zeuz_failed"
         else:
-            value += "0" * (6-len(value.split(".")[-1]))
+            value = value.split(".")
+            value = value[0] + "." + str(round(float("." + value[-1]), 3))[2:]
+            value += "0" * (3-len(value.split(".")[-1]))
         colon = 2 - value.count(":")
         if colon < 0:
             CommonUtil.ExecLog(sModuleInfo, "Please provide in valid time format- HH:MM:SS.mmm", 3)

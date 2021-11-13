@@ -613,7 +613,7 @@ def run_all_test_steps_in_a_test_case(
             sec = TestStepEndTime - TestStepStartTime
             hours, remainder = sec // 3600, sec % 3600
             minutes, seconds = remainder // 60, remainder % 60
-            TestStepDuration = "%02d:%02d:%f" % (hours, minutes, seconds)
+            TestStepDuration = "%02d:%02d:%s" % (hours, minutes, round(seconds, 3))
         TestStepMemConsumed = WinMemBegin - WinMemEnd  # get memory consumed
         for i in step_attachment_list: shared.Remove_From_Shared_Variables(i)  # Cleanup step_attachment variables
 
@@ -839,9 +839,9 @@ def cleanup_driver_instances():  # cleans up driver(selenium, appium) instances
             driver = shared.Remove_From_Shared_Variables("selenium_driver")
             if driver not in failed_tag_list:
                 Selenium.Tear_Down_Selenium()
-        if shared.Test_Shared_Variables("appium_driver"):
+        if shared.Test_Shared_Variables("appium_details"):
             import Framework.Built_In_Automation.Mobile.CrossPlatform.Appium.BuiltInFunctions as Appium
-            driver = shared.Remove_From_Shared_Variables("appium_driver")
+            driver = shared.Remove_From_Shared_Variables("appium_details")
             if driver not in failed_tag_list:
                 Appium.teardown_appium()
 
@@ -1343,7 +1343,7 @@ def main(device_dict, user_info_object):
         Userid = (CommonUtil.MachineInfo().getLocalUser()).lower()
 
         get_json, all_file_specific_steps = True, {}
-        save_path = Path(ConfigModule.get_config_value("sectionOne", "temp_run_file_path", temp_ini_file)) / "attachments"
+        save_path = Path(temp_ini_file).parent / "attachments"
         cnt = 0
         for i in os.walk(save_path):
             if get_json:

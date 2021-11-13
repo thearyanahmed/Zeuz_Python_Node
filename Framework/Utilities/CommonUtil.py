@@ -43,10 +43,6 @@ colorama_init(autoreset=True)
 MODULE_NAME = inspect.getmodulename(__file__)
 
 # Get file path for temporary config file
-# temp_config = os.path.join(os.path.join(FL.get_home_folder(), os.path.join('Desktop', os.path.join('AutomationLog',ConfigModule.get_config_value('Advanced Options','_file')))))
-
-
-# temp_config = os.path.join(os.path.join (os.path.realpath(__file__).split("Framework")[0] , os.path.join ('AutomationLog',ConfigModule.get_config_value('Advanced Options', '_file'))))
 temp_config = Path(
     os.path.join(os.path.abspath(__file__).split("Framework")[0])
     / Path("AutomationLog")
@@ -54,7 +50,6 @@ temp_config = Path(
         ConfigModule.get_config_value(
             "Advanced Options",
             "_file",
-            Path(os.path.abspath(__file__)).parent.parent / Path("settings.conf"),
         )
     )
 )
@@ -169,12 +164,13 @@ def ZeuZ_map_code_decoder(val):
 
 def parse_value_into_object(val):
     """Parses the given value into a Python object: int, str, list, dict."""
-
     if not isinstance(val, str):
         return val
 
     try:
-        val2 = ast.literal_eval(val)
+        # val2 = ast.literal_eval(val)  # previous method
+        # encoding and decoding is for handling escape characters such as \a \1 \2
+        val2 = ast.literal_eval(val.encode('unicode_escape').decode())
         if not (val.startswith("(") and val.endswith(")")) and isinstance(val2, tuple):
             # We are preventing "1,2" >> (1,2) (str to tuple conversion without first brackets)
             pass
@@ -182,17 +178,17 @@ def parse_value_into_object(val):
             val = val2
     except:
         try:
-            val = json.loads(val)
+            val = ast.literal_eval(val)
         except:
             try:
-                if val.startswith("#ZeuZ_map_code#") and val in ZeuZ_map_code:
-                    #ToDo: find a way to convert the datatype to str or list
-                    val = ZeuZ_map_code[val]
-                else:
-                    val = ast.literal_eval(f'"{val}"')
+                val = json.loads(val)
             except:
-                pass
-
+                try:
+                    if val.startswith("#ZeuZ_map_code#") and val in ZeuZ_map_code:
+                        #ToDo: find a way to convert the datatype to str or list
+                        val = ZeuZ_map_code[val]
+                except:
+                    pass
     return val
 
 
@@ -681,7 +677,7 @@ def set_screenshot_vars(shared_variables):
 
 def TakeScreenShot(function_name, local_run=False):
     """ Puts TakeScreenShot into a thread, so it doesn't block test case execution """
-
+    # if debug_status: return
     try:
         if upload_on_fail and rerun_on_fail and not rerunning_on_fail and not debug_status:
             return
@@ -993,8 +989,6 @@ class MachineInfo:
         :return: returns the local pc unique ID
         """
         try:
-            # node_id_file_path = os.path.join(FL.get_home_folder(), os.path.join('Desktop', 'node_id.conf'))
-            # node_id_file_path = os.path.join (os.path.realpath(__file__).split("Framework")[0] , os.path.join ('node_id.conf'))
             node_id_file_path = Path(
                 os.path.abspath(__file__).split("Framework")[0]
             ) / Path("node_id.conf")

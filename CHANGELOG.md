@@ -1,15 +1,28 @@
 # Changelog
 
 # Version 14.x.x
-## Version 14.4.x
+## Version 14.5.x
 
-### [14.4.1] [September 27, 2021]
+### [14.5.2] [October 19, 2021]
+- **[Add]** Dictionary support is added in compare variable action
 
+### [14.5.1] [October 18, 2021]
+- **[Add]** key-value structure is added in excel_read action
+
+### [14.5.0] [October 13, 2021]
+
+- **[Improve]** Improved variable parsing by handling escape characters
 - **[Change]** All internal APIs that communicate with Zeuz Server are now
   authenticated by API key. Only API key based login is going to work now.
 - **[Add]** Desktop record and replay action! Record your mouse interactions
   with **Node > Apps > desktop-recorder > MouseModuleRecorder.py** and replay
   them with the `playback recorded events` action.
+- **[Fix]** Switch Iframe and Slider bar bug is fixed
+- **[Add]** Custom step duration action is added
+- **[Add]** Read and save mail action is added
+- **[Add]** Delete mail action is added
+- **[Add]** Search and save text using regex action is added
+## Version 14.4.x
 ### [14.4.0] [August 24, 2021]
 - **[Fix]** Fixed variable parsing limitations
 - **[Fix]** Fixed exact match bug and improved subset in compare_data action
@@ -30,7 +43,7 @@
 - **[Add]** Parent/Sibling/Index method added
 - **[Add]** Partial and case-insensitive search added
 - **[Add]** Element path method is added for searching an Element
-- **[Add]** element_path_detector.py app is added for generating path for an element
+- **[Add]** ZeuZ_Windows_Inspector.py app is added for generating path for an element
 - **[Add]** Zeuz default variable "os_name" is added
 - **[Add]** Wait for element to appear and disappear actions are added
 - **[Add]** "Save attribute values in list" action added
