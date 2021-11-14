@@ -210,7 +210,16 @@ def Get_Element(step_data_set, driver, query_debug=False,wait_enable=True, retur
             if save_parameter != "":  # save element to a variable
                 sr.Set_Shared_Variables(save_parameter, result)
             return result  # Return on pass
+        if not wait_enable:
+            CommonUtil.ExecLog(
+                sModuleInfo,
+                "Element not found. Waiting is disabled, so returning",
+                2,
+            )
+            return result  # If asked not to loop, return the failure
+            # If fail, but instructed to loop, do so
         return "zeuz_failed"
+
     except Exception:
         return CommonUtil.Exception_Handler(sys.exc_info())
 
@@ -577,8 +586,8 @@ def _switch(step_data_set):
     except Exception:
         return CommonUtil.Exception_Handler(sys.exc_info())
 
-
-def _get_xpath_or_css_element(element_query, css_xpath, index_number=None, Filter="", return_all_elements=False, element_wait=None):
+end = 1
+def _get_xpath_or_css_element(element_query, css_xpath, index_number=None, Filter="", return_all_elements=False,element_wait=None):
     """
     Here, we actually execute the query based on css/xpath and then analyze if there are multiple.
     If we find multiple we give warning and send the first one we found.
@@ -595,8 +604,14 @@ def _get_xpath_or_css_element(element_query, css_xpath, index_number=None, Filte
         end = time.time() + element_wait
         unique_element = None
         flag=0
-
-        while True:
+        displayed_len=0
+        hidden_len=0
+        all_matching_elements=[]
+        x = 0
+        #while time.time() < end:
+        while x < end:
+            x = x+1
+            generic_driver.switch_to.default_content()
             if css_xpath == "unique" and (
                 driver_type == "appium" or driver_type == "selenium"
             ):  # for unique id
@@ -650,10 +665,33 @@ def _get_xpath_or_css_element(element_query, css_xpath, index_number=None, Filte
                     continue
             elif css_xpath == "xpath" and driver_type != "xml":
                 all_matching_elements_visible_invisible = generic_driver.find_elements(By.XPATH, element_query)
+                all_matching_elements = filter_elements(all_matching_elements_visible_invisible, Filter)
+                if Filter == "allow hidden":
+                    displayed_len += len(filter_elements(all_matching_elements_visible_invisible, ""))
+                    hidden_len = len(all_matching_elements_visible_invisible) - displayed_len
+                else:
+                    displayed_len += len(all_matching_elements)
+                    hidden_len = len(all_matching_elements_visible_invisible) - displayed_len
+
             elif css_xpath == "xpath" and driver_type == "xml":
                 all_matching_elements_visible_invisible = generic_driver.xpath(element_query)
+                all_matching_elements = filter_elements(all_matching_elements_visible_invisible, Filter)
+                if Filter == "allow hidden":
+                    displayed_len += len(filter_elements(all_matching_elements_visible_invisible, ""))
+                    hidden_len = len(all_matching_elements_visible_invisible) - displayed_len
+                else:
+                    displayed_len += len(all_matching_elements)
+                    hidden_len = len(all_matching_elements_visible_invisible) - displayed_len
+
             elif css_xpath == "css":
                 all_matching_elements_visible_invisible = generic_driver.find_elements(By.CSS_SELECTOR, element_query)
+                all_matching_elements = filter_elements(all_matching_elements_visible_invisible, Filter)
+                if Filter == "allow hidden":
+                    displayed_len += len(filter_elements(all_matching_elements_visible_invisible, ""))
+                    hidden_len = len(all_matching_elements_visible_invisible) - displayed_len
+                else:
+                    displayed_len += len(all_matching_elements)
+                    hidden_len = len(all_matching_elements_visible_invisible) - displayed_len
 
             if len(all_matching_elements_visible_invisible) > 0 and len(filter_elements(all_matching_elements_visible_invisible, "")) > 0:
                 break
@@ -661,22 +699,14 @@ def _get_xpath_or_css_element(element_query, css_xpath, index_number=None, Filte
         # end of while loop
 
         i = 0 if index_number is None else index_number
-        if exception_cnd or len(all_matching_elements_visible_invisible) <= i:
+        if exception_cnd  or len(all_matching_elements_visible_invisible) <= i:
             generic_driver.switch_to.default_content()
             iframes = generic_driver.find_elements_by_tag_name('iframe') #find all the iframes in the default frame
-            all_matching_elements_visible_invisible = auto_frame_switch(len(iframes), [],unique_element,element_query,css_xpath, i)
+            all_matching_elements_visible_invisible,unique_element, all_matching_elements,displayed_len, hidden_len = auto_frame_switch(len(iframes), [],unique_element,element_query,css_xpath, i, Filter,[],displayed_len,hidden_len )
 
         #flag ==1 means function returned the unique element
         if flag == 1:
-            return all_matching_elements_visible_invisible
-
-        all_matching_elements = filter_elements(all_matching_elements_visible_invisible, Filter)
-        if Filter == "allow hidden":
-            displayed_len = len(filter_elements(all_matching_elements_visible_invisible, ""))
-            hidden_len = len(all_matching_elements_visible_invisible) - displayed_len
-        else:
-            displayed_len = len(all_matching_elements)
-            hidden_len = len(all_matching_elements_visible_invisible) - displayed_len
+            return unique_element
 
         tot_len = len(all_matching_elements_visible_invisible)
         if (Filter == "allow hidden" and (index_number is None and tot_len == 0) or (index_number is not None and tot_len <= index_number))\
@@ -1139,7 +1169,7 @@ def _scale_image(file_name, size_w, size_h):
         return CommonUtil.Exception_Handler(sys.exc_info(), None, "Error scaling image")
 
 
-def auto_frame_switch(number_of_iframes,all_matching_elements_visible_invisible,unique_element,element_query,css_xpath, element_index):
+def auto_frame_switch(number_of_iframes,all_matching_elements_visible_invisible,unique_element,element_query,css_xpath, element_index, Filter,all_matching_elements,displayed_len,hidden_len ):
     try:
         for idx in range(number_of_iframes):
             generic_driver.switch_to.frame(idx)
@@ -1208,32 +1238,56 @@ def auto_frame_switch(number_of_iframes,all_matching_elements_visible_invisible,
                                 By.XPATH, "//*[@%s='%s']" % (unique_key, unique_value)
                             )
                     if unique_element != None:
-                        return unique_element
+                        return all_matching_elements_visible_invisible,unique_element,all_matching_elements, displayed_len, hidden_len
                 except:
                     pass
 
             elif css_xpath == "xpath" and driver_type != "xml":
                 all_matching_elements_visible_invisible += generic_driver.find_elements(By.XPATH, element_query)
+                all_matching_elements = filter_elements(all_matching_elements_visible_invisible, Filter)
+                if Filter == "allow hidden":
+                    displayed_len += len(filter_elements(all_matching_elements_visible_invisible, ""))
+                    hidden_len = len(all_matching_elements_visible_invisible) - displayed_len
+                else:
+                    displayed_len += len(all_matching_elements)
+                    hidden_len = len(all_matching_elements_visible_invisible) - displayed_len
+
             elif css_xpath == "xpath" and driver_type == "xml":
                 all_matching_elements_visible_invisible += generic_driver.xpath(element_query)
+                all_matching_elements = filter_elements(all_matching_elements_visible_invisible, Filter)
+                if Filter == "allow hidden":
+                    displayed_len += len(filter_elements(all_matching_elements_visible_invisible, ""))
+                    hidden_len = len(all_matching_elements_visible_invisible) - displayed_len
+                else:
+                    displayed_len += len(all_matching_elements)
+                    hidden_len = len(all_matching_elements_visible_invisible) - displayed_len
+
             elif css_xpath == "css":
                 all_matching_elements_visible_invisible += generic_driver.find_elements(By.CSS_SELECTOR, element_query)
+                all_matching_elements = filter_elements(all_matching_elements_visible_invisible, Filter)
+                if Filter == "allow hidden":
+                    displayed_len += len(filter_elements(all_matching_elements_visible_invisible, ""))
+                    hidden_len = len(all_matching_elements_visible_invisible) - displayed_len
+                else:
+                    displayed_len += len(all_matching_elements)
+                    hidden_len = len(all_matching_elements_visible_invisible) - displayed_len
+
 
             if len(all_matching_elements_visible_invisible) > element_index:
-                return all_matching_elements_visible_invisible
+                return all_matching_elements_visible_invisible,unique_element,all_matching_elements, displayed_len, hidden_len
 
             iframes = generic_driver.find_elements_by_tag_name('iframe')
             # if there is nested iframes it will call the function recursively
             if len(iframes) != 0:
-                auto_frame_switch(len(iframes), all_matching_elements_visible_invisible, unique_element, element_query, css_xpath)
+                all_matching_elements_visible_invisible,unique_element,all_matching_elements, displayed_len, hidden_len = auto_frame_switch(len(iframes), all_matching_elements_visible_invisible, unique_element, element_query, css_xpath, element_index, Filter,all_matching_elements,displayed_len,hidden_len )
                 if len(all_matching_elements_visible_invisible) > element_index:
-                    generic_driver.switch_to.parent_frame()
-                    return all_matching_elements_visible_invisible
+                    return all_matching_elements_visible_invisible,unique_element, all_matching_elements, displayed_len, hidden_len
+
                 generic_driver.switch_to.parent_frame()
             else:
                 generic_driver.switch_to.parent_frame()
 
-        return all_matching_elements_visible_invisible
+        return all_matching_elements_visible_invisible, unique_element, all_matching_elements, displayed_len, hidden_len
 
     except:
         generic_driver.switch_to.default_content()
