@@ -53,6 +53,9 @@ declarations = (
     {"name": "delete mail",                                  "function": "delete_mail_action",                     "screenshot": "none"},
     {"name": "save mail",                                    "function": "save_mail_action",                       "screenshot": "none"},
 
+    #FireBase Actions
+    {"name": "firebase authentication", "function": "firebase_authentication", "screenshot": "none"},
+
     # Global Variable Actions
     { "name": "get global list variable",                    "function": "get_global_list_variable",              "screenshot": "none" },
     { "name": "append to global list variable",              "function": "append_to_global_list_variable",        "screenshot": "none" },

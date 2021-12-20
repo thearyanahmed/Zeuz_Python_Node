@@ -10,7 +10,7 @@ from pathlib import Path
 from imap_tools import MailBox
 import re
 from typing import List
-
+import pyrebase
 try:
     import xlwings as xw
 except:
@@ -3855,6 +3855,89 @@ def save_mail_action(data_set):
             before_date,
             wait
         )
+
+        sr.Set_Shared_Variables(variable_name, result)
+        return "passed"
+    except:
+        return CommonUtil.Exception_Handler(sys.exc_info())
+
+@logger
+def firebase_authentication(data_set):
+    sModuleInfo = inspect.currentframe().f_code.co_name + " : " + MODULE_NAME
+
+    try:
+        api_key=""
+        auth_domain=""
+        db_url=""
+        storage_bucket=""
+        service_account=""
+        variable_name=None
+        email=""
+        password=""
+        for left, mid, right in data_set:
+            left = left.lower().strip()
+            right = right.strip()
+            if "api key" == left:
+                api_key = right
+            elif "auth domain" == left:
+                auth_domain = right
+            elif "db url" == left:
+                db_url = right
+            elif "storage bucket" == left:
+                storage_bucket = right
+            elif "service account" == left:
+                service_account = right
+            elif "email" == left:
+                email = right
+            elif "password" == left:
+                password = right
+            elif "action" == mid:
+                variable_name = right
+
+        if api_key == "":
+            CommonUtil.ExecLog(sModuleInfo, "please provide the api key credentials for firebase authentication, see action help", 3)
+            return "zeuz_failed"
+        if auth_domain == "":
+            CommonUtil.ExecLog(sModuleInfo, "please provide the auth domain credentials for firebase authentication, see action help", 3)
+            return "zeuz_failed"
+        if db_url == "":
+            db_url="xxxxxx"
+        if service_account == "":
+            service_account="xxxxxx"
+            # CommonUtil.ExecLog(sModuleInfo, "please provide the db url credentials for firebase authentication, see action help", 3)
+            # return "zeuz_failed"
+        if storage_bucket == "":
+            CommonUtil.ExecLog(sModuleInfo, "please provide the storage bucket credentials for firebase authentication, see action help", 3)
+            return "zeuz_failed"
+        if email == "":
+            CommonUtil.ExecLog(sModuleInfo, "please provide the email credentials for firebase authentication, see action help", 3)
+            return "zeuz_failed"
+        if password == "":
+            CommonUtil.ExecLog(sModuleInfo, "please provide the password credentials for firebase authentication, see action help", 3)
+            return "zeuz_failed"
+        if variable_name == "":
+            CommonUtil.ExecLog(sModuleInfo, "please provide variable name", 3)
+            return "zeuz_failed"
+
+        config = {
+            "apiKey": api_key,
+            "authDomain": auth_domain,
+            "databaseURL": db_url,
+            "storageBucket": storage_bucket,
+            # "serviceAccount": service_account
+        }
+
+        firebase = pyrebase.initialize_app(config)
+
+        # Get a reference to the auth service
+        auth = firebase.auth()
+
+        #sign in with email and password
+        user = auth.sign_in_with_email_and_password(email, password)
+         # before the 1 hour expiry:
+        user = auth.refresh(user['refreshToken'])
+        # now we have a fresh token
+        result=user
 
         sr.Set_Shared_Variables(variable_name, result)
         return "passed"
