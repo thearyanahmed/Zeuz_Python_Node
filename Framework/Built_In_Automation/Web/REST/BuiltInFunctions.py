@@ -14,6 +14,7 @@ import inspect
 
 # Suppress the InsecureRequestWarning since we use verify=False parameter.
 from urllib3.exceptions import InsecureRequestWarning
+
 requests.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
 
 sys.path.append("..")
@@ -114,7 +115,7 @@ def Action_Handler(action_step_data, action_row):
 @logger
 @deprecated
 def Initialize_List(data_set):
-    """ Temporary wrapper until we can convert everything to use just data_set and not need the extra [] """
+    """Temporary wrapper until we can convert everything to use just data_set and not need the extra []"""
     return Shared_Resources.Initialize_List([data_set])
 
 
@@ -451,7 +452,9 @@ def Insert_Into_List(step_data):
 
             returned_step_data_list = Validate_Step_Data(element_step_data)
 
-            if (returned_step_data_list == []) or (returned_step_data_list == "zeuz_failed"):
+            if (returned_step_data_list == []) or (
+                returned_step_data_list == "zeuz_failed"
+            ):
                 return "zeuz_failed"
             else:
                 try:
@@ -616,7 +619,11 @@ def search_condition_wrapper(data, condition_string):
 
 
 KEY_ZEUZ_API_SESSIONS = "zeuz_api_sessions"
-def get_session(session_name: Union[str, None] = None) -> Union[requests.Request, requests.Session]:
+
+
+def get_session(
+    session_name: Union[str, None] = None
+) -> Union[requests.Request, requests.Session]:
     """
     Fetches either an old session or creates a new session if it does not exist
     with the provided `session_name`. A value of `None` means, we won't return
@@ -628,29 +635,31 @@ def get_session(session_name: Union[str, None] = None) -> Union[requests.Request
     # then inserted in this dictionary, and afterwards use the newly created
     # session. The default is the `None` session, which means there's no session and
     # every request with the `None` session will be sent as a one-off request.
-    sessions: Union[requests.Request, requests.Session] = Shared_Resources.Get_Shared_Variables(KEY_ZEUZ_API_SESSIONS, log=False)
+    sessions: Union[
+        requests.Request, requests.Session
+    ] = Shared_Resources.Get_Shared_Variables(KEY_ZEUZ_API_SESSIONS, log=False)
 
     if sessions == "zeuz_failed":
         Shared_Resources.Set_Shared_Variables(
-            KEY_ZEUZ_API_SESSIONS,
-            { None: requests },
-            print_variable=False
+            KEY_ZEUZ_API_SESSIONS, {None: requests}, print_variable=False
         )
-        sessions = Shared_Resources.Get_Shared_Variables(KEY_ZEUZ_API_SESSIONS, log=False)
+        sessions = Shared_Resources.Get_Shared_Variables(
+            KEY_ZEUZ_API_SESSIONS, log=False
+        )
 
     if session_name not in sessions:
         sessions[session_name] = requests.Session()
 
         Shared_Resources.Set_Shared_Variables(
-            KEY_ZEUZ_API_SESSIONS,
-            sessions,
-            print_variable=False
+            KEY_ZEUZ_API_SESSIONS, sessions, print_variable=False
         )
 
     return sessions[session_name]
 
 
 ENV_ZEUZ_NODE_CLIENT_CERT = "ZEUZ_NODE_CLIENT_CERT"
+
+
 def get_client_certificate() -> Union[str, Tuple[str, str], None]:
     """
     Gets the client-side certificate if there's any.
@@ -748,7 +757,12 @@ def handle_rest_call(
         if temp not in failed_tag_list:
             body = temp
 
-        CommonUtil.ExecLog(sModuleInfo, "HTTP method: %s\nURL: %s\nBODY: %s\nHEADERS: %s" % (method, url, body, headers), 5)
+        CommonUtil.ExecLog(
+            sModuleInfo,
+            "HTTP method: %s\nURL: %s\nBODY: %s\nHEADERS: %s"
+            % (method, url, body, headers),
+            5,
+        )
         if payload:
             CommonUtil.ExecLog(sModuleInfo, "PAYLOAD: %s" % payload, 1)
 
@@ -892,18 +906,20 @@ def handle_rest_call(
             count += 1
         if CommonUtil.load_testing:
             end_counter = time.perf_counter()
-            runtime = round(end_counter-start_counter, 6)
+            runtime = round(end_counter - start_counter, 6)
             CommonUtil.performance_report["endpoint"] = result.url
             CommonUtil.performance_report["data"].append(
-                {
-                    "status": status_code,
-                    "message": result.text,
-                    "runtime": runtime
-                }
+                {"status": status_code, "message": result.text, "runtime": runtime}
             )
             CommonUtil.performance_report["individual_stats"] = {
-                "slowest": max(runtime, CommonUtil.performance_report["individual_stats"]["slowest"]),
-                "fastest": min(runtime, CommonUtil.performance_report["individual_stats"]["fastest"]),
+                "slowest": max(
+                    runtime,
+                    CommonUtil.performance_report["individual_stats"]["slowest"],
+                ),
+                "fastest": min(
+                    runtime,
+                    CommonUtil.performance_report["individual_stats"]["fastest"],
+                ),
             }
             if str(status_code) in CommonUtil.performance_report["status_counts"]:
                 CommonUtil.performance_report["status_counts"][str(status_code)] += 1
@@ -927,7 +943,9 @@ def handle_rest_call(
         Shared_Resources.Set_Shared_Variables("status_code", result.status_code)
         try:
             if result.json():
-                Shared_Resources.Set_Shared_Variables("rest_response", result.json(), print_variable=False)
+                Shared_Resources.Set_Shared_Variables(
+                    "rest_response", result.json(), print_variable=False
+                )
                 Shared_Resources.Set_Shared_Variables("http_response", result.json())
                 CommonUtil.ExecLog(sModuleInfo, "HTTP Request successful.", 1)
 
@@ -1006,7 +1024,9 @@ def handle_rest_call(
                         )
                 return "passed"
             else:
-                CommonUtil.ExecLog(sModuleInfo, "HTTP Request did not respond in json format", 1)
+                CommonUtil.ExecLog(
+                    sModuleInfo, "HTTP Request did not respond in json format", 1
+                )
                 response_text = result.json()
                 CommonUtil.ExecLog(sModuleInfo, "Received Response", 1)
                 try:
@@ -1040,7 +1060,8 @@ def handle_rest_call(
                         "rest_response", response_text, print_variable=False
                     )
                     Shared_Resources.Set_Shared_Variables(
-                        "http_response", CommonUtil.parse_value_into_object(response_text)
+                        "http_response",
+                        CommonUtil.parse_value_into_object(response_text),
                     )
                     CommonUtil.ExecLog(
                         sModuleInfo,
@@ -1062,7 +1083,9 @@ def handle_rest_call(
                     sModuleInfo, "Trying to convert REST Call Response Text to json", 1
                 )
                 json_of_response = ast.literal_eval(response_text)
-                Shared_Resources.Set_Shared_Variables("rest_response", json_of_response, print_variable=False)
+                Shared_Resources.Set_Shared_Variables(
+                    "rest_response", json_of_response, print_variable=False
+                )
                 Shared_Resources.Set_Shared_Variables("http_response", json_of_response)
                 CommonUtil.ExecLog(
                     sModuleInfo,
@@ -1076,7 +1099,9 @@ def handle_rest_call(
                     "REST Call Response Text couldn't be converted to json",
                     2,
                 )
-                Shared_Resources.Set_Shared_Variables("rest_response", response_text, print_variable=False)
+                Shared_Resources.Set_Shared_Variables(
+                    "rest_response", response_text, print_variable=False
+                )
                 Shared_Resources.Set_Shared_Variables("http_response", response_text)
                 CommonUtil.ExecLog(
                     sModuleInfo,
@@ -1085,7 +1110,9 @@ def handle_rest_call(
                 )
             return "passed"
     except requests.Timeout:
-        CommonUtil.ExecLog(sModuleInfo, f"Request '{url}' timed out after {timeout} seconds.", 3)
+        CommonUtil.ExecLog(
+            sModuleInfo, f"Request '{url}' timed out after {timeout} seconds.", 3
+        )
         return "zeuz_failed"
     except Exception:
         return CommonUtil.Exception_Handler(sys.exc_info())
@@ -1141,7 +1168,9 @@ def Get_Response(step_data, save_cookie=False):
 
         returned_step_data_list = Validate_Step_Data(element_step_data)
 
-        if (returned_step_data_list == []) or (returned_step_data_list == "zeuz_failed"):
+        if (returned_step_data_list == []) or (
+            returned_step_data_list == "zeuz_failed"
+        ):
             return "zeuz_failed"
         else:
             try:
@@ -1216,7 +1245,9 @@ def Search_Response(step_data):
 
         returned_step_data_list = Validate_Step_Data(element_step_data)
 
-        if (returned_step_data_list == []) or (returned_step_data_list == "zeuz_failed"):
+        if (returned_step_data_list == []) or (
+            returned_step_data_list == "zeuz_failed"
+        ):
             return "zeuz_failed"
         else:
             try:
@@ -1429,7 +1460,9 @@ def Validate_Step_Data(step_data):
 
         for each in step_data:
             if "graphql" in each[1]:
-                graphql_dict[each[0].strip()] = CommonUtil.parse_value_into_object(each[2])
+                graphql_dict[each[0].strip()] = CommonUtil.parse_value_into_object(
+                    each[2]
+                )
             elif each[1].lower().strip() == "element parameter":
                 element_parameter = each[0].lower().strip()
                 if element_parameter == "method":

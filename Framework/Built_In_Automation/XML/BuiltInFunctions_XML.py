@@ -67,7 +67,7 @@ add_tag_list = ["Add", "add", "ADD"]  # Add additional line(s) or element(s)
 @logger
 def update_element(step_data):
     """
-     Function to update the target element(s) of XML tree
+    Function to update the target element(s) of XML tree
     """
     sModuleInfo = inspect.currentframe().f_code.co_name + " : " + MODULE_NAME
     try:
@@ -136,7 +136,7 @@ def update_element(step_data):
 @logger
 def read_element(step_data):
     """
-    Function to read the elements from XML file 
+    Function to read the elements from XML file
     """
     sModuleInfo = inspect.currentframe().f_code.co_name + " : " + MODULE_NAME
     try:
@@ -385,7 +385,7 @@ def update_target_element(
     action_value,
 ):
     """
-     Function to update the target element value
+    Function to update the target element value
     """
     sModuleInfo = inspect.currentframe().f_code.co_name + " : " + MODULE_NAME
     try:
@@ -446,7 +446,7 @@ def update_target_element(
 @logger
 def update_action_value(file_path, doc):
     """
-     Function the write the user provided action value in the XML file
+    Function the write the user provided action value in the XML file
     """
     sModuleInfo = inspect.currentframe().f_code.co_name + " : " + MODULE_NAME
     try:

@@ -20,14 +20,18 @@ from .data_collector import DataCollector
 global shared_variables
 test_action_info = []
 shared_variables = {}
-protected_variables = []  # Used to ensure internally used shared variables can't be overwritten by step data
+protected_variables = (
+    []
+)  # Used to ensure internally used shared variables can't be overwritten by step data
 attachment_variables = {}
 
 MODULE_NAME = inspect.getmodulename(__file__)
 data_collector = DataCollector()
 
 
-def Set_Shared_Variables(key, value, protected=False, attachment_var=False, print_variable=True, pretty=True):
+def Set_Shared_Variables(
+    key, value, protected=False, attachment_var=False, print_variable=True, pretty=True
+):
     try:
         sModuleInfo = inspect.currentframe().f_code.co_name + " : " + MODULE_NAME
         global shared_variables, protected_variables
@@ -41,16 +45,18 @@ def Set_Shared_Variables(key, value, protected=False, attachment_var=False, prin
             if key.startswith("__") and key.endswith("__"):
                 CommonUtil.ExecLog(
                     sModuleInfo,
-                    "You cannot use '{k}' because it has double underscore both at beginning and end which are Special Variables in python".format(k=key),
+                    "You cannot use '{k}' because it has double underscore both at beginning and end which are Special Variables in python".format(
+                        k=key
+                    ),
                     3,
                 )
                 return "zeuz_failed"
             if not re.search("^[a-zA-Z_][a-zA-Z_0-9]*$", key):
                 CommonUtil.ExecLog(
                     sModuleInfo,
-                    "Please provide a valid variable name. valid variable name rules-\n" +
-                    "1. A variable name can only contain Letters a-z, underscore _ and Digits 0-9\n" +
-                    "2. A variable name Cannot Start with Digits 0-9",
+                    "Please provide a valid variable name. valid variable name rules-\n"
+                    + "1. A variable name can only contain Letters a-z, underscore _ and Digits 0-9\n"
+                    + "2. A variable name Cannot Start with Digits 0-9",
                     3,
                 )
                 return "zeuz_failed"
@@ -58,8 +64,10 @@ def Set_Shared_Variables(key, value, protected=False, attachment_var=False, prin
                 # Todo: Suggest a valid name according to what user is trying to define
                 CommonUtil.ExecLog(
                     sModuleInfo,
-                    "You are trying to overwrite a zeuz internal variable '{m}'. Please Choose a slightly different name. Example: {mc}, {mu}, _{m}, {m}_".format(m=key, mu=key.upper(), mc=key.capitalize()),
-                    2
+                    "You are trying to overwrite a zeuz internal variable '{m}'. Please Choose a slightly different name. Example: {mc}, {mu}, _{m}, {m}_".format(
+                        m=key, mu=key.upper(), mc=key.capitalize()
+                    ),
+                    2,
                 )
             if protected:
                 protected_variables.append(key)  # Add to list of protected variables
@@ -78,14 +86,17 @@ def Set_Shared_Variables(key, value, protected=False, attachment_var=False, prin
             shared_variables[key] = value
 
         if print_variable:
-            try: val = json.dumps(CommonUtil.parse_value_into_object(value), indent=2, sort_keys=True)
-            except: val = str(value)
+            try:
+                val = json.dumps(
+                    CommonUtil.parse_value_into_object(value), indent=2, sort_keys=True
+                )
+            except:
+                val = str(value)
             CommonUtil.ExecLog(
-                sModuleInfo, "Saved variable: %s" % key, 1,
-                variable={
-                    "key": key,
-                    "val": val
-                }
+                sModuleInfo,
+                "Saved variable: %s" % key,
+                1,
+                variable={"key": key, "val": val},
             )
         if pretty:
             # Try to get a pretty print.
@@ -129,11 +140,17 @@ def Set_List_Shared_Variables(list_name, key, value, protected=False):
                 # Try to get a pretty print.
                 CommonUtil.prettify(key, value)
                 CommonUtil.ExecLog(
-                    sModuleInfo, "Saved variable: %s" % key, 1,
+                    sModuleInfo,
+                    "Saved variable: %s" % key,
+                    1,
                     variable={
                         "key": key,
-                        "val": json.dumps(CommonUtil.parse_value_into_object(value), indent=2, sort_keys=True)
-                    }
+                        "val": json.dumps(
+                            CommonUtil.parse_value_into_object(value),
+                            indent=2,
+                            sort_keys=True,
+                        ),
+                    },
                 )
                 CommonUtil.ExecLog(
                     sModuleInfo, "Saved variable:\n%s = %s" % (key, value), 0
@@ -155,7 +172,7 @@ def Set_List_Shared_Variables(list_name, key, value, protected=False):
 
 
 def Append_List_Shared_Variables(key, value, protected=False, value_as_list=False):
-    """ Creates and appends a python list variable """
+    """Creates and appends a python list variable"""
 
     try:
         sModuleInfo = inspect.currentframe().f_code.co_name + " : " + MODULE_NAME
@@ -207,7 +224,7 @@ def Append_List_Shared_Variables(key, value, protected=False, value_as_list=Fals
 
 @deprecated
 def Append_Dict_Shared_Variables(key, value, protected=False, parent_dict=""):
-    """ Creates and appends a python list variable """
+    """Creates and appends a python list variable"""
 
     try:
         sModuleInfo = inspect.currentframe().f_code.co_name + " : " + MODULE_NAME
@@ -263,7 +280,11 @@ def Get_Shared_Variables(key, log=True):
         elif key in shared_variables:
             return shared_variables[key]
         if log:
-            CommonUtil.ExecLog(sModuleInfo, "No Such variable named '%s' found in shared variables" % key, 3)
+            CommonUtil.ExecLog(
+                sModuleInfo,
+                "No Such variable named '%s' found in shared variables" % key,
+                3,
+            )
         return "zeuz_failed"
     except:
         CommonUtil.Exception_Handler(sys.exc_info())
@@ -298,7 +319,7 @@ def Get_List_from_Shared_Variables(list_name):
 
 
 def Remove_From_Shared_Variables(key, attachment_var=False):
-    """ Remove if a variable already exists and return the value or false """
+    """Remove if a variable already exists and return the value or false"""
 
     try:
         sModuleInfo = inspect.currentframe().f_code.co_name + " : " + MODULE_NAME
@@ -314,7 +335,7 @@ def Remove_From_Shared_Variables(key, attachment_var=False):
 
 
 def Test_Shared_Variables(key):
-    """ Test if a variable already exists and return true or false """
+    """Test if a variable already exists and return true or false"""
 
     try:
         sModuleInfo = inspect.currentframe().f_code.co_name + " : " + MODULE_NAME
@@ -414,25 +435,25 @@ def handle_nested_rest_json(result, string):
 
 class VariableParser:
     """Helper class for parsing the values of different indices as
-          specified in [ ] square brackets of a variable.
+    specified in [ ] square brackets of a variable.
     """
 
     @staticmethod
     def get_number(idx):
-        try: return int(idx)
-        except: return None
-    
+        try:
+            return int(idx)
+        except:
+            return None
 
     @staticmethod
     def get_string(idx):
         if isinstance(idx, str):
             if idx[0] in ("'", '"'):
-                return idx[1:len(idx)-1]
+                return idx[1 : len(idx) - 1]
 
             return None
         return None
 
-    
     @staticmethod
     def get_slice(idx):
         try:
@@ -440,11 +461,15 @@ class VariableParser:
             if len(sp) > 1:
                 left, right = sp[0], sp[1]
 
-                try: left = int(left)
-                except: left = Get_Shared_Variables(left, log=False)
+                try:
+                    left = int(left)
+                except:
+                    left = Get_Shared_Variables(left, log=False)
 
-                try: right = int(right)
-                except: right = Get_Shared_Variables(right, log=False)
+                try:
+                    right = int(right)
+                except:
+                    right = Get_Shared_Variables(right, log=False)
 
                 if "zeuz_failed" == left:
                     left = None
@@ -458,9 +483,9 @@ class VariableParser:
 
                 return left, right
 
-        except: pass
+        except:
+            pass
         return None, None
-
 
     @staticmethod
     def get_variable(idx):
@@ -474,7 +499,14 @@ def generate_zeuz_code_if_not_json_obj(val):
         return val
     except:
         while True:
-            code = "#ZeuZ_map_code#" + ''.join(random.choices(string.ascii_letters + string.digits + '!#$%&()*+,-./:;<=>?@[]^_`{|}~', k=15))
+            code = "#ZeuZ_map_code#" + "".join(
+                random.choices(
+                    string.ascii_letters
+                    + string.digits
+                    + "!#$%&()*+,-./:;<=>?@[]^_`{|}~",
+                    k=15,
+                )
+            )
             if code not in CommonUtil.ZeuZ_map_code:
                 break
         CommonUtil.ZeuZ_map_code[code] = val
@@ -492,7 +524,7 @@ def parse_variable(name):
     pattern.
 
     Patterns:
-    
+
         "_" (underscore) - match all list items.
         "*" (asterisk)   - match all values of dictionaries.
         "*xyz"           - partial match for dictionary keys ending with "xyz"
@@ -503,7 +535,7 @@ def parse_variable(name):
         name: Variable name with indices specified if necessary.
 
     Examples:
-        
+
         var
         var["hello"]
         var[hello] - Fetch hello from shared variables.
@@ -538,7 +570,11 @@ def parse_variable(name):
         # For printing log.
         copy_of_name = name
 
-        if len(indices) > 0 and re.search("^[a-zA-Z_][a-zA-Z_0-9]*{", name) and Test_Shared_Variables(name[: name.find("{")]):
+        if (
+            len(indices) > 0
+            and re.search("^[a-zA-Z_][a-zA-Z_0-9]*{", name)
+            and Test_Shared_Variables(name[: name.find("{")])
+        ):
             # regex: startswith valid_var_name{
             # Data collector with pattern.
             # Match with the following pattern.
@@ -563,7 +599,11 @@ def parse_variable(name):
             # Print to console.
             CommonUtil.prettify(copy_of_name, result)
             return result
-        elif len(indices) > 0 and re.search("^[a-zA-Z_][a-zA-Z_0-9]*\(", name) and Test_Shared_Variables(name[: name.find("(")]):
+        elif (
+            len(indices) > 0
+            and re.search("^[a-zA-Z_][a-zA-Z_0-9]*\(", name)
+            and Test_Shared_Variables(name[: name.find("(")])
+        ):
             # regex: startswith valid_var_name(
             # Data collector with keys.
             # Match with the following pattern.
@@ -613,8 +653,14 @@ def get_previous_response_variables_in_strings(step_data_string_input):
                 if "(" in full_string:
                     temp = full_string.split("(")
                     params = temp[1].split(")")[0]
-                    if isinstance(CommonUtil.parse_value_into_object(params.strip()), list):
-                        random_string = str(random.choice(CommonUtil.parse_value_into_object(params.strip())))
+                    if isinstance(
+                        CommonUtil.parse_value_into_object(params.strip()), list
+                    ):
+                        random_string = str(
+                            random.choice(
+                                CommonUtil.parse_value_into_object(params.strip())
+                            )
+                        )
                     elif re.search("^\s*\d+\s*-{1}\s*\d+\s*$", params):
                         start, end = params.replace(" ", "").split("-")
                         random_string = str(random.randrange(int(start), int(end), 1))
@@ -633,60 +679,72 @@ def get_previous_response_variables_in_strings(step_data_string_input):
                 else:
                     CommonUtil.ExecLog(
                         sModuleInfo,
-                        'Wrong format provided. The correct for %|random_data()|% is below\n' +
-                        '%|random_data( [False , "a", True] )|%\n%|random_data(100-200)|%',
+                        "Wrong format provided. The correct for %|random_data()|% is below\n"
+                        + '%|random_data( [False , "a", True] )|%\n%|random_data(100-200)|%',
                         3,
                     )
                     return "zeuz_failed"
 
                 generated_value = random_string
 
-            elif var_name.startswith("random_string"):    # Todo: Remove this variable 3 months later from 18 January, 2022
+            elif var_name.startswith(
+                "random_string"
+            ):  # Todo: Remove this variable 3 months later from 18 January, 2022
                 CommonUtil.ExecLog(
                     "",
-                    '%|random_string()|% is deprecated. Use %|random_data()|% to get updated features. Example:\n'+
-                    "%|random_data('nluc',15)|%\n%|random_data('n',5)|%",
-                    3
+                    "%|random_string()|% is deprecated. Use %|random_data()|% to get updated features. Example:\n"
+                    + "%|random_data('nluc',15)|%\n%|random_data('n',5)|%",
+                    3,
                 )
                 return "zeuz_failed"
 
-            elif var_name.lower().startswith("today") or var_name.startswith("currentEpochTime"):
+            elif var_name.lower().startswith("today") or var_name.startswith(
+                "currentEpochTime"
+            ):
                 replaced = save_built_in_time_variable(var_name)
                 if replaced in failed_tag_list:
                     CommonUtil.ExecLog(
                         sModuleInfo,
-                        "No such date variable named '"+var_name+"', user formats like %|today|% , %|today + 1d|% , %|today - 3m|% , %|today + 1w|%, %|today + 2y|% , %|currentEpochTime|% etc.",
+                        "No such date variable named '"
+                        + var_name
+                        + "', user formats like %|today|% , %|today + 1d|% , %|today - 3m|% , %|today + 1w|%, %|today + 2y|% , %|currentEpochTime|% etc.",
                         3,
                     )
                     return "zeuz_failed"
                 print(replaced)
                 generated_value = replaced
 
-            elif var_name.startswith("random_number_in_range"):    # Todo: Remove this variable 3 months later from 18 January, 2022
+            elif var_name.startswith(
+                "random_number_in_range"
+            ):  # Todo: Remove this variable 3 months later from 18 January, 2022
                 CommonUtil.ExecLog(
                     "",
-                    '%|random_number_in_range()|% is deprecated. Use %|random_data()|% to get updated features. Example:\n' +
-                    "%|random_data(100-200)|%\n%|random_data([1,2,3,'hello',True])|%",
-                    3
+                    "%|random_number_in_range()|% is deprecated. Use %|random_data()|% to get updated features. Example:\n"
+                    + "%|random_data(100-200)|%\n%|random_data([1,2,3,'hello',True])|%",
+                    3,
                 )
                 return "zeuz_failed"
 
-            elif var_name.startswith("pick_random_element"):    # Todo: Remove this variable 3 months later from 18 January, 2022
+            elif var_name.startswith(
+                "pick_random_element"
+            ):  # Todo: Remove this variable 3 months later from 18 January, 2022
                 CommonUtil.ExecLog(
                     "",
-                    '%|pick_random_element()|% is deprecated. Use %|random_data()|% to get updated features. Example:\n' +
-                    "%|random_data(100-200)|%\n%|random_data([1,2,3,'hello',True])|%",
-                    3
+                    "%|pick_random_element()|% is deprecated. Use %|random_data()|% to get updated features. Example:\n"
+                    + "%|random_data(100-200)|%\n%|random_data([1,2,3,'hello',True])|%",
+                    3,
                 )
                 return "zeuz_failed"
 
             else:
-                if var_name.startswith("rest_response"):        # Todo: Remove this variable from Rest files 3 months later from 18 January, 2022
+                if var_name.startswith(
+                    "rest_response"
+                ):  # Todo: Remove this variable from Rest files 3 months later from 18 January, 2022
                     CommonUtil.ExecLog(
                         "",
-                        '%|rest_response|% is deprecated. Use %|http_response|% to get updated features. Example:\n' +
-                        "%|http_response[\"data\"][1][\"default\"]|%",
-                        3
+                        "%|rest_response|% is deprecated. Use %|http_response|% to get updated features. Example:\n"
+                        + '%|http_response["data"][1]["default"]|%',
+                        3,
                     )
                 var_value = str(parse_variable(var_name))
                 if var_value == "zeuz_failed":
@@ -992,7 +1050,9 @@ def Compare_Lists_or_Dicts(step_data):
             list1 = CommonUtil.parse_value_into_object(list1_name)
             list2 = CommonUtil.parse_value_into_object(list2_name)
             if not isinstance(list1, list) or not isinstance(list2, list):
-                CommonUtil.ExecLog(sModuleInfo, "To check subset both the variable should be list", 3)
+                CommonUtil.ExecLog(
+                    sModuleInfo, "To check subset both the variable should be list", 3
+                )
                 return "zeuz_failed"
             if list1 == list2:
                 CommonUtil.ExecLog(sModuleInfo, "2nd list is equal to the 1st list", 1)
@@ -1001,7 +1061,9 @@ def Compare_Lists_or_Dicts(step_data):
                 CommonUtil.ExecLog(sModuleInfo, "2nd list is a subset of 1st list", 1)
                 return "passed"
             else:
-                CommonUtil.ExecLog(sModuleInfo, "2nd list is not a subset of 1st list", 1)
+                CommonUtil.ExecLog(
+                    sModuleInfo, "2nd list is not a subset of 1st list", 1
+                )
                 return "zeuz_failed"
 
         list1 = Get_List_from_Shared_Variables(list1_name)
@@ -1326,7 +1388,7 @@ def Clean_Up_Shared_Variables():
 
 
 def Shared_Variable_Export():
-    """ Exports all shared variables if for some reason modules can't use the functions herein """
+    """Exports all shared variables if for some reason modules can't use the functions herein"""
     return shared_variables
 
 
@@ -1349,7 +1411,15 @@ def save_built_in_time_variable(string):
         elif input.startswith("today"):
             if input.lower().strip() == "today":
                 if os.name == "nt":
-                    datetime_format = datetime_format.replace("%-d", "%#d").replace("%-m", "%#m").replace("%-H", "%#H").replace("%-I", "%#I").replace("%-M", "%#M").replace("%-S", "%#S").replace("%-j", "%#j")
+                    datetime_format = (
+                        datetime_format.replace("%-d", "%#d")
+                        .replace("%-m", "%#m")
+                        .replace("%-H", "%#H")
+                        .replace("%-I", "%#I")
+                        .replace("%-M", "%#M")
+                        .replace("%-S", "%#S")
+                        .replace("%-j", "%#j")
+                    )
                 return datetime.today().strftime(datetime_format)
             elif "+" in input:
                 l = input.split("+")

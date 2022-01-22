@@ -4,13 +4,24 @@
 import os
 from pathlib import Path
 import platform
-version_path = Path(os.getcwd())/"Framework"/"Version.txt"
+
+version_path = Path(os.getcwd()) / "Framework" / "Version.txt"
 with open(version_path, "r"):
     text = version_path.read_text()
-    text = text[text.find("=")+1:].split("\n")[0].strip()
-    os.system("title " + "Python " + platform.python_version() + "(" + platform.architecture()[0] + ")" + " -- ZeuZ Node " + text)
+    text = text[text.find("=") + 1 :].split("\n")[0].strip()
+    os.system(
+        "title "
+        + "Python "
+        + platform.python_version()
+        + "("
+        + platform.architecture()[0]
+        + ")"
+        + " -- ZeuZ Node "
+        + text
+    )
     print(version_path.read_text())
 from Framework.module_installer import install_missing_modules
+
 install_missing_modules()
 
 import sys, time, os.path, base64, signal, argparse, requests, zipfile
@@ -30,10 +41,11 @@ sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "Framew
 # kill any process that is running  from the same node folder
 pid = os.getpid()
 
-pidfile = os.path.abspath(__file__).split("node_cli.py")[0] + 'pid.txt'
+pidfile = os.path.abspath(__file__).split("node_cli.py")[0] + "pid.txt"
 
 try:
     import psutil
+
     pidfile_read = open(pidfile)
     pidNumber = pidfile_read.read()
     pidNumber = int("".join(pidNumber.split()))
@@ -49,7 +61,6 @@ try:
     f.close()
 except:
     True
-
 
 
 if not os.path.exists(
@@ -78,7 +89,7 @@ from Framework.Utilities import (
     CommonUtil,
     FileUtilities as FL,
     All_Device_Info,
-    self_updater
+    self_updater,
 )
 from Framework import MainDriverApi
 
@@ -91,6 +102,7 @@ temp_ini_file = (
 
 import subprocess
 
+
 def signal_handler(sig, frame):
     print("Disconnecting from server...")
     disconnect_from_server()
@@ -98,11 +110,12 @@ def signal_handler(sig, frame):
 
 
 def password_hash(encrypt, key, pw):
-    """ Encrypt, decrypt password and encode in plaintext """
+    """Encrypt, decrypt password and encode in plaintext"""
     # This is just an obfuscation technique, so the password is not immediately seen by users
     # Zeuz_Node.py has a similar function that will need to be updated if this is changed
 
     try:
+
         def pass_encode(key, clear):
             enc = []
             for i in range(len(clear)):
@@ -226,21 +239,25 @@ def Login(cli=False, run_once=False, log_dir=None):
     api_flag = True
     if not api or not server_name:
         zeuz_authentication_prompts_for_cli()
-        for i in range(30):     # it takes time to save in the file. so lets wait 15 sec
+        for i in range(30):  # it takes time to save in the file. so lets wait 15 sec
             time.sleep(0.5)
             api = ConfigModule.get_config_value(AUTHENTICATION_TAG, "api-key")
-            server_name = ConfigModule.get_config_value(AUTHENTICATION_TAG, "server_address")
+            server_name = ConfigModule.get_config_value(
+                AUTHENTICATION_TAG, "server_address"
+            )
             if api and server_name:
                 break
     while api and server_name:
-        url = '/api/auth/token/verify?api_key=%s' % (api)
+        url = "/api/auth/token/verify?api_key=%s" % (api)
         r = RequestFormatter.Get(url)
         if r:
             try:
-                token = r['token']
-                res = RequestFormatter.Get("/api/user", headers={'Authorization': "Bearer %s" % token})
+                token = r["token"]
+                res = RequestFormatter.Get(
+                    "/api/user", headers={"Authorization": "Bearer %s" % token}
+                )
                 info = res[0]
-                username = info['username']
+                username = info["username"]
                 api_flag = False
                 ConfigModule.add_config_value(AUTHENTICATION_TAG, "username", username)
                 break
@@ -305,15 +322,22 @@ def Login(cli=False, run_once=False, log_dir=None):
                 if api_flag:
                     r = RequestFormatter.Post("login_api", user_info_object)
 
-                if r or (isinstance(r, dict) and r['status'] == 200):
+                if r or (isinstance(r, dict) and r["status"] == 200):
                     CommonUtil.ExecLog(
                         "",
                         f"Authentication successful: USER='{username}', "
                         f"PROJECT='{user_info_object['project']}', TEAM='{user_info_object['team']}', SERVER='{server_name}'",
-                        4
+                        4,
                     )
-                    ConfigModule.add_config_value("sectionOne", PROJECT_TAG, user_info_object['project'], temp_ini_file)
-                    ConfigModule.add_config_value("sectionOne", TEAM_TAG, user_info_object['team'], temp_ini_file)
+                    ConfigModule.add_config_value(
+                        "sectionOne",
+                        PROJECT_TAG,
+                        user_info_object["project"],
+                        temp_ini_file,
+                    )
+                    ConfigModule.add_config_value(
+                        "sectionOne", TEAM_TAG, user_info_object["team"], temp_ini_file
+                    )
                     global device_dict
                     device_dict = All_Device_Info.get_all_connected_device_info()
                     machine_object = update_machine(
@@ -330,11 +354,17 @@ def Login(cli=False, run_once=False, log_dir=None):
                                 "machine": tester_id,
                             }
                             executor = CommonUtil.GetExecutor()
-                            executor.submit(RequestFormatter.Get, "send_machine_time_zone_api", time_zone_object)
+                            executor.submit(
+                                RequestFormatter.Get,
+                                "send_machine_time_zone_api",
+                                time_zone_object,
+                            )
                             # RequestFormatter.Get("send_machine_time_zone_api", time_zone_object)
                             # end
                         except Exception as e:
-                            CommonUtil.ExecLog("", "Time zone settings failed {}".format(e), 4, False)
+                            CommonUtil.ExecLog(
+                                "", "Time zone settings failed {}".format(e), 4, False
+                            )
                         # Telling the node_manager that the node is ready to deploy
                         CommonUtil.node_manager_json(
                             {
@@ -342,10 +372,15 @@ def Login(cli=False, run_once=False, log_dir=None):
                                 "report": {
                                     "zip": None,
                                     "directory": None,
-                                }
+                                },
                             }
                         )
-                        run_again = RunProcess(tester_id, user_info_object, run_once=run_once, log_dir=log_dir)
+                        run_again = RunProcess(
+                            tester_id,
+                            user_info_object,
+                            run_once=run_once,
+                            log_dir=log_dir,
+                        )
 
                         if not run_again:
                             break  # Exit login
@@ -366,7 +401,10 @@ def Login(cli=False, run_once=False, log_dir=None):
                     break
                 else:  # Server likely sent nothing back or RequestFormatter.Get() caught an exception
                     CommonUtil.ExecLog(
-                        "", "Login attempt failed, retrying in 60 seconds...", 4, False,
+                        "",
+                        "Login attempt failed, retrying in 60 seconds...",
+                        4,
+                        False,
                     )
                     if cli:
                         zeuz_authentication_prompts_for_cli()
@@ -410,15 +448,20 @@ def Login(cli=False, run_once=False, log_dir=None):
             time.sleep(60)
 
     if run_once:
-        print("[OFFLINE]", "Zeuz Node is going offline after running one session, since `--once` or `-o` flag is specified.")
+        print(
+            "[OFFLINE]",
+            "Zeuz Node is going offline after running one session, since `--once` or `-o` flag is specified.",
+        )
     else:
-        CommonUtil.ExecLog("[OFFLINE]", "Zeuz Node Offline", 3)  # GUI relies on this exact text. GUI must be updated if this is changed
+        CommonUtil.ExecLog(
+            "[OFFLINE]", "Zeuz Node Offline", 3
+        )  # GUI relies on this exact text. GUI must be updated if this is changed
 
     processing_test_case = False
 
 
 def disconnect_from_server():
-    """ Exits script - Used by Zeuz Node GUI """
+    """Exits script - Used by Zeuz Node GUI"""
     global exit_script
     exit_script = True
     CommonUtil.set_exit_mode(True)  # Tell Sequential Actions to exit
@@ -434,7 +477,11 @@ def RunProcess(sTesterid, user_info_object, run_once=False, log_dir=None):
             if time.time() > etime:
                 print("30 minutes over, logging in again")
                 return True  # Timeout reached, re-login. We do this because after about 3-4 hours this function will hang, and thus not be available for deployment
-            executor.submit(RequestFormatter.Get, "update_machine_with_time_api", {"machine_name": sTesterid})
+            executor.submit(
+                RequestFormatter.Get,
+                "update_machine_with_time_api",
+                {"machine_name": sTesterid},
+            )
             # r = RequestFormatter.Get("is_run_submitted_api", {"machine_name": sTesterid})
             r = RequestFormatter.Get(f"is_submitted_api?machine_name={sTesterid}")
             # r = requests.get(RequestFormatter.form_uri("is_submitted_api"), {"machine_name": sTesterid}, verify=False).json()
@@ -446,22 +493,40 @@ def RunProcess(sTesterid, user_info_object, run_once=False, log_dir=None):
                 else:
                     size = str(size) + " KB"
                 save_path = temp_ini_file.parent / "attachments"
-                CommonUtil.ExecLog("", "Downloading dataset and attachments of %s into:\n%s" % (size, str(save_path/"input.zip")), 4)
+                CommonUtil.ExecLog(
+                    "",
+                    "Downloading dataset and attachments of %s into:\n%s"
+                    % (size, str(save_path / "input.zip")),
+                    4,
+                )
                 FL.CreateFolder(save_path)
                 headers = RequestFormatter.add_api_key_to_headers({})
-                response = requests.get(RequestFormatter.form_uri("getting_json_data_api"), {"machine_name": Userid}, stream=True, verify=False, **headers)
+                response = requests.get(
+                    RequestFormatter.form_uri("getting_json_data_api"),
+                    {"machine_name": Userid},
+                    stream=True,
+                    verify=False,
+                    **headers,
+                )
                 chunk_size = 4096
-                progress_bar = tqdm(total=r["file_size"], unit='B', mininterval=0, unit_scale=True, unit_divisor=1024, leave=False)
-                with open(save_path/"input.zip", 'wb') as file:
+                progress_bar = tqdm(
+                    total=r["file_size"],
+                    unit="B",
+                    mininterval=0,
+                    unit_scale=True,
+                    unit_divisor=1024,
+                    leave=False,
+                )
+                with open(save_path / "input.zip", "wb") as file:
                     for data in response.iter_content(chunk_size):
                         progress_bar.update(len(data))
                         file.write(data)
                     progress_bar.refresh()
                 progress_bar.close()
-                z = zipfile.ZipFile(save_path/"input.zip")
+                z = zipfile.ZipFile(save_path / "input.zip")
                 z.extractall(save_path)
                 z.close()
-                os.unlink(save_path/"input.zip")
+                os.unlink(save_path / "input.zip")
                 PreProcess(log_dir=log_dir)
                 # Telling the node_manager that a run_id is deployed
                 CommonUtil.node_manager_json(
@@ -470,7 +535,7 @@ def RunProcess(sTesterid, user_info_object, run_once=False, log_dir=None):
                         "report": {
                             "zip": None,
                             "directory": None,
-                        }
+                        },
                     }
                 )
                 try:
@@ -480,7 +545,9 @@ def RunProcess(sTesterid, user_info_object, run_once=False, log_dir=None):
 
                 if run_once or exit_script:
                     return False
-                CommonUtil.ExecLog("", "Successfully updated db with parameter", 4, False)
+                CommonUtil.ExecLog(
+                    "", "Successfully updated db with parameter", 4, False
+                )
                 break
             else:
                 time.sleep(3)
@@ -517,8 +584,12 @@ def PreProcess(log_dir=None):
         ConfigModule.add_config_value("Selenium_driver_paths", "edge_path", "")
         ConfigModule.add_config_value("Selenium_driver_paths", "opera_path", "")
         ConfigModule.add_config_value("Selenium_driver_paths", "ie_path", "")
-    if not ConfigModule.get_config_value("Selenium_driver_paths", "electron_chrome_path"):
-        ConfigModule.add_config_value("Selenium_driver_paths", "electron_chrome_path", "")
+    if not ConfigModule.get_config_value(
+        "Selenium_driver_paths", "electron_chrome_path"
+    ):
+        ConfigModule.add_config_value(
+            "Selenium_driver_paths", "electron_chrome_path", ""
+        )
 
     # If `log_dir` is not specified, then store all logs inside Zeuz Node's
     # "AutomationLog" folder
@@ -531,7 +602,9 @@ def PreProcess(log_dir=None):
         str(log_dir),
         current_path_file,
     )
-    ConfigModule.add_config_value("sectionOne", "sTestStepExecLogId", "node_cli", temp_ini_file)
+    ConfigModule.add_config_value(
+        "sectionOne", "sTestStepExecLogId", "node_cli", temp_ini_file
+    )
 
 
 def update_machine(dependency, default_team_and_project_dict):
@@ -576,7 +649,10 @@ def update_machine(dependency, default_team_and_project_dict):
         r = RequestFormatter.Get("update_automation_machine_api", update_object)
         if r["registered"]:
             CommonUtil.ExecLog(
-                "", "Zeuz Node is online: %s" % (r["name"]), 4, False,
+                "",
+                "Zeuz Node is online: %s" % (r["name"]),
+                4,
+                False,
             )
         else:
             if r["license"]:
@@ -611,7 +687,7 @@ def update_machine(dependency, default_team_and_project_dict):
 
 
 def dependency_collection(default_team_and_project):
-    """ In future we will again fetch this feature of validating dependencies with server and local """
+    """In future we will again fetch this feature of validating dependencies with server and local"""
     return False
     # try:
     #     dependency_tag = "Dependency"
@@ -688,7 +764,7 @@ def check_server_online():
 
 
 def get_team_names(noerror=False):
-    """ Retrieve all teams user has access to """
+    """Retrieve all teams user has access to"""
 
     try:
         username = ConfigModule.get_config_value(AUTHENTICATION_TAG, USERNAME_TAG)
@@ -713,7 +789,7 @@ def get_team_names(noerror=False):
 
 
 def get_project_names(team):
-    """ Retrieve projects for given team """
+    """Retrieve projects for given team"""
 
     try:
         username = ConfigModule.get_config_value(AUTHENTICATION_TAG, USERNAME_TAG)
@@ -770,6 +846,7 @@ def pass_decode(key, enc):
         dec.append(dec_c)
     return "".join(dec)
 
+
 def check_for_updates():
     """Checks for update. If any update is not found the code will continue to login prompts, otherwise it will
     download the newest version of Zeuz Node, install it and restart/quit the terminal.
@@ -793,9 +870,9 @@ def check_for_updates():
                     print(note)
                 print("*** A new update is available. Automatically installing.")
 
-                update_path = os.path.dirname(
-                    os.path.abspath(__file__)
-                ).replace(os.sep + "Framework", "")
+                update_path = os.path.dirname(os.path.abspath(__file__)).replace(
+                    os.sep + "Framework", ""
+                )
                 self_updater.main(update_path)
             except:
                 print("Couldn't install updates")
@@ -826,8 +903,12 @@ def Local_run(log_dir=None):
     try:
         PreProcess(log_dir=log_dir)
         user_info_object = {}
-        user_info_object['project'] = ConfigModule.get_config_value("sectionOne", PROJECT_TAG, temp_ini_file)
-        user_info_object['team'] = ConfigModule.get_config_value("sectionOne", TEAM_TAG, temp_ini_file)
+        user_info_object["project"] = ConfigModule.get_config_value(
+            "sectionOne", PROJECT_TAG, temp_ini_file
+        )
+        user_info_object["team"] = ConfigModule.get_config_value(
+            "sectionOne", TEAM_TAG, temp_ini_file
+        )
         device_dict = All_Device_Info.get_all_connected_device_info()
         rem_config = {"local_run": True}
         ConfigModule.remote_config = rem_config
@@ -848,6 +929,7 @@ def Local_run(log_dir=None):
             + str(exc_tb.tb_lineno)
         )
         CommonUtil.ExecLog("", Error_Detail, 4, False)
+
 
 def command_line_args() -> Path:
     """
@@ -911,7 +993,11 @@ def command_line_args() -> Path:
         "-n", "--node_id", action="store", help="Enter custom node_id", metavar=""
     )
     parser_object.add_argument(
-        "-m", "--max_run_history", action="store", help="How many latest histories do you want to keep", metavar=""
+        "-m",
+        "--max_run_history",
+        action="store",
+        help="How many latest histories do you want to keep",
+        metavar="",
     )
     parser_object.add_argument(
         "-l", "--logout", action="store_true", help="Logout from the server"
@@ -923,10 +1009,17 @@ def command_line_args() -> Path:
         "-r", "--local_run", action="store_true", help="Performs a local run"
     )
     parser_object.add_argument(
-        "-o", "--once", action="store_true", help="If specified, this flag tells node to run only one session (test set/deployment) and then quit immediately"
+        "-o",
+        "--once",
+        action="store_true",
+        help="If specified, this flag tells node to run only one session (test set/deployment) and then quit immediately",
     )
     parser_object.add_argument(
-        "-d", "--log_dir", action="store", help="Specify a custom directory for storing Run IDs and logs.", metavar=""
+        "-d",
+        "--log_dir",
+        action="store",
+        help="Specify a custom directory for storing Run IDs and logs.",
+        metavar="",
     )
     all_arguments = parser_object.parse_args()
 
@@ -953,9 +1046,13 @@ def command_line_args() -> Path:
             touch_file.touch()
             touch_file.unlink()
     except PermissionError:
-        raise Exception(f"ERR: Zeuz Node does not have enough permissions to write to the specified log directory: {log_dir}")
+        raise Exception(
+            f"ERR: Zeuz Node does not have enough permissions to write to the specified log directory: {log_dir}"
+        )
     except:
-        raise Exception(f"ERR: Invalid custom log directory, or failed to create directory: {log_dir}")
+        raise Exception(
+            f"ERR: Invalid custom log directory, or failed to create directory: {log_dir}"
+        )
 
     global local_run
     local_run = all_arguments.local_run
@@ -1007,7 +1104,7 @@ def command_line_args() -> Path:
 
 def Bypass():
     while True:
-        user_info_object = {'project': 'zeuz', 'team': 'zeuz'}
+        user_info_object = {"project": "zeuz", "team": "zeuz"}
         oLocalInfo = CommonUtil.MachineInfo()
         testerid = (oLocalInfo.getLocalUser()).lower()
         print("[Bypass] Zeuz Node is online: %s" % testerid)
@@ -1024,6 +1121,7 @@ if __name__ == "__main__":
         log_dir = command_line_args()
     except Exception as e:
         from colorama import Fore
+
         print(Fore.RED + str(e))
         print("Exiting...")
         sys.exit(1)

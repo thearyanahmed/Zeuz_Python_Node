@@ -207,6 +207,7 @@ def get_all_sections(location=False):
         print("found no options")
         return []
 
+
 def has_section(section_name, location=False):
     try:
         config = configparser.ConfigParser()

@@ -5,10 +5,11 @@ import traceback
 
 # NULL output device for disabling print output of pip installs
 try:
-    from subprocess import DEVNULL # py3k
+    from subprocess import DEVNULL  # py3k
 except ImportError:
     import os
-    DEVNULL = open(os.devnull, 'wb')
+
+    DEVNULL = open(os.devnull, "wb")
 
 
 def install_missing_modules():
@@ -70,11 +71,27 @@ def install_missing_modules():
             if module_name.lower() not in alredy_installed_list:
                 try:
                     print("module_installer: Installing module: %s" % module_name)
-                    subprocess.check_call([sys.executable, "-m", "pip", "install","--trusted-host=pypi.org", "--trusted-host=files.pythonhosted.org", module_name], stderr=DEVNULL, stdout=DEVNULL,)
-                    print("module_installer: Installed missing module: %s" % module_name)
+                    subprocess.check_call(
+                        [
+                            sys.executable,
+                            "-m",
+                            "pip",
+                            "install",
+                            "--trusted-host=pypi.org",
+                            "--trusted-host=files.pythonhosted.org",
+                            module_name,
+                        ],
+                        stderr=DEVNULL,
+                        stdout=DEVNULL,
+                    )
+                    print(
+                        "module_installer: Installed missing module: %s" % module_name
+                    )
                     installed = True
                 except:
-                    print("module_installer: Failed to install module: %s" % module_name)
+                    print(
+                        "module_installer: Failed to install module: %s" % module_name
+                    )
 
         if installed:
             print("module_installer: New modules installed.")

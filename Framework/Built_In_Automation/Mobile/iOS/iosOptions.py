@@ -16,7 +16,7 @@ imobiledevice_path = "/usr/local/bin/"  # Install location of iMobileDevice prog
 
 @logger
 def run_program(cmd):
-    """ Executes a command line program """
+    """Executes a command line program"""
 
     sModuleInfo = inspect.currentframe().f_code.co_name + " : " + MODULE_NAME
     try:
@@ -30,7 +30,7 @@ def run_program(cmd):
 
 @logger
 def get_list_udid():
-    """ Returns a list of UDID's for connected IOS devices """
+    """Returns a list of UDID's for connected IOS devices"""
 
     sModuleInfo = inspect.currentframe().f_code.co_name + " : " + MODULE_NAME
     CommonUtil.ExecLog(sModuleInfo, "Started", 0)
@@ -47,7 +47,7 @@ def get_list_udid():
 
 @logger
 def get_list_device_names(UDID=""):
-    """ Returns a list of device names """
+    """Returns a list of device names"""
 
     sModuleInfo = inspect.currentframe().f_code.co_name + " : " + MODULE_NAME
     CommonUtil.ExecLog(sModuleInfo, "Started", 0)
@@ -66,7 +66,7 @@ def get_list_device_names(UDID=""):
 
 @logger
 def get_device_info(UDID=""):
-    """ Returns list of device information """
+    """Returns list of device information"""
 
     sModuleInfo = inspect.currentframe().f_code.co_name + " : " + MODULE_NAME
     CommonUtil.ExecLog(sModuleInfo, "Started", 0)
@@ -85,7 +85,7 @@ def get_device_info(UDID=""):
 
 @logger
 def get_list_installed_packages(UDID=""):
-    """ Returns a list of all installed packages """
+    """Returns a list of all installed packages"""
 
     sModuleInfo = inspect.currentframe().f_code.co_name + " : " + MODULE_NAME
     CommonUtil.ExecLog(sModuleInfo, "Started", 0)
@@ -108,7 +108,7 @@ def get_list_installed_packages(UDID=""):
 
 @logger
 def take_screenshot(UDID=""):
-    """ Captures a screenshot of the device, and returns the filename """
+    """Captures a screenshot of the device, and returns the filename"""
 
     sModuleInfo = inspect.currentframe().f_code.co_name + " : " + MODULE_NAME
     CommonUtil.ExecLog(sModuleInfo, "Started", 0)
@@ -127,7 +127,7 @@ def take_screenshot(UDID=""):
 
 @logger
 def ios_reboot(UDID=""):
-    """ Reboots the device """
+    """Reboots the device"""
 
     sModuleInfo = inspect.currentframe().f_code.co_name + " : " + MODULE_NAME
     CommonUtil.ExecLog(sModuleInfo, "Started", 0)
@@ -146,7 +146,7 @@ def ios_reboot(UDID=""):
 
 @logger
 def ios_shutdown(UDID=""):
-    """ Turns off the device """
+    """Turns off the device"""
 
     sModuleInfo = inspect.currentframe().f_code.co_name + " : " + MODULE_NAME
     CommonUtil.ExecLog(sModuleInfo, "Started", 0)
@@ -165,7 +165,7 @@ def ios_shutdown(UDID=""):
 
 @logger
 def get_ios_imei(UDID=""):
-    """ Reads the device IMEI """
+    """Reads the device IMEI"""
 
     sModuleInfo = inspect.currentframe().f_code.co_name + " : " + MODULE_NAME
     CommonUtil.ExecLog(sModuleInfo, "Started", 0)
@@ -192,7 +192,7 @@ def get_ios_imei(UDID=""):
 
 @logger
 def get_ios_version(UDID=""):
-    """ Reads the device version """
+    """Reads the device version"""
 
     sModuleInfo = inspect.currentframe().f_code.co_name + " : " + MODULE_NAME
     CommonUtil.ExecLog(sModuleInfo, "Started", 0)
@@ -222,7 +222,7 @@ def get_ios_version(UDID=""):
 
 @logger
 def get_phone_name(UDID=""):
-    """ Reads the phone name """
+    """Reads the phone name"""
 
     sModuleInfo = inspect.currentframe().f_code.co_name + " : " + MODULE_NAME
     CommonUtil.ExecLog(sModuleInfo, "Started", 0)
@@ -252,7 +252,7 @@ def get_phone_name(UDID=""):
 
 @logger
 def get_product_name(UDID=""):
-    """ Reads the phone name """
+    """Reads the phone name"""
 
     sModuleInfo = inspect.currentframe().f_code.co_name + " : " + MODULE_NAME
     CommonUtil.ExecLog(sModuleInfo, "Started", 0)

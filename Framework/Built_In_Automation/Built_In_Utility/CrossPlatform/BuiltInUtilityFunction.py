@@ -70,9 +70,9 @@ def get_home_folder():
 @logger
 def CreateFolder(folderPath, forced=True):
     """
-        :param folderPath: folder path to be created
-        :param forced: if true remove the folder first, if false won't remove the folder if there exists one with same name
-        :return: Exception if Exception occurs or True if successful
+    :param folderPath: folder path to be created
+    :param forced: if true remove the folder first, if false won't remove the folder if there exists one with same name
+    :return: Exception if Exception occurs or True if successful
     """
 
     sModuleInfo = inspect.currentframe().f_code.co_name + " : " + MODULE_NAME
@@ -106,10 +106,10 @@ def CreateFolder(folderPath, forced=True):
 @logger
 def CreateFile(sFilePath, data="", overwrite=False):
     """
-        :param sFilePath: file path to be created
-        :param data: Write data to the file
-        :param overwrite: if true overwrite the current file
-        :return: Exception if Exception occurs or True if successful or False if file already exists
+    :param sFilePath: file path to be created
+    :param data: Write data to the file
+    :param overwrite: if true overwrite the current file
+    :return: Exception if Exception occurs or True if successful or False if file already exists
     """
 
     sModuleInfo = inspect.currentframe().f_code.co_name + " : " + MODULE_NAME
@@ -137,9 +137,9 @@ def CreateFile(sFilePath, data="", overwrite=False):
 @logger
 def MoveFile(file_to_be_moved, new_directory_of_the_file):
     """
-        :param file_to_be_moved: location of source file to be moved(not renamed)
-        :param new_name_of_the_file: location of destination file
-        :return: Exception if Exception occurs otherwise return result
+    :param file_to_be_moved: location of source file to be moved(not renamed)
+    :param new_name_of_the_file: location of destination file
+    :return: Exception if Exception occurs otherwise return result
     """
 
     sModuleInfo = inspect.currentframe().f_code.co_name + " : " + MODULE_NAME
@@ -175,7 +175,7 @@ def MoveFile(file_to_be_moved, new_directory_of_the_file):
 @logger
 def RenameFile(file_to_be_renamed, new_name_of_the_file):
     """
-        Wrapper for MoveFile
+    Wrapper for MoveFile
     """
 
     # result = MoveFile(file_to_be_renamed, new_name_of_the_file)
@@ -186,13 +186,14 @@ def RenameFile(file_to_be_renamed, new_name_of_the_file):
     except:
         return "zeuz_failed"
 
+
 @logger
 def MoveFolder(folder_to_be_moved, new_directory_of_the_folder):
     """
-        Moves folder a to b.
-        :param folder_to_be_moved: location of source folder to be moved(not renamed)
-        :param new_name_of_the_folder: full location of destination folder
-        :return: Exception if Exception occurs otherwise return result
+    Moves folder a to b.
+    :param folder_to_be_moved: location of source folder to be moved(not renamed)
+    :param new_name_of_the_folder: full location of destination folder
+    :return: Exception if Exception occurs otherwise return result
     """
 
     sModuleInfo = inspect.currentframe().f_code.co_name + " : " + MODULE_NAME
@@ -228,7 +229,7 @@ def MoveFolder(folder_to_be_moved, new_directory_of_the_folder):
 @logger
 def RenameFolder(folder_to_be_renamed, new_name_of_the_folder):
     """
-        Wrapper for MoveFolder
+    Wrapper for MoveFolder
     """
 
     result = MoveFolder(folder_to_be_renamed, new_name_of_the_folder)
@@ -239,9 +240,9 @@ def RenameFolder(folder_to_be_renamed, new_name_of_the_folder):
 @logger
 def UnZip(file_to_be_unzipped, location_where_to_unzip):
     """
-        :param file_to_be_unzipped: location of source file to be unzipped
-        :param location_where_to_unzip: location of destination
-        :return: Exception if Exception occurs or False if file doesn't exist otherwise return result
+    :param file_to_be_unzipped: location of source file to be unzipped
+    :param location_where_to_unzip: location of destination
+    :return: Exception if Exception occurs or False if file doesn't exist otherwise return result
     """
 
     sModuleInfo = inspect.currentframe().f_code.co_name + " : " + MODULE_NAME
@@ -304,9 +305,9 @@ def md5(fname):
 @logger
 def CompareFile(file_to_be_compared1, file_to_be_compared2):
     """
-        :param file_to_be_compared1: location of file to be compared
-        :param file_to_be_compared2: location of file to be compared
-        :return: Exception if Exception occurs otherwise return result
+    :param file_to_be_compared1: location of file to be compared
+    :param file_to_be_compared2: location of file to be compared
+    :return: Exception if Exception occurs otherwise return result
     """
 
     sModuleInfo = inspect.currentframe().f_code.co_name + " : " + MODULE_NAME
@@ -331,9 +332,9 @@ def CompareFile(file_to_be_compared1, file_to_be_compared2):
 @logger
 def ZipFile(source, destination):
     """
-        :param source: location of source file to be zipped (file or directory - directories are recursively zipped)
-        :param destination: location of destination and filename
-        :return: passed or failed
+    :param source: location of source file to be zipped (file or directory - directories are recursively zipped)
+    :param destination: location of destination and filename
+    :return: passed or failed
     """
 
     sModuleInfo = inspect.currentframe().f_code.co_name + " : " + MODULE_NAME
@@ -384,8 +385,8 @@ def ZipFile(source, destination):
 @logger
 def DeleteFile(sFilePath):
     """
-        :param sFilePath: full location of the file to be deleted
-        :return: Exception if Exception or False if file doesn't exist otherwise return the result
+    :param sFilePath: full location of the file to be deleted
+    :return: Exception if Exception or False if file doesn't exist otherwise return the result
     """
 
     sModuleInfo = inspect.currentframe().f_code.co_name + " : " + MODULE_NAME
@@ -427,8 +428,8 @@ def DeleteFolder(
     sFolderPath,
 ):  #!!! Needs to be updated to handle deleting of directories which contain files and sub-directories
     """
-        :param sFolderPath: full location of the folder to be deleted
-        :return: Exception if Exception or False if folder doesn't exist otherwise return the result
+    :param sFolderPath: full location of the folder to be deleted
+    :return: Exception if Exception or False if folder doesn't exist otherwise return the result
     """
 
     sModuleInfo = inspect.currentframe().f_code.co_name + " : " + MODULE_NAME
@@ -471,8 +472,8 @@ def find_file(
     sFilePath,
 ):  #!!!Needs to be updated to either return true/false or actually try to find a file in a file system
     """
-        :param sFilePath: location of source file to be found
-        :return: Exception if Exception occurs otherwise return result
+    :param sFilePath: location of source file to be found
+    :return: Exception if Exception occurs otherwise return result
     """
 
     sModuleInfo = inspect.currentframe().f_code.co_name + " : " + MODULE_NAME
@@ -493,8 +494,8 @@ def find_folder(
     sFolderPath,
 ):  # !!!Needs to be updated to either return true/false or actually try to find a file in a file system
     """
-        :param sFolderPath: location of source folder to be found
-        :return: Exception if Exception occurs otherwise return result
+    :param sFolderPath: location of source folder to be found
+    :return: Exception if Exception occurs otherwise return result
     """
 
     sModuleInfo = inspect.currentframe().f_code.co_name + " : " + MODULE_NAME
@@ -515,8 +516,8 @@ def empty_trash(
     trash_path,
 ):  # !!! Change this so that it's a general recursive delete of all files and sub-directories. shouldn't limit to trash can, then have a smaller empty trash function
     """
-        :param trash_path: path of the trash
-        :return: Exception if Exception occurs or "falied" if trash is already empty
+    :param trash_path: path of the trash
+    :return: Exception if Exception occurs or "falied" if trash is already empty
     """
 
     sModuleInfo = inspect.currentframe().f_code.co_name + " : " + MODULE_NAME
@@ -557,9 +558,9 @@ def empty_trash(
 @logger
 def copy_folder(src, dest):
     """
-        :param src: source of the folder to be copied
-        :param dest: destination where to be copied
-        :return:  Exception if Exception occurs otherwise return result
+    :param src: source of the folder to be copied
+    :param dest: destination where to be copied
+    :return:  Exception if Exception occurs otherwise return result
     """
 
     sModuleInfo = inspect.currentframe().f_code.co_name + " : " + MODULE_NAME
@@ -593,9 +594,9 @@ def copy_file(
     src, dest
 ):  #!!!merge with copy_folder, just check if src is a file or not
     """
-        :param src: source of the file to be copied
-        :param dest: destination where to be copied
-        :return:  Exception if Exception occurs otherwise return result
+    :param src: source of the file to be copied
+    :param dest: destination where to be copied
+    :return:  Exception if Exception occurs otherwise return result
     """
 
     sModuleInfo = inspect.currentframe().f_code.co_name + " : " + MODULE_NAME
@@ -626,7 +627,7 @@ def copy_file(
 @logger
 def empty_recycle_bin():
     """
-        :return: Exception if Exception occurs or "failed if bin is empty otherwise return the result
+    :return: Exception if Exception occurs or "failed if bin is empty otherwise return the result
     """
 
     sModuleInfo = inspect.currentframe().f_code.co_name + " : " + MODULE_NAME
@@ -799,7 +800,7 @@ def empty_recycle_bin():
 # function to generate random string
 @logger
 def random_string_generator(pattern="nluc", size=10):
-    """ Generates a random string """
+    """Generates a random string"""
     # pattern: At least one or more of the following: n l u c (number, lowercase, uppercase, characters)
     # size: Length of string
 
@@ -830,16 +831,16 @@ def random_string_generator(pattern="nluc", size=10):
 # Method to download file using url
 @logger
 def download_file_using_url(file_url, location_of_file, headers=dict()):
-    """ Download a file and save to disk """
+    """Download a file and save to disk"""
     # file_url: URL of file
     # location_of_file: Where to save file on disk
 
     sModuleInfo = inspect.currentframe().f_code.co_name + " : " + MODULE_NAME
 
     try:
-        """ Setting stream parameter to True will cause the download of response headers only and the connection remains open.
-          This avoids reading the content all at once into memory for large responses.
-         A fixed chunk will be loaded each time while r.iter_content is iterated."""
+        """Setting stream parameter to True will cause the download of response headers only and the connection remains open.
+         This avoids reading the content all at once into memory for large responses.
+        A fixed chunk will be loaded each time while r.iter_content is iterated."""
         # Open connection
         r = requests.get(file_url, stream=True)
 
@@ -945,7 +946,7 @@ def download_file_using_url(file_url, location_of_file, headers=dict()):
 def sanitize_step_data(
     step_data, valid_chars="", clean_whitespace_only=False, column=""
 ):
-    """ Sanitize step data Field and Sub-Field """
+    """Sanitize step data Field and Sub-Field"""
     """ Usage:
             Is to be used to allow users flexibility in their step data input, but allow the program to find key words
             :valid_chars: By default this function removes all characters. Specifying a string of characters here will skip removing them
@@ -994,7 +995,7 @@ def sanitize_step_data(
 
 @logger
 def sanitize_string(strg, valid_chars="", clean_whitespace_only=False, maxLength=None):
-    """ Sanitize string """
+    """Sanitize string"""
     """ Usage:
             By default returns the string without special characters, in lower case, underscore replaced with space, and surrounding whitespace removed
             :valid_chars: By default this function removes all characters. Specifying a string of characters here will skip removing them
@@ -1572,7 +1573,9 @@ def Add_Log(step_data):
         list = log_info.split(
             " "
         )  # log level in step data is given as log_1/log_2/log_3 , so to get the level split it by "_"
-        Comment = str(CommonUtil.parse_value_into_object(step_data[0][2])).strip()  # get the comment
+        Comment = str(
+            CommonUtil.parse_value_into_object(step_data[0][2])
+        ).strip()  # get the comment
         LogLevel = int(list[1])  # get the level
         CommonUtil.ExecLog(sModuleInfo, "%s" % Comment, LogLevel)
         return "passed"
@@ -1659,7 +1662,10 @@ def run_command(data_set):
             elif "command separator" == left:
                 command_separator = right
             elif "ssh" == left:
-                if right.lower().strip() in ("true", "yes",):
+                if right.lower().strip() in (
+                    "true",
+                    "yes",
+                ):
                     ssh_mode = True
 
         if None in (commands, variable_name):
@@ -1678,8 +1684,13 @@ def run_command(data_set):
             # general approach if found later on.
             ssh_path = "ssh"
             if sys.platform == "win32":
-                system32 = os.path.join(os.environ['SystemRoot'], 'SysNative' if platform.architecture()[0] == '32bit' else 'System32')
-                ssh_path = os.path.join(system32, 'openSSH', 'ssh.exe')
+                system32 = os.path.join(
+                    os.environ["SystemRoot"],
+                    "SysNative"
+                    if platform.architecture()[0] == "32bit"
+                    else "System32",
+                )
+                ssh_path = os.path.join(system32, "openSSH", "ssh.exe")
             commands = "%s %s" % (ssh_path, commands)
 
         args = {"shell": True, "stdin": None, "stdout": None, "stderr": None}
@@ -2198,10 +2209,16 @@ def TimeStamp(format):
 def Upload(step_data):
     sModuleInfo = inspect.currentframe().f_code.co_name + " : " + MODULE_NAME
     try:
-        if _platform == "linux" or _platform == "linux2" or _platform == "darwin": # linux
-            from_path = get_home_folder() + str(step_data[0][2]).strip()  # location of the file/folder to be copied\
-        elif _platform == "win32": # windows
-            from_path = raw(str(step_data[0][2]).strip())  # location of the file/folder to be copied
+        if (
+            _platform == "linux" or _platform == "linux2" or _platform == "darwin"
+        ):  # linux
+            from_path = (
+                get_home_folder() + str(step_data[0][2]).strip()
+            )  # location of the file/folder to be copied\
+        elif _platform == "win32":  # windows
+            from_path = raw(
+                str(step_data[0][2]).strip()
+            )  # location of the file/folder to be copied
         else:
             CommonUtil.ExecLog(sModuleInfo, "Unsupported OS", 3)
             return "zeuz_failed"
@@ -2217,7 +2234,13 @@ def Upload(step_data):
         )
 
         list_of_dirs = from_path.split(os.sep)
-        to_path = ConfigModule.get_config_value("sectionOne", "test_case_folder", temp_ini_file) + os.sep + list_of_dirs[len(list_of_dirs) - 1]
+        to_path = (
+            ConfigModule.get_config_value(
+                "sectionOne", "test_case_folder", temp_ini_file
+            )
+            + os.sep
+            + list_of_dirs[len(list_of_dirs) - 1]
+        )
         # location where to copy the file/folder
 
         if os.path.isfile(from_path):
@@ -2228,9 +2251,27 @@ def Upload(step_data):
             result = "zeuz_failed"
 
         if result == "zeuz_failed":
-            CommonUtil.ExecLog(sModuleInfo, "Could not copy %s '%s' to the log uploader '%s'" % ("file" if os.path.isfile(from_path) else "folder", from_path, to_path), 3)
+            CommonUtil.ExecLog(
+                sModuleInfo,
+                "Could not copy %s '%s' to the log uploader '%s'"
+                % (
+                    "file" if os.path.isfile(from_path) else "folder",
+                    from_path,
+                    to_path,
+                ),
+                3,
+            )
         else:
-            CommonUtil.ExecLog(sModuleInfo, "%s '%s' copied to the log uploader '%s' successfully" % ("File" if os.path.isfile(from_path) else "Folder", from_path, to_path), 1)
+            CommonUtil.ExecLog(
+                sModuleInfo,
+                "%s '%s' copied to the log uploader '%s' successfully"
+                % (
+                    "File" if os.path.isfile(from_path) else "Folder",
+                    from_path,
+                    to_path,
+                ),
+                1,
+            )
         return result
 
     except Exception:
@@ -2518,7 +2559,7 @@ def Save_Text(step_data):
 # Method to download file
 @logger
 def Download_file(data_set):
-    """ Download file from URL
+    """Download file from URL
     by default if location is not provided, it will save to download folder
     Location needs to be provided by assuming current user's folder such as Documents, Downloads, Pictures and so on
     Example:
@@ -2608,7 +2649,7 @@ def Download_file(data_set):
 # Method to download file and unzip
 @logger
 def Download_File_and_Unzip(data_set):
-    """ Download file and unzip to specified path """
+    """Download file and unzip to specified path"""
 
     sModuleInfo = inspect.currentframe().f_code.co_name + " : " + MODULE_NAME
 
@@ -3268,7 +3309,7 @@ def count_no_of_files_in_folder(step_data):
 
 @logger
 def pattern_matching(dataset):
-    """ Perform user provided regular expression on a string """
+    """Perform user provided regular expression on a string"""
 
     sModuleInfo = inspect.currentframe().f_code.co_name + " : " + MODULE_NAME
 
@@ -3325,7 +3366,11 @@ def pattern_matching(dataset):
 @logger
 def save_substring(data_set):
     sModuleInfo = inspect.currentframe().f_code.co_name + " : " + MODULE_NAME
-    CommonUtil.ExecLog(sModuleInfo, "Use our data collector method. Read- https://automationsolutionz.github.io/docs/data-collector", 2)
+    CommonUtil.ExecLog(
+        sModuleInfo,
+        "Use our data collector method. Read- https://automationsolutionz.github.io/docs/data-collector",
+        2,
+    )
     # Parse data set
     try:
         from_var = ""  # the varibale from which string will be copied
@@ -3422,7 +3467,9 @@ This function saves the variable to a defined variable(not the source variable)
 @deprecated
 def extract_number(data_set):
     sModuleInfo = inspect.currentframe().f_code.co_name + " : " + MODULE_NAME
-    CommonUtil.ExecLog(sModuleInfo, "Try our new action named 'Extract number or Convert data type'", 2)
+    CommonUtil.ExecLog(
+        sModuleInfo, "Try our new action named 'Extract number or Convert data type'", 2
+    )
     # Parse data set
     try:
         from_var = ""  # the varibale from which string will be copied
@@ -3561,18 +3608,20 @@ def datatype_conversion(data_set):
             CommonUtil.ExecLog(
                 sModuleInfo,
                 "Please use %| |% for using variable. From now you can use any variable, list, string, number in the input row",
-                2
+                2,
             )
             in_variable_value = Shared_Resources.Get_Shared_Variables(in_variable_name)
 
         if out_variable_name == "":
             CommonUtil.ExecLog(
-                sModuleInfo, "Output variable name was not set", 3,
+                sModuleInfo,
+                "Output variable name was not set",
+                3,
             )
             return "zeuz_failed"
 
-        if (
-            re.match("^[-+]?[0-9]+$", decimal_point)
+        if re.match(
+            "^[-+]?[0-9]+$", decimal_point
         ):  # Checking if the decimal value is integer
             decimal_point = int(decimal_point)
             decimal_condition = True
@@ -3584,9 +3633,7 @@ def datatype_conversion(data_set):
             )
             decimal_condition = False
 
-        if (
-            re.match("^[-+]?[0-9]+$", index)
-        ):  # Checking if the decimal value is integer
+        if re.match("^[-+]?[0-9]+$", index):  # Checking if the decimal value is integer
             index = int(index)
         else:
             CommonUtil.ExecLog(
@@ -3604,35 +3651,54 @@ def datatype_conversion(data_set):
             out_variable_value = str_to_int(
                 sModuleInfo, in_variable_value, ceil_floor_round
             )
-            return Shared_Resources.Set_Shared_Variables(out_variable_name, out_variable_value)
+            return Shared_Resources.Set_Shared_Variables(
+                out_variable_name, out_variable_value
+            )
 
         elif "str to float" == conversion_type:
             out_variable_value = str_to_float(
                 sModuleInfo, in_variable_value, decimal_point, decimal_condition
             )
-            return Shared_Resources.Set_Shared_Variables(out_variable_name, out_variable_value)
+            return Shared_Resources.Set_Shared_Variables(
+                out_variable_name, out_variable_value
+            )
 
         elif "int to float" == conversion_type:
             out_variable_value = int_to_float(
                 sModuleInfo, in_variable_value, decimal_point, decimal_condition
             )
-            return Shared_Resources.Set_Shared_Variables(out_variable_name, out_variable_value)
+            return Shared_Resources.Set_Shared_Variables(
+                out_variable_name, out_variable_value
+            )
 
         elif "float to int" == conversion_type:
             out_variable_value = float_to_int(
                 sModuleInfo, in_variable_value, ceil_floor_round
             )
-            return Shared_Resources.Set_Shared_Variables(out_variable_name, out_variable_value)
+            return Shared_Resources.Set_Shared_Variables(
+                out_variable_name, out_variable_value
+            )
 
         elif "extract number from str" == conversion_type:
             out_variable_value = extract_num_from_str(
-                sModuleInfo, in_variable_value, decimal_point, decimal_condition, index, ceil_floor_round
+                sModuleInfo,
+                in_variable_value,
+                decimal_point,
+                decimal_condition,
+                index,
+                ceil_floor_round,
             )
-            return Shared_Resources.Set_Shared_Variables(out_variable_name, out_variable_value)
+            return Shared_Resources.Set_Shared_Variables(
+                out_variable_name, out_variable_value
+            )
 
         elif "float to float" == conversion_type:
-            out_variable_value = float_to_float(sModuleInfo, in_variable_value, decimal_point, decimal_condition)
-            return Shared_Resources.Set_Shared_Variables(out_variable_name, out_variable_value)
+            out_variable_value = float_to_float(
+                sModuleInfo, in_variable_value, decimal_point, decimal_condition
+            )
+            return Shared_Resources.Set_Shared_Variables(
+                out_variable_name, out_variable_value
+            )
         else:
             CommonUtil.ExecLog(
                 sModuleInfo,
@@ -3646,7 +3712,9 @@ def datatype_conversion(data_set):
 
     except:
         CommonUtil.ExecLog(
-            sModuleInfo, "Could not convert the data type of the given variable", 3,
+            sModuleInfo,
+            "Could not convert the data type of the given variable",
+            3,
         )
         return "zeuz_failed"
 
@@ -3662,8 +3730,8 @@ def str_to_int(sModuleInfo, in_variable_value, ceil_floor_round):
     Action: "29.1" >> 30
     """
     if isinstance(in_variable_value, str):
-        if (
-            re.match("^[-+]?\d+?\.\d+?$", in_variable_value)
+        if re.match(
+            "^[-+]?\d+?\.\d+?$", in_variable_value
         ):  # Checking if the string has float number
             if ceil_floor_round == "ceil":
                 out_variable_value = int(ceil(float(in_variable_value)))
@@ -3674,8 +3742,8 @@ def str_to_int(sModuleInfo, in_variable_value, ceil_floor_round):
             else:
                 out_variable_value = int(float(in_variable_value))
 
-        elif (
-            re.match("^[-+]?[0-9]+$", in_variable_value)
+        elif re.match(
+            "^[-+]?[0-9]+$", in_variable_value
         ):  # Checking if the string has int number
             out_variable_value = int(in_variable_value)
         else:
@@ -3744,16 +3812,16 @@ def str_to_float(sModuleInfo, in_variable_value, decimal_point, decimal_conditio
     global repeat
 
     if isinstance(in_variable_value, str):
-        if (
-            re.match("^[-+]?\d+?\.\d+?$", in_variable_value)
+        if re.match(
+            "^[-+]?\d+?\.\d+?$", in_variable_value
         ):  # Checking if the string has float number
             if decimal_condition:
                 out_variable_value = round(float(in_variable_value), decimal_point)
             else:
                 out_variable_value = float(in_variable_value)
 
-        elif (
-            re.match("^[-+]?[0-9]+$", in_variable_value)
+        elif re.match(
+            "^[-+]?[0-9]+$", in_variable_value
         ):  # Checking if the string has int number
             if decimal_condition:
                 out_variable_value = round(float(in_variable_value), decimal_point)
@@ -3763,7 +3831,7 @@ def str_to_float(sModuleInfo, in_variable_value, decimal_point, decimal_conditio
         elif repeat:
             CommonUtil.ExecLog(
                 sModuleInfo,
-                "A string has other characters than digits and +-. symbols. Try \"extract num from str\". Returning same value without any conversion",
+                'A string has other characters than digits and +-. symbols. Try "extract num from str". Returning same value without any conversion',
                 2,
             )
             repeat = False
@@ -3774,7 +3842,9 @@ def str_to_float(sModuleInfo, in_variable_value, decimal_point, decimal_conditio
 
         out_variable_value = []
         for i in in_variable_value:
-            out_variable_value.append(str_to_float(sModuleInfo, i, decimal_point, decimal_condition))
+            out_variable_value.append(
+                str_to_float(sModuleInfo, i, decimal_point, decimal_condition)
+            )
 
     else:
         out_variable_value = in_variable_value
@@ -3801,7 +3871,9 @@ def int_to_float(sModuleInfo, in_variable_value, decimal_point, decimal_conditio
 
         out_variable_value = []
         for i in in_variable_value:
-            out_variable_value.append(int_to_float(sModuleInfo, i, decimal_point, decimal_condition))
+            out_variable_value.append(
+                int_to_float(sModuleInfo, i, decimal_point, decimal_condition)
+            )
 
     else:
         out_variable_value = in_variable_value
@@ -3827,7 +3899,9 @@ def float_to_float(sModuleInfo, in_variable_value, decimal_point, decimal_condit
     elif isinstance(in_variable_value, list):
         out_variable_value = []
         for i in in_variable_value:
-            out_variable_value.append(float_to_float(sModuleInfo, i, decimal_point, decimal_condition))
+            out_variable_value.append(
+                float_to_float(sModuleInfo, i, decimal_point, decimal_condition)
+            )
 
     else:
         out_variable_value = in_variable_value
@@ -3836,7 +3910,12 @@ def float_to_float(sModuleInfo, in_variable_value, decimal_point, decimal_condit
 
 
 def extract_num_from_str(
-    sModuleInfo, in_variable_value, decimal_point, decimal_condition, index, ceil_floor_round
+    sModuleInfo,
+    in_variable_value,
+    decimal_point,
+    decimal_condition,
+    index,
+    ceil_floor_round,
 ):
     """
     Field	                Sub Field	        Value
@@ -3858,14 +3937,22 @@ def extract_num_from_str(
             else:
                 extracted_number = all_nums[index]
         except:
-            CommonUtil.ExecLog(sModuleInfo, "Index is out of range", 3,)
+            CommonUtil.ExecLog(
+                sModuleInfo,
+                "Index is out of range",
+                3,
+            )
             return "zeuz_failed"
 
         if no_numbers_found:
-            CommonUtil.ExecLog(sModuleInfo, "Your string has no number to be extracted so returning the string as it is", 1)
+            CommonUtil.ExecLog(
+                sModuleInfo,
+                "Your string has no number to be extracted so returning the string as it is",
+                1,
+            )
             out_variable_value = in_variable_value
-        elif (
-            re.match("^[-+]?\d+?\.\d+?$", extracted_number)
+        elif re.match(
+            "^[-+]?\d+?\.\d+?$", extracted_number
         ):  # Checking if the extracted num has float number
             if ceil_floor_round == "ceil":
                 out_variable_value = ceil(float(extracted_number))
@@ -3878,16 +3965,16 @@ def extract_num_from_str(
             else:
                 out_variable_value = float(extracted_number)
 
-        elif (
-            re.match("^[-+]?[0-9]+$", extracted_number)
+        elif re.match(
+            "^[-+]?[0-9]+$", extracted_number
         ):  # Checking if the extracted num has int number
             if decimal_condition:
                 out_variable_value = round(int(extracted_number), decimal_point)
             else:
                 out_variable_value = int(extracted_number)
 
-        elif (
-            re.match("^[-+]?[0-9]+", extracted_number)
+        elif re.match(
+            "^[-+]?[0-9]+", extracted_number
         ):  # Checking if the extracted num has int number with a full stop at the end.such as "Your verification code is 291767."
             if decimal_condition:
                 out_variable_value = round(int(extracted_number[:-1]), decimal_point)
@@ -3900,7 +3987,16 @@ def extract_num_from_str(
 
         out_variable_value = []
         for i in in_variable_value:
-            out_variable_value.append(extract_num_from_str(sModuleInfo, i, decimal_point, decimal_condition, index, ceil_floor_round))
+            out_variable_value.append(
+                extract_num_from_str(
+                    sModuleInfo,
+                    i,
+                    decimal_point,
+                    decimal_condition,
+                    index,
+                    ceil_floor_round,
+                )
+            )
 
     else:
         out_variable_value = in_variable_value

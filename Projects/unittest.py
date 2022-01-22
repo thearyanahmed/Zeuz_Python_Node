@@ -1,5 +1,7 @@
 import unittest, os
 from Framework.Utilities.CommonUtil import path_parser
+
+
 class Test_path_parser(unittest.TestCase):
     def test_path(self):
         compare = {
@@ -13,11 +15,20 @@ class Test_path_parser(unittest.TestCase):
         for i in compare:
             self.assertEqual(path_parser(i), compare[i])
         p = path_parser(r"~\Downloads\*.pdf")
-        self.assertTrue(os.path.exists(p) and p.endswith(".pdf") and p.startswith(r"C:\Users\ASUS\Downloads"))
+        self.assertTrue(
+            os.path.exists(p)
+            and p.endswith(".pdf")
+            and p.startswith(r"C:\Users\ASUS\Downloads")
+        )
         p = path_parser(r"~\Downloads\*pdf.pdf")
-        self.assertTrue(os.path.exists(p) and p.endswith(".pdf") and p.startswith(r"C:\Users\ASUS\Downloads"))
+        self.assertTrue(
+            os.path.exists(p)
+            and p.endswith(".pdf")
+            and p.startswith(r"C:\Users\ASUS\Downloads")
+        )
         p = path_parser(r"~\Downloads\*")
         self.assertTrue(os.path.exists(p))
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -39,7 +39,7 @@ check_complete = (
 
 
 def copytree(src_dir, dst_dir, skip=[]):
-    """ Copy entire directory, overwrite exsting files """
+    """Copy entire directory, overwrite exsting files"""
     # shutil.copytree only works if dst directory doesn't exist. Won't work for us, so we do it ourselves
 
     try:
@@ -88,7 +88,7 @@ def copytree(src_dir, dst_dir, skip=[]):
 
 
 def remove_deleted(src_dir, dst_dir, skip=[]):
-    """ Delete files and directories from dst, that do not exist in src """
+    """Delete files and directories from dst, that do not exist in src"""
 
     try:
         # Create full paths for skip items
@@ -143,7 +143,7 @@ def remove_deleted(src_dir, dst_dir, skip=[]):
 
 
 def Download_File(url, filename=""):
-    """ Download a file with progress update in percentage """
+    """Download a file with progress update in percentage"""
     # If no filename provided, we will try to get it from the url
 
     chunk_size = 4096  # Size in bytes of data to download at a time
@@ -170,7 +170,7 @@ def Download_File(url, filename=""):
 
 
 def unzip(zipFilePath, destDir):
-    """ Unzip archived files """
+    """Unzip archived files"""
 
     try:
         zfile = zipfile.ZipFile(zipFilePath)
@@ -193,7 +193,7 @@ def unzip(zipFilePath, destDir):
 
 
 def check_for_updates():
-    """ Check if the installed version differs from the newest """
+    """Check if the installed version differs from the newest"""
 
     global check_complete
     try:
@@ -241,7 +241,7 @@ def check_for_updates():
 
 
 def download_new_version(zeuz_node_package):
-    """ Download the newest archive of the software """
+    """Download the newest archive of the software"""
 
     # Directory where installer files will be kept
     if sys.platform == "win32":
@@ -270,7 +270,7 @@ def download_new_version(zeuz_node_package):
 
 
 def main(dst_dir):
-    """ Perform update """
+    """Perform update"""
     # dst_dir: The location that Zeuz Node is installed to
     # Assumes user has already verified there's a new software release
     # We communicate with Zeuz Node via variable "check_complete"

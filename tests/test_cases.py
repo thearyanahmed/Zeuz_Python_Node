@@ -9,6 +9,7 @@ from Projects.Sample_Amazon_Testing.Local_run import main as LocalRun
 import unittest
 import traceback
 
+
 class AppTest(unittest.TestCase):
     """Basis for all test cases"""
 
