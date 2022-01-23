@@ -6,7 +6,6 @@ class MouseModulePlayback:
     def __init__(self, data) -> None:
         self.data = data
 
-
     def play(self, speed_factor=1.0) -> None:
         if not self.data:
             raise RuntimeError("`data` cannot be None")

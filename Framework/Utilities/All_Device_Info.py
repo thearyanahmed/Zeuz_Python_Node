@@ -13,7 +13,7 @@ device_cnt = 1
 
 
 def get_all_connected_android_info():
-    """ For all connected Android devices, get specified information and return in a dictionary with the serial number as the top level key """
+    """For all connected Android devices, get specified information and return in a dictionary with the serial number as the top level key"""
 
     global device_cnt
     try:
@@ -26,7 +26,9 @@ def get_all_connected_android_info():
         android_cmd_name = "shell getprop ro.product.name"
         android_cmd_mfg = "shell getprop ro.product.manufacturer"
         android_cmd_imei = "shell dumpsys iphonesubinfo"
-        android_cmd_alt_imei = "shell service call iphonesubinfo 1"  # Usually needed for CDMA phones
+        android_cmd_alt_imei = (
+            "shell service call iphonesubinfo 1"  # Usually needed for CDMA phones
+        )
 
         # Get list of devices
         # One report of this blocking the next line, so disabled: result = subprocess.check_output('adb kill-server', shell=True) # Stop adb server, to ensure this works properly
@@ -120,7 +122,7 @@ def get_all_connected_android_info():
 
 
 def get_all_connected_ios_info():
-    """ For all connected IOS devices, get specified information and return in a dictionary with the UUID as the top level key """
+    """For all connected IOS devices, get specified information and return in a dictionary with the UUID as the top level key"""
 
     global device_cnt
     try:
@@ -184,7 +186,7 @@ def get_all_connected_ios_info():
 
 
 def get_all_booted_ios_simulator_info():
-    """ For all booted simulator IOS devices, get specified information and return in a dictionary with the UUID as the top level key """
+    """For all booted simulator IOS devices, get specified information and return in a dictionary with the UUID as the top level key"""
     global device_cnt
     try:
 
@@ -230,7 +232,7 @@ def get_all_booted_ios_simulator_info():
 
 
 def get_all_connected_device_info():
-    """ For all connected IOS and Android devices, get specified information and return in a dictionary with the serial number/UUID as the top level key """
+    """For all connected IOS and Android devices, get specified information and return in a dictionary with the serial number/UUID as the top level key"""
 
     try:
         device_list = {}

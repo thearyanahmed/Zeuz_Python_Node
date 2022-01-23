@@ -18,6 +18,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 import selenium
 from xml.etree.ElementTree import tostring, fromstring
+
 global WebDriver_Wait
 WebDriver_Wait = 2
 global generic_driver
@@ -30,7 +31,13 @@ driver_type = None
 MODULE_NAME = inspect.getmodulename(__file__)
 
 
-def Get_Element(step_data_set, driver, query_debug=False, return_all_elements=False, element_wait=None):
+def Get_Element(
+    step_data_set,
+    driver,
+    query_debug=False,
+    return_all_elements=False,
+    element_wait=None,
+):
     """
     This funciton will return "zeuz_failed" if something went wrong, else it will always return a single element
     if you are trying to produce a query from a step dataset, make sure you provide query_debug =True.  This is
@@ -62,7 +69,7 @@ def Get_Element(step_data_set, driver, query_debug=False, return_all_elements=Fa
         # We need to switch to default content just in case previous action switched to something else
         try:
             if driver_type == "selenium":
-                pass #generic_driver.switch_to.default_content()
+                pass  # generic_driver.switch_to.default_content()
                 # we need to see if there are more than one handles.  Since we cannot know if we had switch
                 # windows before, we are going to assume that we can always safely switch to default handle 0
                 """
@@ -135,7 +142,9 @@ def Get_Element(step_data_set, driver, query_debug=False, return_all_elements=Fa
                 if row[0].strip().startswith("%|") and row[0].strip().endswith("|%"):
                     get_parameter = row[0].strip().strip("%").strip("|")
                 else:
-                    CommonUtil.ExecLog(sModuleInfo, "Use '%| |%' sign to get variable value", 3)
+                    CommonUtil.ExecLog(
+                        sModuleInfo, "Use '%| |%' sign to get variable value", 3
+                    )
                     return "zeuz_failed"
             elif row[1].strip().lower() == "option":
                 left = row[0].strip().lower()
@@ -148,7 +157,9 @@ def Get_Element(step_data_set, driver, query_debug=False, return_all_elements=Fa
         if get_parameter != "":
 
             result = sr.parse_variable(get_parameter)
-            result = CommonUtil.ZeuZ_map_code_decoder(result)   # Decode if this is a ZeuZ_map_code
+            result = CommonUtil.ZeuZ_map_code_decoder(
+                result
+            )  # Decode if this is a ZeuZ_map_code
             if result not in failed_tag_list:
                 CommonUtil.ExecLog(
                     sModuleInfo,
@@ -177,20 +188,29 @@ def Get_Element(step_data_set, driver, query_debug=False, return_all_elements=Fa
         element_query, query_type = _construct_query(step_data_set, web_element_object)
         CommonUtil.ExecLog(
             sModuleInfo,
-            "To locate the Element we used %s:\n%s"
-            % (query_type, element_query),
+            "To locate the Element we used %s:\n%s" % (query_type, element_query),
             5,
         )
 
         if query_debug == True:
-            print("This query will not be run as query_debug is enabled.  It will only print out in console")
+            print(
+                "This query will not be run as query_debug is enabled.  It will only print out in console"
+            )
             print("Your query from the step data provided is:  %s" % element_query)
             print("Your query type is: %s" % query_type)
             result = "passed"
         if element_query == False:
             result = "zeuz_failed"
         elif query_type in ("xpath", "css", "unique"):
-            result = _get_xpath_or_css_element(element_query, query_type,step_data_set, index_number, Filter, return_all_elements, element_wait)
+            result = _get_xpath_or_css_element(
+                element_query,
+                query_type,
+                step_data_set,
+                index_number,
+                Filter,
+                return_all_elements,
+                element_wait,
+            )
         else:
             result = "zeuz_failed"
 
@@ -206,14 +226,14 @@ def Get_Element(step_data_set, driver, query_debug=False, return_all_elements=Fa
         if result not in failed_tag_list:
             if type(result) != list:
                 try:
-                    attribute_parameter = result.get_attribute('outerHTML')
+                    attribute_parameter = result.get_attribute("outerHTML")
                     i, c = 0, 0
                     for i in range(len(attribute_parameter)):
                         if attribute_parameter[i] == '"':
-                            c += 1 
-                        if (attribute_parameter[i] == ">" and c % 2 == 0):
+                            c += 1
+                        if attribute_parameter[i] == ">" and c % 2 == 0:
                             break
-                    attribute_parameter =  attribute_parameter[:i+1]
+                    attribute_parameter = attribute_parameter[: i + 1]
                     CommonUtil.ExecLog(sModuleInfo, "%s" % (attribute_parameter), 5)
                 except:
                     pass
@@ -227,7 +247,7 @@ def Get_Element(step_data_set, driver, query_debug=False, return_all_elements=Fa
 
 def _construct_query(step_data_set, web_element_object=False):
     """
-    first find out if in our dataset user is using css or xpath.  If they are using css or xpath, they cannot use any 
+    first find out if in our dataset user is using css or xpath.  If they are using css or xpath, they cannot use any
     other feature such as child parameter or multiple element parameter to locate the element.
     If web_element_object = True then it will generate a xpath so that find_elements can find only the child elements
     inside the given parent element
@@ -274,7 +294,7 @@ def _construct_query(step_data_set, web_element_object=False):
             and sibling_ref_exits == False
             and web_element_object == False
         ):
-            """  If  there are no child or parent as reference, then we construct the xpath differently"""
+            """If  there are no child or parent as reference, then we construct the xpath differently"""
             # first we collect all rows with element parameter only
             xpath_element_list = _construct_xpath_list(element_parameter_list)
             return (_construct_xpath_string_from_list(xpath_element_list), "xpath")
@@ -284,7 +304,7 @@ def _construct_query(step_data_set, web_element_object=False):
             and parent_ref_exits == False
             and sibling_ref_exits == False
         ):
-            """  If  There is child but making sure no parent or sibling
+            """If  There is child but making sure no parent or sibling
             //<child_tag>[child_parameter]/ancestor::<element_tag>[element_parameter]
             """
             xpath_child_list = _construct_xpath_list(child_parameter_list)
@@ -305,7 +325,7 @@ def _construct_query(step_data_set, web_element_object=False):
             and sibling_ref_exits == False
             and (driver_type == "appium" or driver_type == "selenium")
         ):
-            """  
+            """
             parent as a reference
             '//<parent tag>[<parent attributes>]/descendant::<target element tag>[<target element attribute>]'
             """
@@ -344,7 +364,7 @@ def _construct_query(step_data_set, web_element_object=False):
             and sibling_ref_exits == True
             and (driver_type == "appium" or driver_type == "selenium")
         ):
-            """  for siblings, we need parent, siblings and element.  Siblings cannot be used with just element
+            """for siblings, we need parent, siblings and element.  Siblings cannot be used with just element
             xpath_format = '//<sibling_tag>[<sibling_element>]/ancestor::<immediate_parent_tag>[<immediate_parent_element>]//<target_tag>[<target_element>]'
             """
             xpath_sibling_list = _construct_xpath_list(sibling_parameter_list)
@@ -370,7 +390,7 @@ def _construct_query(step_data_set, web_element_object=False):
             and sibling_ref_exits == False
             and (driver_type == "xml")
         ):
-            """  If  There is parent but making sure no child"""
+            """If  There is parent but making sure no child"""
             xpath_parent_list = _construct_xpath_list(parent_parameter_list)
             parent_xpath_string = _construct_xpath_string_from_list(xpath_parent_list)
             # For xml we just put parent first and element later
@@ -437,7 +457,9 @@ def _construct_xpath_list(parameter_list, add_dot=False):
         element_main_body_list = []
         # these are special cases where we cannot treat their attribute as any other attribute such as id, class and so on...
         excluded_attribute = [
-            "**text", "*text", "text",
+            "**text",
+            "*text",
+            "text",
             "tag",
             "css",
             "index",
@@ -451,14 +473,26 @@ def _construct_xpath_list(parameter_list, add_dot=False):
             attribute = each_data_row[0].strip()
             attribute_value = each_data_row[2]
 
-            if attribute == "text" and driver_type in ("selenium", "xml"):  # exact search
+            if attribute == "text" and driver_type in (
+                "selenium",
+                "xml",
+            ):  # exact search
                 text_value = '[text()="%s"]' % attribute_value
                 element_main_body_list.append(text_value)
-            elif attribute == "*text" and driver_type in ("selenium", "xml"):  # partial search
+            elif attribute == "*text" and driver_type in (
+                "selenium",
+                "xml",
+            ):  # partial search
                 text_value = '[contains(text(),"%s")]' % (str(attribute_value))
                 element_main_body_list.append(text_value)
-            elif attribute == "**text" and driver_type in ("selenium", "xml"):  # partial search + ignore case
-                text_value = '[contains(translate(text(),"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz"),"%s")]' % str(attribute_value).lower()
+            elif attribute == "**text" and driver_type in (
+                "selenium",
+                "xml",
+            ):  # partial search + ignore case
+                text_value = (
+                    '[contains(translate(text(),"ABCDEFGHIJKLMNOPQRSTUVWXYZ","abcdefghijklmnopqrstuvwxyz"),"%s")]'
+                    % str(attribute_value).lower()
+                )
                 element_main_body_list.append(text_value)
 
             elif attribute == "text" and driver_type == "appium":  # exact search
@@ -468,32 +502,61 @@ def _construct_xpath_list(parameter_list, add_dot=False):
                 else:
                     text_value = '[@text="%s"]' % attribute_value
                 element_main_body_list.append(text_value)
-            elif attribute == "**text" and driver_type == "appium":  # partial search + ignore case
-                text_value = "[contains(translate(@text,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'%s')]"%str(attribute_value).lower()
+            elif (
+                attribute == "**text" and driver_type == "appium"
+            ):  # partial search + ignore case
+                text_value = (
+                    "[contains(translate(@text,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'%s')]"
+                    % str(attribute_value).lower()
+                )
                 current_context = generic_driver.context
                 element_main_body_list.append(text_value)
             elif attribute == "*text" and driver_type == "appium":  # partial search
                 current_context = generic_driver.context
                 if "WEB" in current_context:
-                    text_value = '[contains(%s(),"%s")]' % (attribute.split("*")[1], str(attribute_value))
+                    text_value = '[contains(%s(),"%s")]' % (
+                        attribute.split("*")[1],
+                        str(attribute_value),
+                    )
                 else:
-                    text_value = '[contains(@%s,"%s")]' % (attribute.split("*")[1], str(attribute_value))
+                    text_value = '[contains(@%s,"%s")]' % (
+                        attribute.split("*")[1],
+                        str(attribute_value),
+                    )
                 element_main_body_list.append(text_value)
 
-            elif attribute not in excluded_attribute and "*" not in attribute:  # exact search
+            elif (
+                attribute not in excluded_attribute and "*" not in attribute
+            ):  # exact search
                 other_value = '[@%s="%s"]' % (attribute, attribute_value)
                 element_main_body_list.append(other_value)
-            elif attribute not in excluded_attribute and "**" in attribute:  # partial search + ignore case
+            elif (
+                attribute not in excluded_attribute and "**" in attribute
+            ):  # partial search + ignore case
                 if driver_type == "appium":
-                    other_value = "[contains(translate(@%s,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'%s')]" % (attribute.split('**')[1], str(attribute_value.lower()))
+                    other_value = (
+                        "[contains(translate(@%s,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'%s')]"
+                        % (attribute.split("**")[1], str(attribute_value.lower()))
+                    )
                 else:
-                    other_value = "[contains(translate(@%s,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'%s')]" % (attribute.split('**')[1], str(attribute_value).lower())
+                    other_value = (
+                        "[contains(translate(@%s,'ABCDEFGHIJKLMNOPQRSTUVWXYZ','abcdefghijklmnopqrstuvwxyz'),'%s')]"
+                        % (attribute.split("**")[1], str(attribute_value).lower())
+                    )
                 element_main_body_list.append(other_value)
-            elif attribute not in excluded_attribute and "*" in attribute:  # partial search
+            elif (
+                attribute not in excluded_attribute and "*" in attribute
+            ):  # partial search
                 if driver_type == "appium":
-                    other_value = '[contains(@%s,"%s")]' % (attribute.split("*")[1], str(attribute_value))
+                    other_value = '[contains(@%s,"%s")]' % (
+                        attribute.split("*")[1],
+                        str(attribute_value),
+                    )
                 else:
-                    other_value = '[contains(@%s,"%s")]' % (attribute.split("*")[1], str(attribute_value))
+                    other_value = '[contains(@%s,"%s")]' % (
+                        attribute.split("*")[1],
+                        str(attribute_value),
+                    )
                 element_main_body_list.append(other_value)
 
         # we do the tag on its own
@@ -534,9 +597,10 @@ def _switch(step_data_set):
             generic_driver.switch_to.default_content()
             CommonUtil.ExecLog(
                 sModuleInfo,
-                "This method of 'switch frame' is deprecated and will be removed at a later period.\n" +
-                "Please use our new action 'Switch iframe' to get updated features",
-                2)
+                "This method of 'switch frame' is deprecated and will be removed at a later period.\n"
+                + "Please use our new action 'Switch iframe' to get updated features",
+                2,
+            )
             frame_switch = [x for x in step_data_set if "switch frame" == x[0]][0][2]
             # first we split by > and then we reconstruct the list by striping trailing spaces
             frame_switch_list = [(x.strip()) for x in (frame_switch.split(">"))]
@@ -547,7 +611,10 @@ def _switch(step_data_set):
                 check_if_index = ["0", "1", "2", "3", "4", "5"]
                 if each_frame in check_if_index:
                     each_frame = int(each_frame)
-                if isinstance(each_frame, str) and each_frame.strip().lower() == "default content":
+                if (
+                    isinstance(each_frame, str)
+                    and each_frame.strip().lower() == "default content"
+                ):
                     continue
                 else:
                     generic_driver.switch_to_frame(each_frame)
@@ -595,7 +662,9 @@ def auto_scroll_appium(data_set, element_query):
     global generic_driver
     all_matching_elements_visible_invisible = []
     sModuleInfo = inspect.currentframe().f_code.co_name + " : " + MODULE_NAME
-    scrollable_element = generic_driver.find_elements_by_android_uiautomator("new UiSelector().scrollable(true)")
+    scrollable_element = generic_driver.find_elements_by_android_uiautomator(
+        "new UiSelector().scrollable(true)"
+    )
     auto_scroll = False
     inset = 0.1
     position = 0.5
@@ -603,21 +672,33 @@ def auto_scroll_appium(data_set, element_query):
         left = left.strip().lower()
         mid = mid.strip().lower()
         right = right.replace("%", "").replace(" ", "").lower()
-        if "scroll parameter" in mid and left == "auto scroll" and right in ("yes", "ok", "enable", "true"):
+        if (
+            "scroll parameter" in mid
+            and left == "auto scroll"
+            and right in ("yes", "ok", "enable", "true")
+        ):
             auto_scroll = True
-    if auto_scroll == False :
+    if auto_scroll == False:
         return []
 
     if len(scrollable_element) == 0:
         return []
     elif len(scrollable_element) > 1:
-        CommonUtil.ExecLog(sModuleInfo, 'Multiple scrollable page found. So Auto scroll will not respond. Please use "Scroll to an element" action if you need scroll to find that element', 2)
+        CommonUtil.ExecLog(
+            sModuleInfo,
+            'Multiple scrollable page found. So Auto scroll will not respond. Please use "Scroll to an element" action if you need scroll to find that element',
+            2,
+        )
         return []
 
     height = scrollable_element[0].size["height"]
     width = scrollable_element[0].size["width"]
-    xstart_location = scrollable_element[0].location["x"]  # Starting location of the x-coordinate of scrollable element
-    ystart_location = scrollable_element[0].location["y"]  # Starting location of the y-coordinate of scrollable element
+    xstart_location = scrollable_element[0].location[
+        "x"
+    ]  # Starting location of the x-coordinate of scrollable element
+    ystart_location = scrollable_element[0].location[
+        "y"
+    ]  # Starting location of the y-coordinate of scrollable element
     max_try = 10
     direction = "up" if height > width else "left"
     swipe_speed = None
@@ -639,7 +720,11 @@ def auto_scroll_appium(data_set, element_query):
                 elif left == "max try":
                     max_try = float(right)
     except:
-        CommonUtil.Exception_Handler(sys.exc_info(), None, "Unable to parse data. Please write data in correct format")
+        CommonUtil.Exception_Handler(
+            sys.exc_info(),
+            None,
+            "Unable to parse data. Please write data in correct format",
+        )
         return []
 
     if direction == "up":
@@ -692,30 +777,63 @@ def auto_scroll_appium(data_set, element_query):
         else:
             duration = new_width * swipe_speed
     else:
-        CommonUtil.ExecLog(sModuleInfo, "Direction should be among up, down, right or left", 3)
+        CommonUtil.ExecLog(
+            sModuleInfo, "Direction should be among up, down, right or left", 3
+        )
         return []
 
     try:
-        CommonUtil.ExecLog(sModuleInfo, "Auto scrolling with the following scroll parameter:\n" +
-           "Max_try: %s, Direction: %s, Duration of a swipe: %s second, Inset: %s, Position:%s\n" % (max_try, direction, duration, inset*100, position*100) +
-           "Calculated Coordinate: (%s,%s) to (%s,%s)" % (x1, y1, x2, y2), 1)
+        CommonUtil.ExecLog(
+            sModuleInfo,
+            "Auto scrolling with the following scroll parameter:\n"
+            + "Max_try: %s, Direction: %s, Duration of a swipe: %s second, Inset: %s, Position:%s\n"
+            % (max_try, direction, duration, inset * 100, position * 100)
+            + "Calculated Coordinate: (%s,%s) to (%s,%s)" % (x1, y1, x2, y2),
+            1,
+        )
         i = 0
         while i < max_try:
             # We will try to match the outerHTML of the scrollable element to determine the end of the scroll.
-            page_src = tostring(fromstring(generic_driver.page_source).findall('.//*[@scrollable="true"]')[0]).decode()
-            generic_driver.swipe(x1, y1, x2, y2, duration * 1000)  # duration seconds to milliseconds
-            all_matching_elements_visible_invisible = generic_driver.find_elements(By.XPATH, element_query)
-            if page_src == tostring(fromstring(generic_driver.page_source).findall('.//*[@scrollable="true"]')[0]).decode() or len(all_matching_elements_visible_invisible) != 0:
+            page_src = tostring(
+                fromstring(generic_driver.page_source).findall(
+                    './/*[@scrollable="true"]'
+                )[0]
+            ).decode()
+            generic_driver.swipe(
+                x1, y1, x2, y2, duration * 1000
+            )  # duration seconds to milliseconds
+            all_matching_elements_visible_invisible = generic_driver.find_elements(
+                By.XPATH, element_query
+            )
+            if (
+                page_src
+                == tostring(
+                    fromstring(generic_driver.page_source).findall(
+                        './/*[@scrollable="true"]'
+                    )[0]
+                ).decode()
+                or len(all_matching_elements_visible_invisible) != 0
+            ):
                 return all_matching_elements_visible_invisible
             i += 1
         return all_matching_elements_visible_invisible
 
     except Exception:
-        CommonUtil.Exception_Handler(sys.exc_info(), None, "Error could not auto scroll")
+        CommonUtil.Exception_Handler(
+            sys.exc_info(), None, "Error could not auto scroll"
+        )
         return []
 
 
-def _get_xpath_or_css_element(element_query, css_xpath,data_set, index_number=None, Filter="", return_all_elements=False, element_wait=None):
+def _get_xpath_or_css_element(
+    element_query,
+    css_xpath,
+    data_set,
+    index_number=None,
+    Filter="",
+    return_all_elements=False,
+    element_wait=None,
+):
     """
     Here, we actually execute the query based on css/xpath and then analyze if there are multiple.
     If we find multiple we give warning and send the first one we found.
@@ -733,7 +851,9 @@ def _get_xpath_or_css_element(element_query, css_xpath,data_set, index_number=No
         end = time.time() + element_wait
 
         while True:
-            if css_xpath == "unique" and (driver_type == "appium" or driver_type == "selenium"):  # for unique id
+            if css_xpath == "unique" and (
+                driver_type == "appium" or driver_type == "selenium"
+            ):  # for unique id
                 try:
                     unique_key = element_query[0]
                     unique_value = element_query[1]
@@ -743,48 +863,95 @@ def _get_xpath_or_css_element(element_query, css_xpath,data_set, index_number=No
                         or unique_key == "content-desc"
                         or unique_key == "content desc"
                     ):  # content-desc for android, accessibility id for iOS
-                        unique_element = generic_driver.find_element_by_accessibility_id(unique_value)
-                    elif unique_key == "id" or (driver_type == "appium" and (unique_key == "resource id" or unique_key == "resource-id" or unique_key == "name")):  # name for iOS
-                        unique_element = generic_driver.find_element(By.ID, unique_value)
+                        unique_element = (
+                            generic_driver.find_element_by_accessibility_id(
+                                unique_value
+                            )
+                        )
+                    elif unique_key == "id" or (
+                        driver_type == "appium"
+                        and (
+                            unique_key == "resource id"
+                            or unique_key == "resource-id"
+                            or unique_key == "name"
+                        )
+                    ):  # name for iOS
+                        unique_element = generic_driver.find_element(
+                            By.ID, unique_value
+                        )
                     elif unique_key == "name":
-                        unique_element = generic_driver.find_element(By.NAME, unique_value)
+                        unique_element = generic_driver.find_element(
+                            By.NAME, unique_value
+                        )
                     elif unique_key == "class":
-                        unique_element = generic_driver.find_element(By.CLASS_NAME, unique_value)
+                        unique_element = generic_driver.find_element(
+                            By.CLASS_NAME, unique_value
+                        )
                     elif unique_key == "tag":
-                        unique_element = generic_driver.find_element(By.TAG_NAME, unique_value)
+                        unique_element = generic_driver.find_element(
+                            By.TAG_NAME, unique_value
+                        )
                     elif unique_key == "css":
-                        unique_element = generic_driver.find_element(By.CSS_SELECTOR, unique_value)
+                        unique_element = generic_driver.find_element(
+                            By.CSS_SELECTOR, unique_value
+                        )
                     elif unique_key == "xpath":
-                        unique_element = generic_driver.find_element(By.XPATH, unique_value)
+                        unique_element = generic_driver.find_element(
+                            By.XPATH, unique_value
+                        )
                     elif unique_key in ["text", "*text"]:
                         if driver_type == "appium":
                             if unique_key == "text":
-                                unique_element = generic_driver.find_element(By.XPATH, '//*[@text="%s"]' % unique_value)
+                                unique_element = generic_driver.find_element(
+                                    By.XPATH, '//*[@text="%s"]' % unique_value
+                                )
                             else:
-                                unique_element = generic_driver.find_element(By.XPATH, '//*[contains(@text,"%s")]' % unique_value)
+                                unique_element = generic_driver.find_element(
+                                    By.XPATH, '//*[contains(@text,"%s")]' % unique_value
+                                )
                         else:
                             if unique_key == "text":
-                                unique_element = generic_driver.find_element(By.XPATH, '//*[text()="%s"]' % unique_value)
+                                unique_element = generic_driver.find_element(
+                                    By.XPATH, '//*[text()="%s"]' % unique_value
+                                )
                             else:
-                                unique_element = generic_driver.find_element(By.XPATH, '//*[contains(text(),"%s")]' % unique_value)
+                                unique_element = generic_driver.find_element(
+                                    By.XPATH,
+                                    '//*[contains(text(),"%s")]' % unique_value,
+                                )
                     else:
                         if "*" in unique_key:
                             unique_key = unique_key[1:]  # drop the asterisk
-                            unique_element = generic_driver.find_element(By.XPATH, "//*[contains(@%s,'%s')]" % (unique_key, unique_value))
+                            unique_element = generic_driver.find_element(
+                                By.XPATH,
+                                "//*[contains(@%s,'%s')]" % (unique_key, unique_value),
+                            )
                         else:
-                            unique_element = generic_driver.find_element(By.XPATH, "//*[@%s='%s']" % (unique_key, unique_value))
+                            unique_element = generic_driver.find_element(
+                                By.XPATH, "//*[@%s='%s']" % (unique_key, unique_value)
+                            )
                     return unique_element
                 except Exception as e:
                     exception_cnd = True
                     continue
             elif css_xpath == "xpath" and driver_type != "xml":
-                all_matching_elements_visible_invisible = generic_driver.find_elements(By.XPATH, element_query)
+                all_matching_elements_visible_invisible = generic_driver.find_elements(
+                    By.XPATH, element_query
+                )
             elif css_xpath == "xpath" and driver_type == "xml":
-                all_matching_elements_visible_invisible = generic_driver.xpath(element_query)
+                all_matching_elements_visible_invisible = generic_driver.xpath(
+                    element_query
+                )
             elif css_xpath == "css":
-                all_matching_elements_visible_invisible = generic_driver.find_elements(By.CSS_SELECTOR, element_query)
+                all_matching_elements_visible_invisible = generic_driver.find_elements(
+                    By.CSS_SELECTOR, element_query
+                )
 
-            if all_matching_elements_visible_invisible and len(filter_elements(all_matching_elements_visible_invisible, "")) > 0:
+            if (
+                all_matching_elements_visible_invisible
+                and len(filter_elements(all_matching_elements_visible_invisible, ""))
+                > 0
+            ):
                 break
             elif time.time() > end:
                 break
@@ -793,14 +960,32 @@ def _get_xpath_or_css_element(element_query, css_xpath,data_set, index_number=No
         if exception_cnd:
             return False
 
-        if driver_type == "appium" and index_number is not None and index_number > 0 and len(all_matching_elements_visible_invisible) == 0:
-            CommonUtil.ExecLog(sModuleInfo, "Element not found and we do not support Auto Scroll when index is provided", 2)
-        elif driver_type == "appium" and len(all_matching_elements_visible_invisible) == 0:
-            all_matching_elements_visible_invisible = auto_scroll_appium(data_set, element_query)
-             
-        all_matching_elements = filter_elements(all_matching_elements_visible_invisible, Filter)
+        if (
+            driver_type == "appium"
+            and index_number is not None
+            and index_number > 0
+            and len(all_matching_elements_visible_invisible) == 0
+        ):
+            CommonUtil.ExecLog(
+                sModuleInfo,
+                "Element not found and we do not support Auto Scroll when index is provided",
+                2,
+            )
+        elif (
+            driver_type == "appium"
+            and len(all_matching_elements_visible_invisible) == 0
+        ):
+            all_matching_elements_visible_invisible = auto_scroll_appium(
+                data_set, element_query
+            )
+
+        all_matching_elements = filter_elements(
+            all_matching_elements_visible_invisible, Filter
+        )
         if Filter == "allow hidden":
-            displayed_len = len(filter_elements(all_matching_elements_visible_invisible, ""))
+            displayed_len = len(
+                filter_elements(all_matching_elements_visible_invisible, "")
+            )
             hidden_len = len(all_matching_elements_visible_invisible) - displayed_len
         else:
             displayed_len = len(all_matching_elements)
@@ -812,97 +997,113 @@ def _get_xpath_or_css_element(element_query, css_xpath,data_set, index_number=No
                     "",
                     "Found %s hidden elements and %s displayed elements. Returning all of them"
                     % (hidden_len, displayed_len),
-                    1
+                    1,
                 )
             else:
                 CommonUtil.ExecLog(
                     "",
                     "Found %s hidden elements and %s displayed elements. Returning %s displayed elements only"
                     % (hidden_len, displayed_len, displayed_len),
-                    1
+                    1,
                 )
             return all_matching_elements
         elif len(all_matching_elements) == 0:
             if hidden_len > 0 and Filter != "allow hidden":
                 CommonUtil.ExecLog(
                     "",
-                    "Found %s hidden elements and no displayed elements. Nothing to return.\n" % hidden_len +
-                    "To get hidden elements add a row (\"allow hidden\", \"optional option\", \"yes\")",
-                    3
+                    "Found %s hidden elements and no displayed elements. Nothing to return.\n"
+                    % hidden_len
+                    + 'To get hidden elements add a row ("allow hidden", "optional option", "yes")',
+                    3,
                 )
             return False
         elif len(all_matching_elements) == 1 and index_number is None:
             if hidden_len > 0 and Filter != "allow hidden":
                 CommonUtil.ExecLog(
                     "",
-                    "Found %s hidden elements and %s displayed elements. Returning the displayed element only\n" % (hidden_len, displayed_len) +
-                    "To get hidden elements add a row (\"allow hidden\", \"optional option\", \"yes\") and also consider providing index",
-                    2
+                    "Found %s hidden elements and %s displayed elements. Returning the displayed element only\n"
+                    % (hidden_len, displayed_len)
+                    + 'To get hidden elements add a row ("allow hidden", "optional option", "yes") and also consider providing index',
+                    2,
                 )
             elif Filter == "allow hidden":
-                CommonUtil.ExecLog("", "Found %s hidden element and %s displayed element" % (hidden_len, displayed_len), 1)
+                CommonUtil.ExecLog(
+                    "",
+                    "Found %s hidden element and %s displayed element"
+                    % (hidden_len, displayed_len),
+                    1,
+                )
             return all_matching_elements[0]
         elif len(all_matching_elements) > 1 and index_number is None:
             if hidden_len > 0 and Filter != "allow hidden":
                 CommonUtil.ExecLog(
                     "",
-                    "Found %s hidden elements and %s displayed elements. Returning the first displayed element only\n" % (hidden_len, displayed_len) +
-                    "To get hidden elements add a row (\"allow hidden\", \"optional option\", \"yes\") and also consider providing index",
-                    2
+                    "Found %s hidden elements and %s displayed elements. Returning the first displayed element only\n"
+                    % (hidden_len, displayed_len)
+                    + 'To get hidden elements add a row ("allow hidden", "optional option", "yes") and also consider providing index',
+                    2,
                 )
             elif Filter != "allow hidden":
                 CommonUtil.ExecLog(
                     "",
-                    "Found %s displayed elements. Returning the first displayed element only. Consider providing index" % displayed_len,
-                    2
+                    "Found %s displayed elements. Returning the first displayed element only. Consider providing index"
+                    % displayed_len,
+                    2,
                 )
             else:
                 CommonUtil.ExecLog(
                     "",
-                    "Found %s hidden elements and %s displayed elements. Returning the first element only. Consider providing index" % (hidden_len, displayed_len),
-                    2
+                    "Found %s hidden elements and %s displayed elements. Returning the first element only. Consider providing index"
+                    % (hidden_len, displayed_len),
+                    2,
                 )
             return all_matching_elements[0]
         elif len(all_matching_elements) == 1 and index_number not in (-1, 0):
             if hidden_len > 0 and Filter != "allow hidden":
                 CommonUtil.ExecLog(
                     sModuleInfo,
-                    "Found %s hidden elements and %s displayed elements but you provided a wrong index number. Returning the only displayed element\n" % (hidden_len, displayed_len) +
-                    "To get hidden elements add a row (\"allow hidden\", \"optional option\", \"yes\") and also consider providing correct index",
+                    "Found %s hidden elements and %s displayed elements but you provided a wrong index number. Returning the only displayed element\n"
+                    % (hidden_len, displayed_len)
+                    + 'To get hidden elements add a row ("allow hidden", "optional option", "yes") and also consider providing correct index',
                     2,
                 )
             elif Filter != "allow hidden":
                 CommonUtil.ExecLog(
                     sModuleInfo,
-                    "Found 0 hidden elements and %s displayed elements but you provided a wrong index number. Returning the only displayed element\n" % displayed_len,
+                    "Found 0 hidden elements and %s displayed elements but you provided a wrong index number. Returning the only displayed element\n"
+                    % displayed_len,
                     2,
                 )
             elif Filter == "allow hidden":
                 CommonUtil.ExecLog(
                     "",
-                    "Found %s hidden element and %s displayed element but you provided a wrong index number. Returning the only element" % (hidden_len, displayed_len),
-                    2
+                    "Found %s hidden element and %s displayed element but you provided a wrong index number. Returning the only element"
+                    % (hidden_len, displayed_len),
+                    2,
                 )
             return all_matching_elements[0]
         elif len(all_matching_elements) == 1 and index_number in (-1, 0):
             if hidden_len > 0 and Filter != "allow hidden":
                 CommonUtil.ExecLog(
                     "",
-                    "Found %s hidden elements and %s displayed elements. Returning the displayed element of index %s\n" % (hidden_len, displayed_len, index_number) +
-                    "To get hidden elements add a row (\"allow hidden\", \"optional option\", \"yes\")",
-                    1
+                    "Found %s hidden elements and %s displayed elements. Returning the displayed element of index %s\n"
+                    % (hidden_len, displayed_len, index_number)
+                    + 'To get hidden elements add a row ("allow hidden", "optional option", "yes")',
+                    1,
                 )
             elif Filter != "allow hidden":
                 CommonUtil.ExecLog(
                     "",
-                    "Found 0 hidden elements and %s displayed elements. Returning the displayed element of index %s" % (displayed_len, index_number),
-                    1
+                    "Found 0 hidden elements and %s displayed elements. Returning the displayed element of index %s"
+                    % (displayed_len, index_number),
+                    1,
                 )
             elif Filter == "allow hidden":
                 CommonUtil.ExecLog(
                     "",
-                    "Found %s hidden elements and %s displayed elements. Returning the element of index %s" % (hidden_len, displayed_len, index_number),
-                    1
+                    "Found %s hidden elements and %s displayed elements. Returning the element of index %s"
+                    % (hidden_len, displayed_len, index_number),
+                    1,
                 )
             return all_matching_elements[0]
         elif len(all_matching_elements) > 1 and index_number is not None:
@@ -911,42 +1112,48 @@ def _get_xpath_or_css_element(element_query, css_xpath,data_set, index_number=No
                 if hidden_len > 0 and Filter != "allow hidden":
                     CommonUtil.ExecLog(
                         "",
-                        "Found %s hidden elements and %s displayed elements. Returning the displayed element of index %s\n" % (hidden_len, displayed_len, index_number) +
-                        "To get hidden elements add a row (\"allow hidden\", \"optional option\", \"yes\")",
-                        1
+                        "Found %s hidden elements and %s displayed elements. Returning the displayed element of index %s\n"
+                        % (hidden_len, displayed_len, index_number)
+                        + 'To get hidden elements add a row ("allow hidden", "optional option", "yes")',
+                        1,
                     )
                 elif Filter != "allow hidden":
                     CommonUtil.ExecLog(
                         "",
-                        "Found 0 hidden elements and %s displayed elements. Returning the displayed element of index %s" % (displayed_len, index_number),
-                        1
+                        "Found 0 hidden elements and %s displayed elements. Returning the displayed element of index %s"
+                        % (displayed_len, index_number),
+                        1,
                     )
                 else:
                     CommonUtil.ExecLog(
                         "",
-                        "Found %s hidden elements and %s displayed elements. Returning the element of index %s" % (hidden_len, displayed_len, index_number),
-                        1
+                        "Found %s hidden elements and %s displayed elements. Returning the element of index %s"
+                        % (hidden_len, displayed_len, index_number),
+                        1,
                     )
                 return all_matching_elements[index_number]
             else:
                 if hidden_len > 0 and Filter != "allow hidden":
                     CommonUtil.ExecLog(
                         "",
-                        "Found %s hidden elements and %s displayed elements. Index exceeds the number of displayed elements found\n" % (hidden_len, displayed_len) +
-                        "To get hidden elements add a row (\"allow hidden\", \"optional option\", \"yes\") and also consider providing correct index",
-                        3
+                        "Found %s hidden elements and %s displayed elements. Index exceeds the number of displayed elements found\n"
+                        % (hidden_len, displayed_len)
+                        + 'To get hidden elements add a row ("allow hidden", "optional option", "yes") and also consider providing correct index',
+                        3,
                     )
                 elif Filter != "allow hidden":
                     CommonUtil.ExecLog(
                         "",
-                        "Found 0 hidden elements and %s displayed elements. Index exceeds the number of displayed elements found" % displayed_len,
-                        3
+                        "Found 0 hidden elements and %s displayed elements. Index exceeds the number of displayed elements found"
+                        % displayed_len,
+                        3,
                     )
                 else:
                     CommonUtil.ExecLog(
                         "",
-                        "Found %s hidden elements and %s displayed elements. Index exceeds the number of elements found" % (hidden_len, displayed_len),
-                        3
+                        "Found %s hidden elements and %s displayed elements. Index exceeds the number of elements found"
+                        % (hidden_len, displayed_len),
+                        3,
                     )
                 return "zeuz_failed"
         else:
@@ -997,7 +1204,7 @@ def _locate_index_number(step_data_set):
 
 
 def _pyautogui(step_data_set):
-    """ Gets coordinates for pyautogui (doesn't provide an object) """
+    """Gets coordinates for pyautogui (doesn't provide an object)"""
 
     """ 
     Valid files:
@@ -1047,16 +1254,25 @@ def _pyautogui(step_data_set):
                 elif "index" in left:
                     idx = int(right.strip())
                 elif "confidence" in left:
-                    confidence = float(right.replace("%", "").replace(" ", "").lower())/100
+                    confidence = (
+                        float(right.replace("%", "").replace(" ", "").lower()) / 100
+                    )
                 else:
                     file_name = right.strip()
                     if "~" in file_name:
                         file_name = str(Path(os.path.expanduser(file_name)))
 
-            if mid in ("child parameter", "parent parameter"):  # Find a related image, that we'll use as a reference point
+            if mid in (
+                "child parameter",
+                "parent parameter",
+            ):  # Find a related image, that we'll use as a reference point
                 file_name_parent = right  # Save Value as the filename
-                direction = left.lower().strip()  # Save Field as a possible distance or index
-            elif mid == "action" and file_name == "":  # Alternative method, there is no element parameter, so filename is expected on the action line
+                direction = (
+                    left.lower().strip()
+                )  # Save Field as a possible distance or index
+            elif (
+                mid == "action" and file_name == ""
+            ):  # Alternative method, there is no element parameter, so filename is expected on the action line
                 file_name = Path(right)  # Save Value as the filename
 
         # Check that we have some value
@@ -1067,23 +1283,31 @@ def _pyautogui(step_data_set):
         if file_name not in file_attachment and not os.path.exists(file_name):
             CommonUtil.ExecLog(
                 sModuleInfo,
-                "Could not find file attachment called %s, and could not find it locally" % file_name,
+                "Could not find file attachment called %s, and could not find it locally"
+                % file_name,
                 3,
             )
             return "zeuz_failed"
         if file_name in file_attachment:
-            file_name = file_attachment[file_name]  # In file is an attachment, get the full path
+            file_name = file_attachment[
+                file_name
+            ]  # In file is an attachment, get the full path
 
         if file_name_parent != "":
-            if file_name_parent not in file_attachment and not os.path.exists(file_name_parent):
+            if file_name_parent not in file_attachment and not os.path.exists(
+                file_name_parent
+            ):
                 CommonUtil.ExecLog(
                     sModuleInfo,
-                    "Could not find file attachment called %s, and could not find it locally" % file_name_parent,
+                    "Could not find file attachment called %s, and could not find it locally"
+                    % file_name_parent,
                     3,
                 )
                 return "zeuz_failed"
             if file_name_parent in file_attachment:
-                file_name_parent = file_attachment[file_name_parent]  # In file is an attachment, get the full path
+                file_name_parent = file_attachment[
+                    file_name_parent
+                ]  # In file is an attachment, get the full path
 
         # Now file_name should have a directory/file pointing to the correct image
 
@@ -1093,30 +1317,51 @@ def _pyautogui(step_data_set):
             file_name_parent = file_name_parent.encode("ascii")
 
     except:
-        return CommonUtil.Exception_Handler(sys.exc_info(), None, "Error parsing data set")
+        return CommonUtil.Exception_Handler(
+            sys.exc_info(), None, "Error parsing data set"
+        )
 
     # Parse direction (physical direction, index or nothing)
-    if direction != "all":  # If a reference image was specified (direction would be set to a different value)
+    if (
+        direction != "all"
+    ):  # If a reference image was specified (direction would be set to a different value)
         try:
-            if direction in ("left", "right", "up", "down"):  # User specified a direction to look for the element
+            if direction in (
+                "left",
+                "right",
+                "up",
+                "down",
+            ):  # User specified a direction to look for the element
                 pass
             else:
                 try:
-                    direction = int(direction)  # Test if it's a number, if so, format it properly
+                    direction = int(
+                        direction
+                    )  # Test if it's a number, if so, format it properly
                     index = True
                     direction -= 1  #  Offset by one, because user will set first element as one, but in the array it's element zero
                 except:  # Not a number
                     direction = "all"  # Default to search all directions equally (find the closest image alement to the reference)
         except:
-            return CommonUtil.Exception_Handler(sys.exc_info(), None, "Error parsing direction")
+            return CommonUtil.Exception_Handler(
+                sys.exc_info(), None, "Error parsing direction"
+            )
 
     # Find element information
     try:
         # Scale image if required
-        regex = re.compile(r"(\d+)\s*x\s*(\d+)", re.IGNORECASE)  # Create regex object with expression
-        match = regex.search(file_name)  # Search for resolution within filename (this is the resolution of the screen the image was captured on)
-        if match is None and resolution != "":  # If resolution not in filename, try to find it in the step data
-            match = regex.search(resolution)  # Search for resolution within the Field of the element paramter row (this is the resolution of the screen the image was captured on)
+        regex = re.compile(
+            r"(\d+)\s*x\s*(\d+)", re.IGNORECASE
+        )  # Create regex object with expression
+        match = regex.search(
+            file_name
+        )  # Search for resolution within filename (this is the resolution of the screen the image was captured on)
+        if (
+            match is None and resolution != ""
+        ):  # If resolution not in filename, try to find it in the step data
+            match = regex.search(
+                resolution
+            )  # Search for resolution within the Field of the element paramter row (this is the resolution of the screen the image was captured on)
 
         if match is not None:  # Match found, so scale
             CommonUtil.ExecLog(sModuleInfo, "Scaling image (%s)" % match.group(0), 5)
@@ -1126,7 +1371,9 @@ def _pyautogui(step_data_set):
             )  # Extract width, height from match (is screen resolution of desktop image was taken on)
             file_name = _scale_image(file_name, size_w, size_h)  # Scale image element
             if file_name_parent != "":
-                file_name_parent = _scale_image(file_name_parent, size_w, size_h)  # Scale parent image element
+                file_name_parent = _scale_image(
+                    file_name_parent, size_w, size_h
+                )  # Scale parent image element
 
         # Find image on screen (file_name here is either an actual directory/file or a PIL image object after scaling)
         element_list = []
@@ -1136,7 +1383,9 @@ def _pyautogui(step_data_set):
                 file_name, grayscale=True, confidence=confidence
             )  # Get coordinates of element. Use greyscale for increased speed and better matching across machines. May cause higher number of false-positives
             element_list = tuple(element)
-            if element_list or time.time() > start + int(sr.Get_Shared_Variables("element_wait")):
+            if element_list or time.time() > start + int(
+                sr.Get_Shared_Variables("element_wait")
+            ):
                 break
             time.sleep(0.1)
         #         if len(tuple(tmp)) == 0: # !!! This should work, but accessing the generator causes it to lose one or more of it's results, thus causing an error when we  try to use it with a single image
@@ -1156,7 +1405,11 @@ def _pyautogui(step_data_set):
             if -len(element_list) <= idx < len(element_list):
                 element = element_list[idx]
             elif len(element_list) != 0:
-                CommonUtil.ExecLog(sModuleInfo, "Found %s elements. Index out of range" % len(element_list), 3)
+                CommonUtil.ExecLog(
+                    sModuleInfo,
+                    "Found %s elements. Index out of range" % len(element_list),
+                    3,
+                )
 
         # Reference image specified, so find the closest image element to it
         else:
@@ -1168,7 +1421,9 @@ def _pyautogui(step_data_set):
                 element_parent = pyautogui.locateOnScreen(
                     file_name_parent, grayscale=True, confidence=0.85
                 )
-                if element_parent or time.time() > start + int(sr.Get_Shared_Variables("element_wait")):
+                if element_parent or time.time() > start + int(
+                    sr.Get_Shared_Variables("element_wait")
+                ):
                     break
                 time.sleep(0.1)
             if element_parent == None:
@@ -1191,7 +1446,9 @@ def _pyautogui(step_data_set):
                 try:
                     element = tuple(element)[direction]
                 except:
-                    return CommonUtil.Exception_Handler(sys.exc_info(), None, "Provided index number is invalid")
+                    return CommonUtil.Exception_Handler(
+                        sys.exc_info(), None, "Provided index number is invalid"
+                    )
 
             # User provided a direction, or no indication, so try to find the element based on that
             else:
@@ -1203,35 +1460,70 @@ def _pyautogui(step_data_set):
 
                     # Remove negavite values, depending on direction. This allows us to favour a certain direction by keeping the original number
                     if direction == "all":
-                        distance_new[0] = abs(distance_new[0])  # Remove negative sign for x
-                        distance_new[1] = abs(distance_new[1])  # Remove negative sign for y
+                        distance_new[0] = abs(
+                            distance_new[0]
+                        )  # Remove negative sign for x
+                        distance_new[1] = abs(
+                            distance_new[1]
+                        )  # Remove negative sign for y
                     elif direction in ("up", "down"):
-                        distance_new[0] = abs(distance_new[0])  # Remove negative sign for x - we don't care about that direction
+                        distance_new[0] = abs(
+                            distance_new[0]
+                        )  # Remove negative sign for x - we don't care about that direction
                     elif direction in ("left", "right"):
-                        distance_new[1] = abs(distance_new[1])  # Remove negative sign for y - we don't care about that direction
+                        distance_new[1] = abs(
+                            distance_new[1]
+                        )  # Remove negative sign for y - we don't care about that direction
 
                     # Compare distances
-                    if element_result == []:  # First run, just save this as the closest match
+                    if (
+                        element_result == []
+                    ):  # First run, just save this as the closest match
                         element_result = e
-                        distance_best = list(distance_new)  # Very important! - this must be saved with the list(), because python will make distance_best a pointer to distance_new without it, thus screwing up what we are trying to do. Thanks Python.
+                        distance_best = list(
+                            distance_new
+                        )  # Very important! - this must be saved with the list(), because python will make distance_best a pointer to distance_new without it, thus screwing up what we are trying to do. Thanks Python.
                     else:  # Subsequent runs, compare distances
-                        if direction == "all" and (distance_new[0] < distance_best[0] or distance_new[1] < distance_best[1]):  # If horozontal or vertical is closer than our best/closest distance that we've found thus far
-                            element_result = e  # Save this element as the best match
-                            distance_best = list(distance_new)  # Save the distance for further comparison
-                        elif direction == "up" and (distance_new[0] < distance_best[0] or distance_new[1] > distance_best[1]):  # Favour Y direction up
+                        if direction == "all" and (
+                            distance_new[0] < distance_best[0]
+                            or distance_new[1] < distance_best[1]
+                        ):  # If horozontal or vertical is closer than our best/closest distance that we've found thus far
                             element_result = e  # Save this element as the best match
                             distance_best = list(
                                 distance_new
                             )  # Save the distance for further comparison
-                        elif direction == "down" and (distance_new[0] < distance_best[0] or distance_new[1] < distance_best[1]):  # Favour Y direction down
+                        elif direction == "up" and (
+                            distance_new[0] < distance_best[0]
+                            or distance_new[1] > distance_best[1]
+                        ):  # Favour Y direction up
                             element_result = e  # Save this element as the best match
-                            distance_best = list(distance_new)  # Save the distance for further comparison
-                        elif direction == "left" and (distance_new[0] > distance_best[0] or distance_new[1] < distance_best[1]):  # Favour X direction left
+                            distance_best = list(
+                                distance_new
+                            )  # Save the distance for further comparison
+                        elif direction == "down" and (
+                            distance_new[0] < distance_best[0]
+                            or distance_new[1] < distance_best[1]
+                        ):  # Favour Y direction down
                             element_result = e  # Save this element as the best match
-                            distance_best = list(distance_new)  # Save the distance for further comparison
-                        elif direction == "right" and (distance_new[0] < distance_best[0] or distance_new[1] < distance_best[1]):  # Favour X direction right
+                            distance_best = list(
+                                distance_new
+                            )  # Save the distance for further comparison
+                        elif direction == "left" and (
+                            distance_new[0] > distance_best[0]
+                            or distance_new[1] < distance_best[1]
+                        ):  # Favour X direction left
                             element_result = e  # Save this element as the best match
-                            distance_best = list(distance_new)  # Save the distance for further comparison
+                            distance_best = list(
+                                distance_new
+                            )  # Save the distance for further comparison
+                        elif direction == "right" and (
+                            distance_new[0] < distance_best[0]
+                            or distance_new[1] < distance_best[1]
+                        ):  # Favour X direction right
+                            element_result = e  # Save this element as the best match
+                            distance_best = list(
+                                distance_new
+                            )  # Save the distance for further comparison
 
                 # Whether there is one or more matches, we now have the closest image to our reference, so save the result in the common variable
                 element = element_result
@@ -1248,7 +1540,7 @@ def _pyautogui(step_data_set):
 
 
 def _scale_image(file_name, size_w, size_h):
-    """ This function calculates ratio and scales an image for comparison by _pyautogui() """
+    """This function calculates ratio and scales an image for comparison by _pyautogui()"""
 
     sModuleInfo = inspect.currentframe().f_code.co_name + " : " + MODULE_NAME
 
@@ -1267,11 +1559,20 @@ def _scale_image(file_name, size_w, size_h):
         image_w, image_h = file_name.size  # Read the image element's actual size
 
         # Calculate new image size
-        if size_w > screen_w:  # Make sure we create the scaling ratio in the proper direction
-            ratio = Decimal(size_w) / Decimal(screen_w)  # Get ratio (assume same for height)
+        if (
+            size_w > screen_w
+        ):  # Make sure we create the scaling ratio in the proper direction
+            ratio = Decimal(size_w) / Decimal(
+                screen_w
+            )  # Get ratio (assume same for height)
         else:
-            ratio = Decimal(screen_w) / Decimal(size_w)  # Get ratio (assume same for height)
-        size = (int(image_w * ratio), int(image_h * ratio))  # Calculate new resolution of image element
+            ratio = Decimal(screen_w) / Decimal(
+                size_w
+            )  # Get ratio (assume same for height)
+        size = (
+            int(image_w * ratio),
+            int(image_h * ratio),
+        )  # Calculate new resolution of image element
 
         # Scale image
         # file_name.thumbnail(size, Image.ANTIALIAS)  # Resize image per calculation above

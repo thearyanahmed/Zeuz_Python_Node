@@ -50,11 +50,7 @@ def process(data, save_path="report.xml"):
 
     testsuite.set("failures", str(failures))
 
-    ET.ElementTree(testsuite).write(
-        save_path,
-        encoding="UTF-8",
-        xml_declaration=True
-    )
+    ET.ElementTree(testsuite).write(save_path, encoding="UTF-8", xml_declaration=True)
 
 
 def main():
@@ -62,7 +58,7 @@ def main():
     with open("reporting/sample.json", "r") as f:
         data = json.loads(f.read())
 
-    #print(data)
+    # print(data)
     process(data, "reporting/report.xml")
 
 

@@ -19,12 +19,7 @@ def req(req_type, host, url, payload=dict(), headers=dict(), params=dict()):
     url = host + url
 
     response = requests.request(
-        req_type,
-        url,
-        headers=headers,
-        params=params,
-        data=payload,
-        verify=False
+        req_type, url, headers=headers, params=params, data=payload, verify=False
     )
     return response
 
@@ -160,10 +155,7 @@ def extract_dependencies(param_str: str):
         data = json.loads(param_str)
         return data
     except Exception as e:
-        return {
-            "Browser": "chromeheadless",
-            "OS": "linux"
-        }
+        return {"Browser": "chromeheadless", "OS": "linux"}
 
 
 def main():
@@ -318,8 +310,7 @@ def main():
                 machine = machine_list[0]["name"]
             else:
                 machine = next(
-                    (m["name"] for m in machine_list if m["name"] == machine_name),
-                    None
+                    (m["name"] for m in machine_list if m["name"] == machine_name), None
                 )
             break
 

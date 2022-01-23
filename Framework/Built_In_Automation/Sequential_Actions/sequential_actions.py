@@ -38,7 +38,9 @@ from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 
 from . import common_functions as common  # Functions that are common to all modules
-from Framework.Built_In_Automation.Shared_Resources import BuiltInFunctionSharedResources as sr
+from Framework.Built_In_Automation.Shared_Resources import (
+    BuiltInFunctionSharedResources as sr,
+)
 from Framework.Utilities import ConfigModule
 from Framework.Built_In_Automation.Shared_Resources import LocateElement
 from Framework.Utilities import CommonUtil
@@ -50,14 +52,14 @@ from Framework.Utilities.CommonUtil import (
 
 MODULE_NAME = inspect.getmodulename(__file__)
 temp_ini_file = os.path.join(
+    os.path.join(
+        os.path.abspath(__file__).split("Framework")[0],
         os.path.join(
-            os.path.abspath(__file__).split("Framework")[0],
-            os.path.join(
-                "AutomationLog",
-                ConfigModule.get_config_value("Advanced Options", "_file"),
-            ),
-        )
+            "AutomationLog",
+            ConfigModule.get_config_value("Advanced Options", "_file"),
+        ),
     )
+)
 # Recall dependency, if not already set
 dependency = None
 if sr.Test_Shared_Variables(
@@ -83,6 +85,7 @@ sr.Set_Shared_Variables(
 )  # Save as protected shared variable
 
 from pathlib import Path
+
 if os.path.exists(Path(__file__).parent.parent.parent.parent / "bypass.json"):
     bypass_exist = True
 else:
@@ -92,7 +95,7 @@ else:
 def load_sa_modules(
     module,
 ):  # Load module "AS" must match module name we get from step data (See actions variable above)
-    """ Dynamically loads modules when needed """
+    """Dynamically loads modules when needed"""
 
     sModuleInfo = inspect.currentframe().f_code.co_name + " : " + MODULE_NAME
     CommonUtil.ExecLog(sModuleInfo, "Function Start", 0)
@@ -108,7 +111,7 @@ def load_sa_modules(
         elif module == "database":
             global database
             from Framework.Built_In_Automation.Database import (
-                BuiltInFunctions as database
+                BuiltInFunctions as database,
             )
         elif module == "appium":
             global appium
@@ -173,7 +176,7 @@ def Sequential_Actions(
     _device_info=None,
     debug_actions=None,
 ):
-    """ Main Sequential Actions function - Performs logical decisions based on user input """
+    """Main Sequential Actions function - Performs logical decisions based on user input"""
 
     if _device_info is None:
         _device_info = {}
@@ -191,15 +194,27 @@ def Sequential_Actions(
         dependency, file_attachment, device_details, run_time_params = {}, {}, {}, {}
         if _dependency != {}:
             dependency = _dependency  # Save to global variable
-            sr.Set_Shared_Variables("dependency", _dependency, protected=True)  # Save in Shared Variables
+            sr.Set_Shared_Variables(
+                "dependency", _dependency, protected=True
+            )  # Save in Shared Variables
 
         if _run_time_params != {}:
             run_time_params = _run_time_params  # Save to global variable
-            sr.Set_Shared_Variables("run_time_params", _run_time_params, protected=True)  # Save in Shared Variables
-            for run_time_params_name in run_time_params:  # Add each parameter as it's own Shared Variable, so the user can easily refer to it
-                sr.Set_Shared_Variables(run_time_params_name, run_time_params[run_time_params_name])
+            sr.Set_Shared_Variables(
+                "run_time_params", _run_time_params, protected=True
+            )  # Save in Shared Variables
+            for (
+                run_time_params_name
+            ) in (
+                run_time_params
+            ):  # Add each parameter as it's own Shared Variable, so the user can easily refer to it
+                sr.Set_Shared_Variables(
+                    run_time_params_name, run_time_params[run_time_params_name]
+                )
 
-        if _device_info != {}:  # If any devices and their details were sent by the server, save to shared variable
+        if (
+            _device_info != {}
+        ):  # If any devices and their details were sent by the server, save to shared variable
             device_info = _device_info
             sr.Set_Shared_Variables("device_info", device_info, protected=True)
 
@@ -213,18 +228,24 @@ def Sequential_Actions(
         # Prepare step data for processing
         step_data = common.unmask_step_data(step_data)
         # step_data = common.sanitize(step_data)  # Sanitize Sub-Field
-        step_data = common.adjust_element_parameters(step_data, supported_platforms)  # Parse any mobile platform related fields
+        step_data = common.adjust_element_parameters(
+            step_data, supported_platforms
+        )  # Parse any mobile platform related fields
         if step_data in failed_tag_list:
             return "zeuz_failed"
         if common.verify_step_data(step_data) in failed_tag_list:
             return "zeuz_failed"  # Verify step data is in correct format
     except:
-        return CommonUtil.Exception_Handler(sys.exc_info(), None, "Error during Sequential Actions startup")
+        return CommonUtil.Exception_Handler(
+            sys.exc_info(), None, "Error during Sequential Actions startup"
+        )
 
     # Process step data
     # save the full step data in share variables
 
-    sr.Set_Shared_Variables(CommonUtil.dont_prettify_on_server[0], step_data, protected=True)
+    sr.Set_Shared_Variables(
+        CommonUtil.dont_prettify_on_server[0], step_data, protected=True
+    )
     # sr.Set_Shared_Variables("test_action_info", test_action_info, protected=True, print_variable=False)
     sr.test_action_info = test_action_info
 
@@ -234,7 +255,10 @@ def Sequential_Actions(
     write_browser_logs()
     return result
 
+
 deprecateLog = True
+
+
 def get_data_set_nums(action_value):
     try:
         data_set_nums = []
@@ -259,7 +283,20 @@ def get_data_set_nums(action_value):
                 except:
                     pass
         elif "if" in action_value.lower():
-            valid, data = ('0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '-', ','), ""
+            valid, data = (
+                "0",
+                "1",
+                "2",
+                "3",
+                "4",
+                "5",
+                "6",
+                "7",
+                "8",
+                "9",
+                "-",
+                ",",
+            ), ""
             for i in action_value:
                 if i in valid:
                     data += i
@@ -270,9 +307,9 @@ def get_data_set_nums(action_value):
             for each in splitted:
                 try:
                     if "-" in each:
-                        start, end = each.replace(" ","").split("-")
-                        for i in range(int(start), int(end)+1):
-                            data_set_nums.append(i-1)
+                        start, end = each.replace(" ", "").split("-")
+                        for i in range(int(start), int(end) + 1):
+                            data_set_nums.append(i - 1)
                     elif each.strip().lower() in ("pass", "passed", "passes"):
                         data_set_nums.append("p")
                         break
@@ -281,7 +318,7 @@ def get_data_set_nums(action_value):
                         break
                     else:
                         string = each.strip()
-                        data_set_nums.append(int(string)-1)
+                        data_set_nums.append(int(string) - 1)
                 except:
                     pass
 
@@ -299,7 +336,7 @@ def if_else_log_for_actions(left, next_level_step_data, statement="if"):
         elif "f" == i:
             log_actions.append("Step fail")
             break
-        log_actions.append(i+1)
+        log_actions.append(i + 1)
     log_actions = str(log_actions).replace("'", "")
 
     if statement == "else":
@@ -329,7 +366,15 @@ def If_else_action(step_data, data_set_no):
         for left, _, right in data_set:
             statement = ""
             operator = ""
-            operators = {" |==| ": 0, " |!=| ": 0, " |<=| ": 0, " |>=| ": 0, " |>| ": 0, " |<| ": 0, " |in| ": 0}
+            operators = {
+                " |==| ": 0,
+                " |!=| ": 0,
+                " |<=| ": 0,
+                " |>=| ": 0,
+                " |>| ": 0,
+                " |<| ": 0,
+                " |in| ": 0,
+            }
             statements = ("else if", "else", "if")
             for i in statements:
                 if left.lower().find(i) == 0:
@@ -353,7 +398,7 @@ def If_else_action(step_data, data_set_no):
                     for i in operators:
                         if i.strip() in left:
                             operators[i] += 1
-                    #TODO: Check these 2 lines, should not be needed anymore
+                    # TODO: Check these 2 lines, should not be needed anymore
 
                     # operators[" |<| "] -= operators[" |<=| "]
                     # operators[" |>| "] -= operators[" |>=| "]
@@ -380,10 +425,18 @@ def If_else_action(step_data, data_set_no):
                 their actual values. Suppose, %|XY|% = "Hello " stripping will remove the last space"""
 
                 if statement != "else":
-                    Lvalue, Rvalue = left[len(statement + " "):].split(operator)  # remove "if "
-                    Lvalue = Lvalue[:-1] if Lvalue[-1] == " " else Lvalue  # remove 1 space before the operator
-                    Rvalue = Rvalue[1:] if Rvalue[0] == " " else Rvalue  # remove 1 space after the operator
-                    Lvalue, Rvalue = CommonUtil.parse_value_into_object(Lvalue), CommonUtil.parse_value_into_object(Rvalue)
+                    Lvalue, Rvalue = left[len(statement + " ") :].split(
+                        operator
+                    )  # remove "if "
+                    Lvalue = (
+                        Lvalue[:-1] if Lvalue[-1] == " " else Lvalue
+                    )  # remove 1 space before the operator
+                    Rvalue = (
+                        Rvalue[1:] if Rvalue[0] == " " else Rvalue
+                    )  # remove 1 space after the operator
+                    Lvalue, Rvalue = CommonUtil.parse_value_into_object(
+                        Lvalue
+                    ), CommonUtil.parse_value_into_object(Rvalue)
             except:
                 CommonUtil.ExecLog(
                     sModuleInfo,
@@ -465,20 +518,32 @@ def If_else_action(step_data, data_set_no):
                 condition_matched = False
                 check_operators()
                 if condition_matched:
-                    log = if_else_log_for_actions(data_set_for_log[row_index][0], next_level_step_data)
+                    log = if_else_log_for_actions(
+                        data_set_for_log[row_index][0], next_level_step_data
+                    )
                     CommonUtil.ExecLog(sModuleInfo, log, 1)
             elif statement == "else if":
                 if not if_exists:
-                    CommonUtil.ExecLog(sModuleInfo, "No 'if' statement found. Please define a 'if' statement first", 3)
+                    CommonUtil.ExecLog(
+                        sModuleInfo,
+                        "No 'if' statement found. Please define a 'if' statement first",
+                        3,
+                    )
                     return "zeuz_failed", []
                 else_if_log = True if not condition_matched else False
                 check_operators()
                 if condition_matched and else_if_log:
-                    log = if_else_log_for_actions(data_set_for_log[row_index][0], next_level_step_data)
+                    log = if_else_log_for_actions(
+                        data_set_for_log[row_index][0], next_level_step_data
+                    )
                     CommonUtil.ExecLog(sModuleInfo, log, 1)
             elif statement == "else":
                 if not if_exists:
-                    CommonUtil.ExecLog(sModuleInfo, "No 'if' statement found. Please define a 'if' statement first", 3)
+                    CommonUtil.ExecLog(
+                        sModuleInfo,
+                        "No 'if' statement found. Please define a 'if' statement first",
+                        3,
+                    )
                     return "zeuz_failed", []
                 else_log = True if not condition_matched else False
                 check_operators()
@@ -488,21 +553,28 @@ def If_else_action(step_data, data_set_no):
 
             row_index += 1
 
-        while "f" in outer_skip: outer_skip.remove("f")
-        while "p" in outer_skip: outer_skip.remove("p")
+        while "f" in outer_skip:
+            outer_skip.remove("f")
+        while "p" in outer_skip:
+            outer_skip.remove("p")
         if next_level_step_data == []:
             CommonUtil.ExecLog(
                 sModuleInfo,
-                "No conditions matched. Skipping action %s" % [i+1 for i in outer_skip],
+                "No conditions matched. Skipping action %s"
+                % [i + 1 for i in outer_skip],
                 2,
             )
 
         for data_set_index in next_level_step_data:
             if data_set_index in ("p", "f"):
                 outer_skip = [i for i in range(len(step_data))]
-                CommonUtil.ExecLog(sModuleInfo, "Step Exit called. Stopping Test Step.", 1)
+                CommonUtil.ExecLog(
+                    sModuleInfo, "Step Exit called. Stopping Test Step.", 1
+                )
                 if data_set_index == "p":
-                    step_exit_fail_called = False   # Actually its already false. just adding for precaution
+                    step_exit_fail_called = (
+                        False  # Actually its already false. just adding for precaution
+                    )
                     step_exit_pass_called = True
                     return "passed", outer_skip
                 else:
@@ -512,21 +584,20 @@ def If_else_action(step_data, data_set_no):
             elif data_set_index >= len(step_data):
                 CommonUtil.ExecLog(
                     sModuleInfo,
-                    "You did not define action %s. So skipping this action index" % str(data_set_index+1),
-                    2
+                    "You did not define action %s. So skipping this action index"
+                    % str(data_set_index + 1),
+                    2,
                 )
                 continue
             elif data_set_index == data_set_no:
                 CommonUtil.ExecLog(
                     sModuleInfo,
                     "You are running an if else action within another if else action. It may create infinite recursion in some cases",
-                    2
+                    2,
                 )
             if data_set_index not in inner_skip:
-                result, skip = Run_Sequential_Actions(
-                    [data_set_index]
-                ) # Running
-                inner_skip = list(set(inner_skip+skip))
+                result, skip = Run_Sequential_Actions([data_set_index])  # Running
+                inner_skip = list(set(inner_skip + skip))
                 outer_skip = list(set(outer_skip + inner_skip))
                 if result in failed_tag_list:
                     return result, outer_skip
@@ -564,30 +635,40 @@ def for_loop_action(step_data, data_set_no):
                 loop_this_data_sets = get_data_set_nums(right)
                 outer_skip += loop_this_data_sets
                 left = row[0].strip().lower()
-                if not left.strip().startswith("for ") or not left.strip()[4:].strip()[left[4:].strip().find(" ")+1:].strip().startswith("in "):
+                if not left.strip().startswith("for ") or not left.strip()[4:].strip()[
+                    left[4:].strip().find(" ") + 1 :
+                ].strip().startswith("in "):
                     CommonUtil.ExecLog(
                         sModuleInfo,
-                        "You provided a wrong dataset. Please follow the following format:\n" +
-                        "(for each_item in %|List|%, for loop action, 2-12)",
-                        3
+                        "You provided a wrong dataset. Please follow the following format:\n"
+                        + "(for each_item in %|List|%, for loop action, 2-12)",
+                        3,
                     )
                     return "zeuz_failed", []
                 else:
                     left = row[0].strip()[4:].strip()
-                    each_varname, left = left[:left.find(" ")], left[left.find(" "):].strip()[3:].strip()
+                    each_varname, left = (
+                        left[: left.find(" ")],
+                        left[left.find(" ") :].strip()[3:].strip(),
+                    )
                     var_name = left.strip("%").strip("|")
                     if sr.Test_Shared_Variables(var_name):
                         iterable = sr.parse_variable(var_name)
-                        iterable = CommonUtil.ZeuZ_map_code_decoder(iterable)   # Decode if this is a ZeuZ_map_code
+                        iterable = CommonUtil.ZeuZ_map_code_decoder(
+                            iterable
+                        )  # Decode if this is a ZeuZ_map_code
                     else:
                         iterable = CommonUtil.parse_value_into_object(left)
-                    CommonUtil.ExecLog(sModuleInfo, "Looping through a %s: %s" % (type(iterable).__name__, str(iterable)), 1)
+                    CommonUtil.ExecLog(
+                        sModuleInfo,
+                        "Looping through a %s: %s"
+                        % (type(iterable).__name__, str(iterable)),
+                        1,
+                    )
             elif row[0].strip().lower().startswith("exit loop"):
                 if not row[2].lower().startswith("if"):
                     CommonUtil.ExecLog(
-                        sModuleInfo,
-                        "'if' keyword is not provided at beginning",
-                        3
+                        sModuleInfo, "'if' keyword is not provided at beginning", 3
                     )
                     return "zeuz_failed", []
                 for i in operators:
@@ -595,31 +676,39 @@ def for_loop_action(step_data, data_set_no):
                         operator = i
                         break
                 if operator == "==":
-                    CommonUtil.ExecLog(
-                        sModuleInfo,
-                        "Please use |==| instead of ==",
-                        2
-                    )
+                    CommonUtil.ExecLog(sModuleInfo, "Please use |==| instead of ==", 2)
                 value = row[2].strip()
                 if "pass" in value.lower() and not operator:
-                    if "any" in value.lower(): passing_data_sets += loop_this_data_sets
-                    else: passing_data_sets += get_data_set_nums(value)
+                    if "any" in value.lower():
+                        passing_data_sets += loop_this_data_sets
+                    else:
+                        passing_data_sets += get_data_set_nums(value)
                     if row[0].strip().lower() == "exit loop and fail":
-                        if "any" in value.lower(): exit_loop_and_fail += loop_this_data_sets
-                        else: exit_loop_and_fail += get_data_set_nums(value)
+                        if "any" in value.lower():
+                            exit_loop_and_fail += loop_this_data_sets
+                        else:
+                            exit_loop_and_fail += get_data_set_nums(value)
                 elif "fail" in value.lower() and not operator:
-                    if "any" in value.lower(): failing_data_sets += loop_this_data_sets
-                    else: failing_data_sets += get_data_set_nums(value)
+                    if "any" in value.lower():
+                        failing_data_sets += loop_this_data_sets
+                    else:
+                        failing_data_sets += get_data_set_nums(value)
                     if row[0].strip().lower() == "exit loop and fail":
-                        if "any" in value.lower(): exit_loop_and_fail += loop_this_data_sets
-                        else: exit_loop_and_fail += get_data_set_nums(value)
+                        if "any" in value.lower():
+                            exit_loop_and_fail += loop_this_data_sets
+                        else:
+                            exit_loop_and_fail += get_data_set_nums(value)
                 elif operator and "optional loop settings" in row[1].strip().lower():
                     operand_matching = row
                     if row[0].strip().lower() == "exit loop and fail":
                         exit_loop_nd_fail = True
 
         if loop_this_data_sets == []:
-            CommonUtil.ExecLog(sModuleInfo, "Loop action step data is invalid, please see action help for more info", 3)
+            CommonUtil.ExecLog(
+                sModuleInfo,
+                "Loop action step data is invalid, please see action help for more info",
+                3,
+            )
             return "zeuz_failed", []
 
         for each_val in iterable:
@@ -630,17 +719,19 @@ def for_loop_action(step_data, data_set_no):
                     if data_set_index >= len(step_data):
                         CommonUtil.ExecLog(
                             sModuleInfo,
-                            "You did not define action %s. So skipping this action index" % str(data_set_index + 1),
-                            2
+                            "You did not define action %s. So skipping this action index"
+                            % str(data_set_index + 1),
+                            2,
                         )
-                        while data_set_index in loop_this_data_sets: loop_this_data_sets.remove(data_set_index)
+                        while data_set_index in loop_this_data_sets:
+                            loop_this_data_sets.remove(data_set_index)
                         outer_skip = list(set(outer_skip + [data_set_index]))
                         continue
                     elif data_set_index == data_set_no:
                         CommonUtil.ExecLog(
                             sModuleInfo,
                             "You are running a Loop action within the same Loop action. It will create infinite recursion",
-                            3
+                            3,
                         )
                         return "zeuz_failed", outer_skip
                     result, skip = Run_Sequential_Actions([data_set_index])
@@ -651,11 +742,16 @@ def for_loop_action(step_data, data_set_no):
                 if result == "passed" and data_set_index in passing_data_sets:
                     CommonUtil.ExecLog(
                         sModuleInfo,
-                        "Loop exit condition satisfied. Action %s passed. Exiting loop" % str(data_set_index + 1),
-                        1
+                        "Loop exit condition satisfied. Action %s passed. Exiting loop"
+                        % str(data_set_index + 1),
+                        1,
                     )
                     if data_set_index in exit_loop_and_fail:
-                        CommonUtil.ExecLog(sModuleInfo, 'Step Exit called. So failing the testcase. If you dont want to fail the testcase use "exit loop and continue" instead of "exit loop and fail"', 2)
+                        CommonUtil.ExecLog(
+                            sModuleInfo,
+                            'Step Exit called. So failing the testcase. If you dont want to fail the testcase use "exit loop and continue" instead of "exit loop and fail"',
+                            2,
+                        )
                         step_exit_fail_called = True
                         step_exit_pass_called = False
                     die = True
@@ -663,28 +759,43 @@ def for_loop_action(step_data, data_set_no):
                 elif result in failed_tag_list and data_set_index in failing_data_sets:
                     CommonUtil.ExecLog(
                         sModuleInfo,
-                        "Loop exit condition satisfied. Action %s failed. Exiting loop" % str(data_set_index + 1),
-                        1
+                        "Loop exit condition satisfied. Action %s failed. Exiting loop"
+                        % str(data_set_index + 1),
+                        1,
                     )
                     if data_set_index in exit_loop_and_fail:
-                        CommonUtil.ExecLog(sModuleInfo, "Step Exit called. Stopping Test Step.", 1)
+                        CommonUtil.ExecLog(
+                            sModuleInfo, "Step Exit called. Stopping Test Step.", 1
+                        )
                         step_exit_fail_called = True
                         step_exit_pass_called = False
                     die = True
                     break
-                elif result in failed_tag_list and not step_exit_fail_called and not step_exit_pass_called:
+                elif (
+                    result in failed_tag_list
+                    and not step_exit_fail_called
+                    and not step_exit_pass_called
+                ):
                     CommonUtil.ExecLog(
                         sModuleInfo,
-                        "Action %s failed. As the action is inside the loop we are continuing the test case.\n" % str(data_set_index + 1) +
-                        "If you want to fail the test case when any action fails inside the loop then mention it in the \"exit loop and fail\" row. For example:\n" +
-                        "(exit loop and fail, optional loop settings, if any fails)\n" +
-                        "Or, for any particular action,\n" +
-                        "(exit loop and fail, optional loop settings, if %s fails)" % str(data_set_index + 1),
-                        2
+                        "Action %s failed. As the action is inside the loop we are continuing the test case.\n"
+                        % str(data_set_index + 1)
+                        + 'If you want to fail the test case when any action fails inside the loop then mention it in the "exit loop and fail" row. For example:\n'
+                        + "(exit loop and fail, optional loop settings, if any fails)\n"
+                        + "Or, for any particular action,\n"
+                        + "(exit loop and fail, optional loop settings, if %s fails)"
+                        % str(data_set_index + 1),
+                        2,
                     )
                 elif operand_matching != "":
-                    operand_matching_2 = operand_matching[2][3:] if operand_matching[2][2] == " " else operand_matching[2][2:]
-                    data = [(operand_matching[0], "optional parameter", operand_matching_2)]
+                    operand_matching_2 = (
+                        operand_matching[2][3:]
+                        if operand_matching[2][2] == " "
+                        else operand_matching[2][2:]
+                    )
+                    data = [
+                        (operand_matching[0], "optional parameter", operand_matching_2)
+                    ]
                     RandL = common.shared_variable_to_value(data)[0][2]
                     if operator == "":
                         CommonUtil.ExecLog(
@@ -694,9 +805,15 @@ def for_loop_action(step_data, data_set_no):
                         )
                         return "zeuz_failed", []
                     Lvalue, Rvalue = RandL.split(operator)
-                    Lvalue = Lvalue[:-1] if Lvalue[-1] == " " else Lvalue  # remove 1 space before the operator
-                    Rvalue = Rvalue[1:] if Rvalue[0] == " " else Rvalue  # remove 1 space after the operator
-                    Lvalue, Rvalue = CommonUtil.parse_value_into_object(Lvalue), CommonUtil.parse_value_into_object(Rvalue)
+                    Lvalue = (
+                        Lvalue[:-1] if Lvalue[-1] == " " else Lvalue
+                    )  # remove 1 space before the operator
+                    Rvalue = (
+                        Rvalue[1:] if Rvalue[0] == " " else Rvalue
+                    )  # remove 1 space after the operator
+                    Lvalue, Rvalue = CommonUtil.parse_value_into_object(
+                        Lvalue
+                    ), CommonUtil.parse_value_into_object(Rvalue)
                     if eval("Lvalue %s Rvalue" % operator.strip("|")):
                         CommonUtil.ExecLog(
                             sModuleInfo,
@@ -704,7 +821,11 @@ def for_loop_action(step_data, data_set_no):
                             1,
                         )
                         if exit_loop_nd_fail:
-                            CommonUtil.ExecLog(sModuleInfo, 'Step Exit called. So failing the testcase. If you dont want to fail the testcase use "exit loop and continue" instead of "exit loop and fail"', 2)
+                            CommonUtil.ExecLog(
+                                sModuleInfo,
+                                'Step Exit called. So failing the testcase. If you dont want to fail the testcase use "exit loop and continue" instead of "exit loop and fail"',
+                                2,
+                            )
                             step_exit_fail_called = True
                             step_exit_pass_called = False
                         die = True
@@ -753,13 +874,13 @@ def While_Loop_Action(step_data, data_set_no):
                 loop_this_data_sets = get_data_set_nums(row[2].strip())
                 outer_skip += loop_this_data_sets
             elif row[0].strip().lower() == "repeat":
-                max_no_of_loop = int(sr.get_previous_response_variables_in_strings(row[2].strip()))
+                max_no_of_loop = int(
+                    sr.get_previous_response_variables_in_strings(row[2].strip())
+                )
             elif row[0].strip().lower().startswith("exit loop"):
                 if not row[2].lower().startswith("if"):
                     CommonUtil.ExecLog(
-                        sModuleInfo,
-                        "'if' keyword is not provided at beginning",
-                        3
+                        sModuleInfo, "'if' keyword is not provided at beginning", 3
                     )
                     return "zeuz_failed", []
                 for i in operators:
@@ -767,24 +888,28 @@ def While_Loop_Action(step_data, data_set_no):
                         operator = i
                         break
                 if operator == "==":
-                    CommonUtil.ExecLog(
-                        sModuleInfo,
-                        "Please use |==| instead of ==",
-                        2
-                    )
+                    CommonUtil.ExecLog(sModuleInfo, "Please use |==| instead of ==", 2)
                 value = row[2].strip()
                 if "pass" in value.lower() and not operator:
-                    if "any" in value.lower(): passing_data_sets += loop_this_data_sets
-                    else: passing_data_sets += get_data_set_nums(value)
+                    if "any" in value.lower():
+                        passing_data_sets += loop_this_data_sets
+                    else:
+                        passing_data_sets += get_data_set_nums(value)
                     if row[0].strip().lower() == "exit loop and fail":
-                        if "any" in value.lower(): exit_loop_and_fail += loop_this_data_sets
-                        else: exit_loop_and_fail += get_data_set_nums(value)
+                        if "any" in value.lower():
+                            exit_loop_and_fail += loop_this_data_sets
+                        else:
+                            exit_loop_and_fail += get_data_set_nums(value)
                 elif "fail" in value.lower() and not operator:
-                    if "any" in value.lower(): failing_data_sets += loop_this_data_sets
-                    else: failing_data_sets += get_data_set_nums(value)
+                    if "any" in value.lower():
+                        failing_data_sets += loop_this_data_sets
+                    else:
+                        failing_data_sets += get_data_set_nums(value)
                     if row[0].strip().lower() == "exit loop and fail":
-                        if "any" in value.lower(): exit_loop_and_fail += loop_this_data_sets
-                        else: exit_loop_and_fail += get_data_set_nums(value)
+                        if "any" in value.lower():
+                            exit_loop_and_fail += loop_this_data_sets
+                        else:
+                            exit_loop_and_fail += get_data_set_nums(value)
                 elif operator and "optional loop settings" in row[1].strip().lower():
                     operand_matching = row
                     if row[0].strip().lower() == "exit loop and fail":
@@ -816,17 +941,19 @@ def While_Loop_Action(step_data, data_set_no):
                     if data_set_index >= len(step_data):
                         CommonUtil.ExecLog(
                             sModuleInfo,
-                            "You did not define action %s. So skipping this action index" % str(data_set_index + 1),
-                            2
+                            "You did not define action %s. So skipping this action index"
+                            % str(data_set_index + 1),
+                            2,
                         )
-                        while data_set_index in loop_this_data_sets: loop_this_data_sets.remove(data_set_index)
+                        while data_set_index in loop_this_data_sets:
+                            loop_this_data_sets.remove(data_set_index)
                         outer_skip = list(set(outer_skip + [data_set_index]))
                         continue
                     elif data_set_index == data_set_no:
                         CommonUtil.ExecLog(
                             sModuleInfo,
                             "You are running a Loop action within the same Loop action. It will create infinite recursion",
-                            3
+                            3,
                         )
                         return "zeuz_failed", outer_skip
                     result, skip = Run_Sequential_Actions(
@@ -840,11 +967,16 @@ def While_Loop_Action(step_data, data_set_no):
                 if result in passed_tag_list and data_set_index in passing_data_sets:
                     CommonUtil.ExecLog(
                         sModuleInfo,
-                        "Loop exit condition satisfied. Action %s passed. Exiting loop" % str(data_set_index+1),
-                        1
+                        "Loop exit condition satisfied. Action %s passed. Exiting loop"
+                        % str(data_set_index + 1),
+                        1,
                     )
                     if data_set_index in exit_loop_and_fail:
-                        CommonUtil.ExecLog(sModuleInfo, 'Step Exit called. So failing the testcase. If you dont want to fail the testcase use "exit loop and continue" instead of "exit loop and fail"', 2)
+                        CommonUtil.ExecLog(
+                            sModuleInfo,
+                            'Step Exit called. So failing the testcase. If you dont want to fail the testcase use "exit loop and continue" instead of "exit loop and fail"',
+                            2,
+                        )
                         step_exit_fail_called = True
                         step_exit_pass_called = False
                     die = True
@@ -852,28 +984,43 @@ def While_Loop_Action(step_data, data_set_no):
                 elif result in failed_tag_list and data_set_index in failing_data_sets:
                     CommonUtil.ExecLog(
                         sModuleInfo,
-                        "Loop exit condition satisfied. Action %s failed. Exiting loop" % str(data_set_index+1),
-                        1
+                        "Loop exit condition satisfied. Action %s failed. Exiting loop"
+                        % str(data_set_index + 1),
+                        1,
                     )
                     if data_set_index in exit_loop_and_fail:
-                        CommonUtil.ExecLog(sModuleInfo, "Step Exit called. Stopping Test Step.", 1)
+                        CommonUtil.ExecLog(
+                            sModuleInfo, "Step Exit called. Stopping Test Step.", 1
+                        )
                         step_exit_fail_called = True
                         step_exit_pass_called = False
                     die = True
                     break
-                elif result in failed_tag_list and not step_exit_fail_called and not step_exit_pass_called:
+                elif (
+                    result in failed_tag_list
+                    and not step_exit_fail_called
+                    and not step_exit_pass_called
+                ):
                     CommonUtil.ExecLog(
                         sModuleInfo,
-                        "Action %s failed. As the action is inside the loop we are continuing the test case.\n" % str(data_set_index + 1) +
-                        "If you want to fail the test case when any action fails inside the loop then mention it in the \"exit loop and fail\" row. For example:\n" +
-                        "(exit loop and fail, optional loop settings, if any fails)\n" +
-                        "Or, for any particular action,\n" +
-                        "(exit loop and fail, optional loop settings, if %s fails)" % str(data_set_index + 1),
-                        2
+                        "Action %s failed. As the action is inside the loop we are continuing the test case.\n"
+                        % str(data_set_index + 1)
+                        + 'If you want to fail the test case when any action fails inside the loop then mention it in the "exit loop and fail" row. For example:\n'
+                        + "(exit loop and fail, optional loop settings, if any fails)\n"
+                        + "Or, for any particular action,\n"
+                        + "(exit loop and fail, optional loop settings, if %s fails)"
+                        % str(data_set_index + 1),
+                        2,
                     )
                 elif operand_matching != "":
-                    operand_matching_2 = operand_matching[2][3:] if operand_matching[2][2] == " " else operand_matching[2][2:]
-                    data = [(operand_matching[0], "optional parameter", operand_matching_2)]
+                    operand_matching_2 = (
+                        operand_matching[2][3:]
+                        if operand_matching[2][2] == " "
+                        else operand_matching[2][2:]
+                    )
+                    data = [
+                        (operand_matching[0], "optional parameter", operand_matching_2)
+                    ]
                     RandL = common.shared_variable_to_value(data)[0][2]
                     if operator == "":
                         CommonUtil.ExecLog(
@@ -883,9 +1030,15 @@ def While_Loop_Action(step_data, data_set_no):
                         )
                         return "zeuz_failed", []
                     Lvalue, Rvalue = RandL.split(operator)
-                    Lvalue = Lvalue[:-1] if Lvalue[-1] == " " else Lvalue  # remove 1 space before the operator
-                    Rvalue = Rvalue[1:] if Rvalue[0] == " " else Rvalue  # remove 1 space after the operator
-                    Lvalue, Rvalue = CommonUtil.parse_value_into_object(Lvalue), CommonUtil.parse_value_into_object(Rvalue)
+                    Lvalue = (
+                        Lvalue[:-1] if Lvalue[-1] == " " else Lvalue
+                    )  # remove 1 space before the operator
+                    Rvalue = (
+                        Rvalue[1:] if Rvalue[0] == " " else Rvalue
+                    )  # remove 1 space after the operator
+                    Lvalue, Rvalue = CommonUtil.parse_value_into_object(
+                        Lvalue
+                    ), CommonUtil.parse_value_into_object(Rvalue)
                     if eval("Lvalue %s Rvalue" % operator.strip("|")):
                         CommonUtil.ExecLog(
                             sModuleInfo,
@@ -893,14 +1046,20 @@ def While_Loop_Action(step_data, data_set_no):
                             1,
                         )
                         if exit_loop_nd_fail:
-                            CommonUtil.ExecLog(sModuleInfo, 'Step Exit called. So failing the testcase. If you dont want to fail the testcase use "exit loop and continue" instead of "exit loop and fail"', 2)
+                            CommonUtil.ExecLog(
+                                sModuleInfo,
+                                'Step Exit called. So failing the testcase. If you dont want to fail the testcase use "exit loop and continue" instead of "exit loop and fail"',
+                                2,
+                            )
                             step_exit_fail_called = True
                             step_exit_pass_called = False
                         die = True
                         break
                 elif var_name != "" and sr.Test_Shared_Variables(var_name):
-                    shared_variable_value = str(sr.Get_Shared_Variables(var_name)).strip().lower()
-                    if (shared_variable_value == var_value):
+                    shared_variable_value = (
+                        str(sr.Get_Shared_Variables(var_name)).strip().lower()
+                    )
+                    if shared_variable_value == var_value:
                         CommonUtil.ExecLog(
                             sModuleInfo,
                             "Loop exit condition satisfied. Left and Right operands matched. Exiting loop",
@@ -932,14 +1091,18 @@ def Run_Sequential_Actions(
     sModuleInfo = inspect.currentframe().f_code.co_name + " : " + MODULE_NAME
     try:
         result = "passed"  # Initialize result = passed so if all actions are disabled it passes
-        skip = []  # List of data set numbers that have been processed, and need to be skipped, so they are not processed again
+        skip = (
+            []
+        )  # List of data set numbers that have been processed, and need to be skipped, so they are not processed again
         skip_for_loop = []
 
         step_data = sr.Get_Shared_Variables("step_data")
         # test_action_info = sr.Get_Shared_Variables("test_action_info")
         test_action_info = sr.test_action_info
         if step_data in failed_tag_list:
-            CommonUtil.ExecLog(sModuleInfo, "Internal Error: Step Data not set in shared variable", 3)
+            CommonUtil.ExecLog(
+                sModuleInfo, "Internal Error: Step Data not set in shared variable", 3
+            )
             return "zeuz_failed", skip_for_loop
         if data_set_list == []:  # run the full step data
             for i in range(len(step_data)):
@@ -961,7 +1124,12 @@ def Run_Sequential_Actions(
                 CommonUtil.ExecLog(
                     "",
                     "\n********** Disabling %s, STEP-%s, ACTION-%d%s **********\n"
-                    % (CommonUtil.current_tc_no, CommonUtil.current_step_no, dataset_cnt + 1, Action_name),
+                    % (
+                        CommonUtil.current_tc_no,
+                        CommonUtil.current_step_no,
+                        dataset_cnt + 1,
+                        Action_name,
+                    ),
                     4,
                 )
                 continue
@@ -971,7 +1139,12 @@ def Run_Sequential_Actions(
                 CommonUtil.ExecLog(
                     "",
                     "\n********** Starting %s, STEP-%s, ACTION-%d%s **********\n"
-                    % (CommonUtil.current_tc_no, CommonUtil.current_step_no, dataset_cnt + 1, Action_name),
+                    % (
+                        CommonUtil.current_tc_no,
+                        CommonUtil.current_step_no,
+                        dataset_cnt + 1,
+                        Action_name,
+                    ),
                     4,
                 )  # Offset by one to make it look proper
             data_set = step_data[dataset_cnt]  # Save data set to variable
@@ -980,43 +1153,72 @@ def Run_Sequential_Actions(
                 action_name = row[1]  # Get Sub-Field
 
                 # Don't process these suport items right now, but also don't fail
-                if action_name.lower().strip() in action_support and "custom" not in action_name:
+                if (
+                    action_name.lower().strip() in action_support
+                    and "custom" not in action_name
+                ):
                     continue
 
                 # If middle column == bypass action, store the data set for later use if needed
                 elif "bypass action" in action_name:
-                    CommonUtil.ExecLog(sModuleInfo, "Bypass action found, storing data set for later use", 1)
+                    CommonUtil.ExecLog(
+                        sModuleInfo,
+                        "Bypass action found, storing data set for later use",
+                        1,
+                    )
                     global bypass_data_set, bypass_row
-                    bypass_data_set.append(data_set)  # Save this data set - see "action" if block below for further processing
+                    bypass_data_set.append(
+                        data_set
+                    )  # Save this data set - see "action" if block below for further processing
                     bypass_row.append(row)
                     result = "passed"
 
                 # If middle column = action, call action handler, but always return a pass
                 elif "optional action" in action_name:
-                    result = Action_Handler(data_set, row)  # Pass data set, and action_name to action handler
+                    result = Action_Handler(
+                        data_set, row
+                    )  # Pass data set, and action_name to action handler
                     if result == "zeuz_failed":
-                        CommonUtil.ExecLog(sModuleInfo, "Optional action failed. Returning pass anyway", 2)
+                        CommonUtil.ExecLog(
+                            sModuleInfo,
+                            "Optional action failed. Returning pass anyway",
+                            2,
+                        )
                     result = "passed"
 
                 # If middle column = conditional action, evaluate data set
                 elif "conditional action" in action_name or "if else" in action_name:
                     if action_name.lower().strip() == "windows conditional action":
-                        result, to_skip = Conditional_Action_Handler(step_data, dataset_cnt)
+                        result, to_skip = Conditional_Action_Handler(
+                            step_data, dataset_cnt
+                        )
                         skip += to_skip
                         skip_for_loop += to_skip
                         if result in failed_tag_list:
-                            CommonUtil.ExecLog(sModuleInfo, "Returned result from Conditional Action Failed", 3)
+                            CommonUtil.ExecLog(
+                                sModuleInfo,
+                                "Returned result from Conditional Action Failed",
+                                3,
+                            )
                             return result, skip_for_loop
                         break
 
-
-                    elif action_name.lower().strip() != "conditional action" and action_name.lower().strip() != "if else":
+                    elif (
+                        action_name.lower().strip() != "conditional action"
+                        and action_name.lower().strip() != "if else"
+                    ):
                         # old style conditional action
-                        result, to_skip = Conditional_Action_Handler(step_data, dataset_cnt)
+                        result, to_skip = Conditional_Action_Handler(
+                            step_data, dataset_cnt
+                        )
                         skip += to_skip
                         skip_for_loop += to_skip
                         if result in failed_tag_list:
-                            CommonUtil.ExecLog(sModuleInfo, "Returned result from Conditional Action Failed", 3)
+                            CommonUtil.ExecLog(
+                                sModuleInfo,
+                                "Returned result from Conditional Action Failed",
+                                3,
+                            )
                             return result, skip_for_loop
                         break
 
@@ -1025,7 +1227,11 @@ def Run_Sequential_Actions(
                         skip += to_skip
                         skip_for_loop += to_skip
                         if result in failed_tag_list:
-                            CommonUtil.ExecLog(sModuleInfo, "Returned result from Conditional Action Failed", 3)
+                            CommonUtil.ExecLog(
+                                sModuleInfo,
+                                "Returned result from Conditional Action Failed",
+                                3,
+                            )
                             return result, skip_for_loop
                         break
 
@@ -1037,23 +1243,48 @@ def Run_Sequential_Actions(
                         if result in failed_tag_list:
                             return "zeuz_failed", skip_for_loop
                         break
-                    elif action_name.lower().strip() not in ("while loop action", "for loop action"):
+                    elif action_name.lower().strip() not in (
+                        "while loop action",
+                        "for loop action",
+                    ):
                         # old style loop action
                         # CommonUtil.ExecLog(sModuleInfo,"Old style loop action found. This will not be supported in 2020, please replace them with new loop actions",2)
-                        result, skip_for_loop = Loop_Action_Handler(data_set, row, dataset_cnt)
+                        result, skip_for_loop = Loop_Action_Handler(
+                            data_set, row, dataset_cnt
+                        )
                         skip = skip_for_loop
 
                         position_of_loop_action = dataset_cnt
-                        set_of_actions_after_loop = range(position_of_loop_action + 1, len(step_data))  # Collecting actions following the first loop action
+                        set_of_actions_after_loop = range(
+                            position_of_loop_action + 1, len(step_data)
+                        )  # Collecting actions following the first loop action
                         for follow_cnt in set_of_actions_after_loop:
                             for follow_row in step_data[follow_cnt]:
-                                if "loop action" in follow_row[1]:  # Check if the action following the first loop in the set is a loop action
-                                    if str(follow_cnt + 1) in row[2]:  # Check if this loop is being called by the first loop. Done to avoid skipping actions of loops in the step that are located after and outside of the first loop.
-                                        for a in follow_row[2].strip(" nested ").strip(" - ").split(","):
+                                if (
+                                    "loop action" in follow_row[1]
+                                ):  # Check if the action following the first loop in the set is a loop action
+                                    if (
+                                        str(follow_cnt + 1) in row[2]
+                                    ):  # Check if this loop is being called by the first loop. Done to avoid skipping actions of loops in the step that are located after and outside of the first loop.
+                                        for a in (
+                                            follow_row[2]
+                                            .strip(" nested ")
+                                            .strip(" - ")
+                                            .split(",")
+                                        ):
                                             skip.append(int(a) - 1)
-                                elif "conditional action" in follow_row[1]:  # Check if the action following the first loop in the set is a conditional action
-                                    if str(follow_cnt + 1) in row[2]:  # Check if this conditional is being called by the first loop. Done to avoid skipping actions of conditional actions in the step that are located after and outside of the first loop.
-                                        for a in follow_row[2].strip(" nested ").strip(" - ").split(","):
+                                elif (
+                                    "conditional action" in follow_row[1]
+                                ):  # Check if the action following the first loop in the set is a conditional action
+                                    if (
+                                        str(follow_cnt + 1) in row[2]
+                                    ):  # Check if this conditional is being called by the first loop. Done to avoid skipping actions of conditional actions in the step that are located after and outside of the first loop.
+                                        for a in (
+                                            follow_row[2]
+                                            .strip(" nested ")
+                                            .strip(" - ")
+                                            .split(",")
+                                        ):
                                             skip.append(int(a) - 1)
 
                         """
@@ -1070,7 +1301,9 @@ def Run_Sequential_Actions(
                             return "zeuz_failed", skip_for_loop
                 elif "loop" in action_name:
                     if "while" in action_name.lower():
-                        result, skip_for_loop = While_Loop_Action(step_data, dataset_cnt)
+                        result, skip_for_loop = While_Loop_Action(
+                            step_data, dataset_cnt
+                        )
                     skip = list(set(skip + skip_for_loop))
                     if result in failed_tag_list:
                         return "zeuz_failed", skip_for_loop
@@ -1079,10 +1312,15 @@ def Run_Sequential_Actions(
                 # Special custom functions can be executed in a specified file
                 elif "custom" in action_name:
                     CommonUtil.ExecLog(sModuleInfo, "Custom Action Start", 2)
-                    if row[0].lower().strip() == "file":  # User specified file to run from (only needed once)
+                    if (
+                        row[0].lower().strip() == "file"
+                    ):  # User specified file to run from (only needed once)
                         # Try to find the image file
                         custom_file_name = row[2].strip()
-                        if custom_file_name not in file_attachment and os.path.exists(custom_file_name) == False:
+                        if (
+                            custom_file_name not in file_attachment
+                            and os.path.exists(custom_file_name) == False
+                        ):
                             CommonUtil.ExecLog(
                                 sModuleInfo,
                                 "Could not find file attachment called %s, and could not find it locally"
@@ -1091,15 +1329,21 @@ def Run_Sequential_Actions(
                             )
                             return "zeuz_failed", skip_for_loop
                         if custom_file_name in file_attachment:
-                            custom_file_name = file_attachment[custom_file_name]  # In file is an attachment, get the full path
+                            custom_file_name = file_attachment[
+                                custom_file_name
+                            ]  # In file is an attachment, get the full path
 
                         # Import the module
                         from imp import load_source
 
                         try:
                             global custom_module  # Need to remember this value between Test Steps
-                            custom_mod_name = os.path.splitext(os.path.basename(custom_file_name))[0]
-                            custom_module = load_source(custom_mod_name, custom_file_name)  # Load module user specified
+                            custom_mod_name = os.path.splitext(
+                                os.path.basename(custom_file_name)
+                            )[0]
+                            custom_module = load_source(
+                                custom_mod_name, custom_file_name
+                            )  # Load module user specified
                             CommonUtil.ExecLog(sModuleInfo, "Import successful", 1)
                             result = "passed"
                         except:
@@ -1115,19 +1359,40 @@ def Run_Sequential_Actions(
                         # If custom module is set, then we are good to use it
                         # User specified filename already and it's imported, so we can move ahead with executing functions
                         custom_var = ""
-                        custom_function = row[0].strip().replace("()", "").replace(" ", "")  # Function name, can't have brackets
+                        custom_function = (
+                            row[0].strip().replace("()", "").replace(" ", "")
+                        )  # Function name, can't have brackets
                         if "=" in custom_function:
-                            custom_var, custom_function = custom_function.split("=")  # If shared variable name included with function, separate them
-                        custom_params = row[2].strip().replace("'", "'")   # Escape single quotes in the parameters
+                            custom_var, custom_function = custom_function.split(
+                                "="
+                            )  # If shared variable name included with function, separate them
+                        custom_params = (
+                            row[2].strip().replace("'", "'")
+                        )  # Escape single quotes in the parameters
                         try:
                             custom_output = ""
-                            exec("custom_output = custom_module.%s(%s)" % (custom_function, custom_params))   # Execute the function from the custom module
+                            exec(
+                                "custom_output = custom_module.%s(%s)"
+                                % (custom_function, custom_params)
+                            )  # Execute the function from the custom module
                             if custom_output != "":
-                                sr.Set_Shared_Variables(custom_var, custom_output)  # Save output to user specified shared variable name
-                            CommonUtil.ExecLog(sModuleInfo, "Function executed successfully: %s" % str(custom_output), 1)
+                                sr.Set_Shared_Variables(
+                                    custom_var, custom_output
+                                )  # Save output to user specified shared variable name
+                            CommonUtil.ExecLog(
+                                sModuleInfo,
+                                "Function executed successfully: %s"
+                                % str(custom_output),
+                                1,
+                            )
                             result = "passed"
                         except Exception as e:
-                            CommonUtil.ExecLog(sModuleInfo, "Failed to execute function %s from the custom module: %s" % (custom_module, e), 3)
+                            CommonUtil.ExecLog(
+                                sModuleInfo,
+                                "Failed to execute function %s from the custom module: %s"
+                                % (custom_module, e),
+                                3,
+                            )
                             return "zeuz_failed", skip_for_loop
 
                     else:  # Function executed but user didn't specify the file to import
@@ -1139,43 +1404,90 @@ def Run_Sequential_Actions(
                         return "zeuz_failed", skip_for_loop
 
                 # If middle column = action, call action handler
-                elif "action" in action_name:  # Must be last, since it's a single word that also exists in other action types
-                    result = Action_Handler(data_set, row)  # Pass data set, and action_name to action handler
+                elif (
+                    "action" in action_name
+                ):  # Must be last, since it's a single word that also exists in other action types
+                    result = Action_Handler(
+                        data_set, row
+                    )  # Pass data set, and action_name to action handler
                     if row[0].lower().strip() == "step exit":
-                        CommonUtil.ExecLog(sModuleInfo, "Step Exit called. Stopping Test Step.", 1)
+                        CommonUtil.ExecLog(
+                            sModuleInfo, "Step Exit called. Stopping Test Step.", 1
+                        )
                         skip_all = [i for i in range(len(step_data))]
                         return result, skip_all
 
                     # Check if user wants to store the result for later use
                     stored = False
                     for r in data_set:
-                        if r[0].lower().strip() == "store" and r[1].lower().strip() == "result":  # If Field = store and Sub-Field = result
-                            CommonUtil.ExecLog(sModuleInfo, "Storing result for later use. Will not exit if action failed: %s" % result, 1)
-                            sr.Set_Shared_Variables(r[2].strip(), result)  # Use the Value as the shared variable name, and save the result
+                        if (
+                            r[0].lower().strip() == "store"
+                            and r[1].lower().strip() == "result"
+                        ):  # If Field = store and Sub-Field = result
+                            CommonUtil.ExecLog(
+                                sModuleInfo,
+                                "Storing result for later use. Will not exit if action failed: %s"
+                                % result,
+                                1,
+                            )
+                            sr.Set_Shared_Variables(
+                                r[2].strip(), result
+                            )  # Use the Value as the shared variable name, and save the result
                             stored = True  # In the case of a failed result, skip the return that comes after this
 
                     # Check result of action handler and use bypass action if specified
                     if stored == False and result in failed_tag_list:
-                        if (bypass_data_set != []):  # User specified a bypass action, so let's try it before we fail
-                            action_module = [x for x in loaded_modules if str(x) in str(row[1])]  # Save module for the original action
+                        if (
+                            bypass_data_set != []
+                        ):  # User specified a bypass action, so let's try it before we fail
+                            action_module = [
+                                x for x in loaded_modules if str(x) in str(row[1])
+                            ]  # Save module for the original action
                             for i in range(len(bypass_data_set)):
-                                bypass_module = [x for x in loaded_modules if str(x) in str(bypass_row[i][1])]  # Save module for the bypass action
+                                bypass_module = [
+                                    x
+                                    for x in loaded_modules
+                                    if str(x) in str(bypass_row[i][1])
+                                ]  # Save module for the bypass action
                                 if action_module != bypass_module:
-                                    CommonUtil.ExecLog(sModuleInfo, "Skipping bypass #%d because it's not the same module" % (i + 1), 1)
+                                    CommonUtil.ExecLog(
+                                        sModuleInfo,
+                                        "Skipping bypass #%d because it's not the same module"
+                                        % (i + 1),
+                                        1,
+                                    )
                                     continue
 
-                                CommonUtil.ExecLog(sModuleInfo, "Action failed. Trying bypass #%d" % (i + 1), 1)
-                                result = Action_Handler(bypass_data_set[i], bypass_row[i])
-                                if result in failed_tag_list:  # This also failed, so chances are first failure was real
+                                CommonUtil.ExecLog(
+                                    sModuleInfo,
+                                    "Action failed. Trying bypass #%d" % (i + 1),
+                                    1,
+                                )
+                                result = Action_Handler(
+                                    bypass_data_set[i], bypass_row[i]
+                                )
+                                if (
+                                    result in failed_tag_list
+                                ):  # This also failed, so chances are first failure was real
                                     continue  # Try the next bypass, if any
                                 else:  # Bypass passed, which indicates there was something blocking the element in the first place
-                                    CommonUtil.ExecLog(sModuleInfo, "Bypass passed. Retrying original action", 1)
-                                    result = Action_Handler(data_set, row)  # Retry failed original data set
-                                    if result in failed_tag_list:  # Still a failure, give up
+                                    CommonUtil.ExecLog(
+                                        sModuleInfo,
+                                        "Bypass passed. Retrying original action",
+                                        1,
+                                    )
+                                    result = Action_Handler(
+                                        data_set, row
+                                    )  # Retry failed original data set
+                                    if (
+                                        result in failed_tag_list
+                                    ):  # Still a failure, give up
                                         return "zeuz_failed", skip_for_loop
                                     break  # No need to process more bypasses
                             if result in failed_tag_list:  # All bypass actions failed
-                                CommonUtil.ExecLog(sModuleInfo, "All bypass actions failed", 3)
+                                CommonUtil.ExecLog(
+                                    sModuleInfo, "All bypass actions failed", 3
+                                )
                                 return "zeuz_failed", skip_for_loop
                         else:  # Yup, it's a failure, and no bypass specified
                             return "zeuz_failed", skip_for_loop
@@ -1197,13 +1509,13 @@ def Run_Sequential_Actions(
 
 
 def Loop_Action_Handler(data, row, dataset_cnt):
-    """ Performs a sub-set of the data set in a loop, similar to a for or while loop """
+    """Performs a sub-set of the data set in a loop, similar to a for or while loop"""
 
     sModuleInfo = inspect.currentframe().f_code.co_name + " : " + MODULE_NAME
     CommonUtil.ExecLog(
         sModuleInfo,
-        "This action is deprecated and will be removed later on. Please use our more improved and simpler \"Loop through a list\" action",
-        2
+        'This action is deprecated and will be removed later on. Please use our more improved and simpler "Loop through a list" action',
+        2,
     )
 
     try:
@@ -1387,7 +1699,11 @@ def Loop_Action_Handler(data, row, dataset_cnt):
             try:
                 load_testing = True
                 CommonUtil.load_testing = True
-                CommonUtil.performance_report = {"data": [], "individual_stats": {"slowest": 0, "fastest": float("inf")}, "status_counts": {}}
+                CommonUtil.performance_report = {
+                    "data": [],
+                    "individual_stats": {"slowest": 0, "fastest": float("inf")},
+                    "status_counts": {},
+                }
                 total_range = 0
                 total_percentage = 0
                 for r in data:
@@ -1506,9 +1822,13 @@ def Loop_Action_Handler(data, row, dataset_cnt):
         inside_interval = False
         load_testing_count = -1
 
-        performance_start_time = datetime.fromtimestamp(time.time()).strftime("%Y-%m-%d %H:%M:%S")
+        performance_start_time = datetime.fromtimestamp(time.time()).strftime(
+            "%Y-%m-%d %H:%M:%S"
+        )
         performance_start_counter = time.perf_counter()
-        while True:  # We control the new sub-set of the step data, so we can examine the output
+        while (
+            True
+        ):  # We control the new sub-set of the step data, so we can examine the output
             CommonUtil.ExecLog(sModuleInfo, "Loop action #%d" % sub_set_cnt, 1)
 
             if loop_method == "exit_on_dataset":
@@ -1528,7 +1848,9 @@ def Loop_Action_Handler(data, row, dataset_cnt):
                     break  # Stop processing this while loop, and go back to regular SA
 
             elif loop_method == "exact":
-                for ndc in range(len(new_step_data)):  # For each data set in the sub-set
+                for ndc in range(
+                    len(new_step_data)
+                ):  # For each data set in the sub-set
                     # Build the sub-set and execute
                     if load_testing:
                         thread_pool.submit(build_subset, [new_step_data[ndc]])
@@ -1640,7 +1962,9 @@ def Loop_Action_Handler(data, row, dataset_cnt):
             if load_testing:
                 load_testing_count += 1
                 if inside_interval:
-                    if load_testing_count < distribution[load_testing_interval][1]:  # current interval running
+                    if (
+                        load_testing_count < distribution[load_testing_interval][1]
+                    ):  # current interval running
                         time.sleep(distribution[load_testing_interval][2])
                         # print "sleeping %f"%distribution[load_testing_interval][2]
                         continue
@@ -1663,9 +1987,13 @@ def Loop_Action_Handler(data, row, dataset_cnt):
         if load_testing:
             thread_pool.shutdown()
 
-            performance_end_time = datetime.fromtimestamp(time.time()).strftime("%Y-%m-%d %H:%M:%S")
+            performance_end_time = datetime.fromtimestamp(time.time()).strftime(
+                "%Y-%m-%d %H:%M:%S"
+            )
             performance_end_counter = time.perf_counter()
-            performance_duration = round(performance_end_counter-performance_start_counter, 6)
+            performance_duration = round(
+                performance_end_counter - performance_start_counter, 6
+            )
 
             CommonUtil.performance_report["loops"] = loop_len
             CommonUtil.performance_report["start_time"] = performance_start_time
@@ -1676,13 +2004,24 @@ def Loop_Action_Handler(data, row, dataset_cnt):
             for each_data in CommonUtil.performance_report["data"]:
                 total_runtime += each_data["runtime"]
 
-            CommonUtil.performance_report["individual_stats"]["average"] = total_runtime/loop_len
-            CommonUtil.performance_report["requests/sec"] = loop_len/performance_duration
+            CommonUtil.performance_report["individual_stats"]["average"] = (
+                total_runtime / loop_len
+            )
+            CommonUtil.performance_report["requests/sec"] = (
+                loop_len / performance_duration
+            )
 
-            CommonUtil.ExecLog(sModuleInfo, "Loop iterated %d times successfully" % sub_set_cnt, 1, force_write=True)
+            CommonUtil.ExecLog(
+                sModuleInfo,
+                "Loop iterated %d times successfully" % sub_set_cnt,
+                1,
+                force_write=True,
+            )
             report_path = os.path.join(
-                ConfigModule.get_config_value("sectionOne", "performance_report", temp_ini_file),
-                "Action_" + str(dataset_cnt+1) + ".json"
+                ConfigModule.get_config_value(
+                    "sectionOne", "performance_report", temp_ini_file
+                ),
+                "Action_" + str(dataset_cnt + 1) + ".json",
             )
             with open(report_path, "w") as f:
                 json.dump(CommonUtil.performance_report, f, indent=2)
@@ -1696,7 +2035,7 @@ def Loop_Action_Handler(data, row, dataset_cnt):
 
 
 def Conditional_Action_Handler(step_data, dataset_cnt):
-    """ Process conditional actions, called only by Sequential_Actions() """
+    """Process conditional actions, called only by Sequential_Actions()"""
     sModuleInfo = inspect.currentframe().f_code.co_name + " : " + MODULE_NAME
 
     # Get module and dynamically load it
@@ -1720,7 +2059,9 @@ def Conditional_Action_Handler(step_data, dataset_cnt):
         for left, mid, right in data_set:
             left = left.lower()
             mid = mid.lower()
-            if "recall" in left and "result" in mid:  # If Field = recall and Sub-Field = result
+            if (
+                "recall" in left and "result" in mid
+            ):  # If Field = recall and Sub-Field = result
                 CommonUtil.ExecLog(sModuleInfo, "Recalled result: %s" % right, 1)
                 stored = True
                 result = right  # Retrieve the saved result (already converted from shared variable)
@@ -1743,9 +2084,10 @@ def Conditional_Action_Handler(step_data, dataset_cnt):
     if stored:  # Use saved result from previous data set
         CommonUtil.ExecLog(
             sModuleInfo,
-            "The action has been deprecated and will be removed at a later period.\n" +
-            "Try our other action 'if else'",
-            2)
+            "The action has been deprecated and will be removed at a later period.\n"
+            + "Try our other action 'if else'",
+            2,
+        )
         if result in failed_tag_list:  # Check result from previous action
             logic_decision = False
         else:  # Passed / Skipped
@@ -1762,9 +2104,13 @@ def Conditional_Action_Handler(step_data, dataset_cnt):
                 if "optional parameter" in mid and "wait" in left:
                     wait = float(right.strip())
 
-            Element = LocateElement.Get_Element(data_set, eval(module).get_driver(), element_wait=wait)
+            Element = LocateElement.Get_Element(
+                data_set, eval(module).get_driver(), element_wait=wait
+            )
             if Element in failed_tag_list:
-                CommonUtil.ExecLog(sModuleInfo, "Conditional Actions could not find the element", 3)
+                CommonUtil.ExecLog(
+                    sModuleInfo, "Conditional Actions could not find the element", 3
+                )
                 logic_decision = False
                 log_msg += "Element is not found\n"
             else:
@@ -1772,13 +2118,16 @@ def Conditional_Action_Handler(step_data, dataset_cnt):
                 log_msg += "Element is found\n"
 
         except:  # Element doesn't exist, proceed with the step data following the fail/false path
-            CommonUtil.ExecLog(sModuleInfo, "Conditional Actions could not find the element", 3)
+            CommonUtil.ExecLog(
+                sModuleInfo, "Conditional Actions could not find the element", 3
+            )
             logic_decision = False
             log_msg += "Element is not found\n"
 
     elif module == "windows":
         try:
             from Framework.Built_In_Automation.Desktop.Windows import BuiltInFunctions
+
             wait = 10
             for left, mid, right in data_set:
                 mid = mid.lower()
@@ -1813,14 +2162,16 @@ def Conditional_Action_Handler(step_data, dataset_cnt):
             logic_decision = False
             log_msg += "Element is not found\n"
 
-
-    elif module == "common" or module == "database":  # compare variable or list, and based on the result conditional actions will work
+    elif (
+        module == "common" or module == "database"
+    ):  # compare variable or list, and based on the result conditional actions will work
         try:
             CommonUtil.ExecLog(
                 sModuleInfo,
-                "The action has been deprecated and will be removed at a later period.\n" +
-                "Try our other action 'if else'",
-                2)
+                "The action has been deprecated and will be removed at a later period.\n"
+                + "Try our other action 'if else'",
+                2,
+            )
             result = common.Compare_Variables(
                 data_set
             )  # Get the element object or "zeuz_failed"
@@ -1846,9 +2197,10 @@ def Conditional_Action_Handler(step_data, dataset_cnt):
     elif module == "rest":
         CommonUtil.ExecLog(
             sModuleInfo,
-            "The action has been deprecated and will be removed at a later period.\n" +
-            "Try our other action 'if else'",
-            2)
+            "The action has been deprecated and will be removed at a later period.\n"
+            + "Try our other action 'if else'",
+            2,
+        )
         Get_Element_Step_Data = getattr(eval(module), "Get_Element_Step_Data")
         element_step_data = Get_Element_Step_Data(
             [data_set]
@@ -1857,29 +2209,38 @@ def Conditional_Action_Handler(step_data, dataset_cnt):
         returned_step_data_list = Validate_Step_Data(
             element_step_data[0]
         )  # Make sure the element step data we got back from above is good
-        if (returned_step_data_list == []) or (returned_step_data_list == "zeuz_failed"):  # Element step data is bad, so fail
-            CommonUtil.ExecLog(sModuleInfo, "Element data is bad: %s" % str(element_step_data), 3)
+        if (returned_step_data_list == []) or (
+            returned_step_data_list == "zeuz_failed"
+        ):  # Element step data is bad, so fail
+            CommonUtil.ExecLog(
+                sModuleInfo, "Element data is bad: %s" % str(element_step_data), 3
+            )
             return "zeuz_failed", []
         else:  # Element step data is good, so continue
             # Check if element from data set exists on device
             try:
                 Get_Response = getattr(eval(module), "Get_Response")
                 Element = Get_Response(element_step_data[0])
-                if Element == "zeuz_failed":  # Element doesn't exist, proceed with the step data following the fail/false path
+                if (
+                    Element == "zeuz_failed"
+                ):  # Element doesn't exist, proceed with the step data following the fail/false path
                     logic_decision = False
                 else:  # Any other return means we found the element, proceed with the step data following the pass/true pass
                     logic_decision = True
             except Exception:  # Element doesn't exist, proceed with the step data following the fail/false path
-                CommonUtil.ExecLog(sModuleInfo, "Could not find element in the by the criteria...", 3)
+                CommonUtil.ExecLog(
+                    sModuleInfo, "Could not find element in the by the criteria...", 3
+                )
                 logic_decision = False
                 return CommonUtil.Exception_Handler(sys.exc_info()), []
 
     elif module == "utility":
         CommonUtil.ExecLog(
             sModuleInfo,
-            "The action has been deprecated and will be removed at a later period.\n" +
-            "Try our other action 'if else'",
-            2)
+            "The action has been deprecated and will be removed at a later period.\n"
+            + "Try our other action 'if else'",
+            2,
+        )
         Get_Path_Step_Data = getattr(eval(module), "Get_Path_Step_Data")
         element_step_data = Get_Path_Step_Data(
             data_set
@@ -1932,23 +2293,30 @@ def Conditional_Action_Handler(step_data, dataset_cnt):
             if logic_decision:
                 for i in get_data_set_nums(str(right).strip()):
                     next_level_step_data.append(i)
-                log_msg = if_else_log_for_actions(log_msg, next_level_step_data, "element")
+                log_msg = if_else_log_for_actions(
+                    log_msg, next_level_step_data, "element"
+                )
 
         elif "false" in left and "conditional action" in mid:
             outer_skip += get_data_set_nums(str(right).strip())
             if not logic_decision:
                 for i in get_data_set_nums(str(right).strip()):
                     next_level_step_data.append(i)
-                log_msg = if_else_log_for_actions(log_msg, next_level_step_data, "element")
+                log_msg = if_else_log_for_actions(
+                    log_msg, next_level_step_data, "element"
+                )
 
     CommonUtil.ExecLog(sModuleInfo, log_msg, 1)
 
-    while "f" in outer_skip: outer_skip.remove("f")
-    while "p" in outer_skip: outer_skip.remove("p")
+    while "f" in outer_skip:
+        outer_skip.remove("f")
+    while "p" in outer_skip:
+        outer_skip.remove("p")
     if next_level_step_data == []:
         CommonUtil.ExecLog(
             sModuleInfo,
-            "No actions found regarding. Skipping action %s" % [i+1 for i in outer_skip],
+            "No actions found regarding. Skipping action %s"
+            % [i + 1 for i in outer_skip],
             2,
         )
 
@@ -1957,7 +2325,9 @@ def Conditional_Action_Handler(step_data, dataset_cnt):
             outer_skip = [i for i in range(len(step_data))]
             CommonUtil.ExecLog(sModuleInfo, "Step Exit called. Stopping Test Step.", 1)
             if data_set_index == "p":
-                step_exit_fail_called = False   # Actually its already false. just adding for precaution
+                step_exit_fail_called = (
+                    False  # Actually its already false. just adding for precaution
+                )
                 step_exit_pass_called = True
                 return "passed", outer_skip
             else:
@@ -1967,20 +2337,19 @@ def Conditional_Action_Handler(step_data, dataset_cnt):
         elif data_set_index >= len(step_data):
             CommonUtil.ExecLog(
                 sModuleInfo,
-                "You did not define action %s. So skipping this action index" % str(data_set_index + 1),
-                2
+                "You did not define action %s. So skipping this action index"
+                % str(data_set_index + 1),
+                2,
             )
             continue
         elif data_set_index == dataset_cnt:
             CommonUtil.ExecLog(
                 sModuleInfo,
                 "You are running an if else action within another if else action. It may create infinite recursion in some cases",
-                2
+                2,
             )
         if data_set_index not in inner_skip:
-            result, skip = Run_Sequential_Actions(
-                [data_set_index]
-            )  # Running
+            result, skip = Run_Sequential_Actions([data_set_index])  # Running
             inner_skip = list(set(inner_skip + skip))
             outer_skip = list(set(outer_skip + inner_skip))
             if result in failed_tag_list:
@@ -1991,8 +2360,10 @@ def Conditional_Action_Handler(step_data, dataset_cnt):
     return "passed", outer_skip
 
 
-def bypass_bug(*args,):
-    """ Suppose, there is a bug in the test product which is a pop-up that appears randomly and you need to close that pop-up
+def bypass_bug(
+    *args,
+):
+    """Suppose, there is a bug in the test product which is a pop-up that appears randomly and you need to close that pop-up
     So instead of putting that inside you testcase use this function.
     This function will read the action dataset from "Zeuz_Python_Node/bypass.json" file and run that action after every particular type action
     Example of bypass.json:
@@ -2010,7 +2381,7 @@ def bypass_bug(*args,):
         ]
       }
     ]
-     """
+    """
     try:
         sModuleInfo = inspect.currentframe().f_code.co_name + " : " + MODULE_NAME
         if not bypass_exist:
@@ -2034,15 +2405,41 @@ def bypass_bug(*args,):
                 l = left.strip().lower()
                 m = mid.strip().lower()
                 r = right.strip().lower().split(",")
-                if "selenium" in module and l in ("web", "selenium") and "optional" in m and curr_action in [i.strip() for i in r]:
+                if (
+                    "selenium" in module
+                    and l in ("web", "selenium")
+                    and "optional" in m
+                    and curr_action in [i.strip() for i in r]
+                ):
                     break
-                elif "appium" in module and l in ("mobile", "appium") and "optional" in m and curr_action in [i.strip() for i in r]:
+                elif (
+                    "appium" in module
+                    and l in ("mobile", "appium")
+                    and "optional" in m
+                    and curr_action in [i.strip() for i in r]
+                ):
                     break
-                elif "windows" in module and l in ("desktop", "windows") and "optional" in m and curr_action in [i.strip() for i in r]:
+                elif (
+                    "windows" in module
+                    and l in ("desktop", "windows")
+                    and "optional" in m
+                    and curr_action in [i.strip() for i in r]
+                ):
                     break
-                elif ("common" in module or "utility" in module) and l in ("common", "utility") and "optional" in m and curr_action in [i.strip() for i in r]:
+                elif (
+                    ("common" in module or "utility" in module)
+                    and l in ("common", "utility")
+                    and "optional" in m
+                    and curr_action in [i.strip() for i in r]
+                ):
                     break
-                elif "rest" in module and l.replace(" ", "").replace("-", "").replace("_", "") in ("rest", "api", "restapi") and "optional" in m and curr_action in [i.strip() for i in r]:
+                elif (
+                    "rest" in module
+                    and l.replace(" ", "").replace("-", "").replace("_", "")
+                    in ("rest", "api", "restapi")
+                    and "optional" in m
+                    and curr_action in [i.strip() for i in r]
+                ):
                     break
             else:
                 continue
@@ -2051,7 +2448,23 @@ def bypass_bug(*args,):
             for left, mid, right in action_dataset:
                 l = left.lower().replace(" ", "").replace("-", "").replace("_", "")
                 m = mid.strip().lower()
-                if l in ("web", "selenium", "mobile", "appium", "desktop", "windows", "common", "utility", "rest", "api", "restapi") and "optional" in m:
+                if (
+                    l
+                    in (
+                        "web",
+                        "selenium",
+                        "mobile",
+                        "appium",
+                        "desktop",
+                        "windows",
+                        "common",
+                        "utility",
+                        "rest",
+                        "api",
+                        "restapi",
+                    )
+                    and "optional" in m
+                ):
                     indices.append(i)
                 i += 1
             indices = reversed(indices)
@@ -2065,15 +2478,24 @@ def bypass_bug(*args,):
                     action_row = tuple(i)
             if action_row is None:
                 continue
-            CommonUtil.ExecLog("", "\n********** Starting Bypass action: %s **********\n%s" % (action_name, json.dumps(action, indent=2)), 4)
+            CommonUtil.ExecLog(
+                "",
+                "\n********** Starting Bypass action: %s **********\n%s"
+                % (action_name, json.dumps(action, indent=2)),
+                4,
+            )
             if Action_Handler(dataset, action_row, False) == "zeuz_failed":
-                CommonUtil.ExecLog(sModuleInfo, "Bypass action failed, however continuing", 2)
+                CommonUtil.ExecLog(
+                    sModuleInfo, "Bypass action failed, however continuing", 2
+                )
     except:
-        return CommonUtil.Exception_Handler(sys.exc_info(), None, "Bypass action failed, however continuing")
+        return CommonUtil.Exception_Handler(
+            sys.exc_info(), None, "Bypass action failed, however continuing"
+        )
 
 
 def Action_Handler(_data_set, action_row, _bypass_bug=True):
-    """ Finds the appropriate function for the requested action in the step data and executes it """
+    """Finds the appropriate function for the requested action in the step data and executes it"""
 
     sModuleInfo = inspect.currentframe().f_code.co_name + " : " + MODULE_NAME
     CommonUtil.ExecLog(sModuleInfo, "Function Start", 0)
@@ -2094,37 +2516,59 @@ def Action_Handler(_data_set, action_row, _bypass_bug=True):
             if "Microsoft" not in location:
                 python_folder.append(location)
         try:
-            python_location = "" if len(python_folder) == 0 else "by going to {}".format(python_folder[0].split("Python")[0] + "Python")
+            python_location = (
+                ""
+                if len(python_folder) == 0
+                else "by going to {}".format(
+                    python_folder[0].split("Python")[0] + "Python"
+                )
+            )
         except:
             python_location = ""
         if not 3.5 <= float(sys.version.split(" ")[0][0:3]) <= 3.8:
-            error_msg = "You have the wrong Python version or bit"\
-                +"\nFollow this procedure"\
-                +"\n1.Go to settings, then go to Apps and in search box type python and uninstall all python related things"\
-                +"\n2.Delete your Python folder"\
-                + python_location \
-                +"\n3.Go to this link and download python https://www.python.org/ftp/python/3.8.10/python-3.8.10-amd64.exe"\
-                +"\n4.During installation, give uncheck 'for all user' and check 'Add Python to Path'. This is very important."\
-                +"\n5.Relaunch zeuz node_cli.py"
+            error_msg = (
+                "You have the wrong Python version or bit"
+                + "\nFollow this procedure"
+                + "\n1.Go to settings, then go to Apps and in search box type python and uninstall all python related things"
+                + "\n2.Delete your Python folder"
+                + python_location
+                + "\n3.Go to this link and download python https://www.python.org/ftp/python/3.8.10/python-3.8.10-amd64.exe"
+                + "\n4.During installation, give uncheck 'for all user' and check 'Add Python to Path'. This is very important."
+                + "\n5.Relaunch zeuz node_cli.py"
+            )
             CommonUtil.ExecLog(sModuleInfo, error_msg, 3)
-            return "zeuz_failed" 
+            return "zeuz_failed"
 
-    module, function, original_module, screenshot = common.get_module_and_function(action_name, action_subfield)  # New, get the module to execute
+    module, function, original_module, screenshot = common.get_module_and_function(
+        action_name, action_subfield
+    )  # New, get the module to execute
 
-    if module in failed_tag_list or module == "" or function == "":  # New, make sure we have a function
-        CommonUtil.ExecLog(sModuleInfo, "You probably didn't add the module as part of the action. Eg: appium action", 3)
+    if (
+        module in failed_tag_list or module == "" or function == ""
+    ):  # New, make sure we have a function
+        CommonUtil.ExecLog(
+            sModuleInfo,
+            "You probably didn't add the module as part of the action. Eg: appium action",
+            3,
+        )
         return "zeuz_failed"
 
     # If this is a common function, try to get the webdriver for it, if there is one, and save it to shared variables. This will allow common functions to work with whichever webdriver they need
     if original_module != "":  # This was identified as a common module
         try:
-            result = load_sa_modules(original_module)  # Load the appropriate module (in case its never been run before this common action has started)
+            result = load_sa_modules(
+                original_module
+            )  # Load the appropriate module (in case its never been run before this common action has started)
             if result == "zeuz_failed":
-                CommonUtil.ExecLog(sModuleInfo, "Can't find module for %s" % original_module, 3)
+                CommonUtil.ExecLog(
+                    sModuleInfo, "Can't find module for %s" % original_module, 3
+                )
                 return "zeuz_failed"
 
             common_driver = eval(original_module).get_driver()  # Get webdriver object
-            sr.Set_Shared_Variables("common_driver", common_driver)  # Save in shared variable
+            sr.Set_Shared_Variables(
+                "common_driver", common_driver
+            )  # Save in shared variable
         except:
             pass  # Not all modules have get_driver, so don't worry if this crashes
 
@@ -2132,7 +2576,10 @@ def Action_Handler(_data_set, action_row, _bypass_bug=True):
     data_set = []
     for row in _data_set:
         new_row = list(row)
-        if "optional parameter" in row[1] and "screen capture" == row[0].strip().lower():
+        if (
+            "optional parameter" in row[1]
+            and "screen capture" == row[0].strip().lower()
+        ):
             screenshot = row[2].strip().lower()
             if screenshot in ("false", "no", "none", "disable"):
                 screenshot = "none"
@@ -2147,7 +2594,9 @@ def Action_Handler(_data_set, action_row, _bypass_bug=True):
             new_row[1] = new_row[1].replace(original_module, "").strip()
         data_set.append(tuple(new_row))
 
-    take_screenshot_settings = ConfigModule.get_config_value("RunDefinition", "take_screenshot")  # True/False to take screenshot from settings.conf
+    take_screenshot_settings = ConfigModule.get_config_value(
+        "RunDefinition", "take_screenshot"
+    )  # True/False to take screenshot from settings.conf
 
     if take_screenshot_settings.lower() == "false":
         screenshot = "none"
@@ -2168,8 +2617,12 @@ def Action_Handler(_data_set, action_row, _bypass_bug=True):
             CommonUtil.ExecLog(sModuleInfo, "Can't find module for %s" % module, 3)
             return "zeuz_failed"
 
-        run_function = getattr(eval(module), function)  # create a reference to the function
-        result = run_function(data_set)  # Execute function, providing all rows in the data set
+        run_function = getattr(
+            eval(module), function
+        )  # create a reference to the function
+        result = run_function(
+            data_set
+        )  # Execute function, providing all rows in the data set
         CommonUtil.TakeScreenShot(function)
         if _bypass_bug:
             CommonUtil.print_execlog = False

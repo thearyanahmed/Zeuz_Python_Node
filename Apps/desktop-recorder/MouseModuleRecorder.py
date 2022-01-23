@@ -22,9 +22,8 @@ class MouseModuleRecorder:
             "recorder_type": "mousemodule",
             "version": 1,
             "platform": sys.platform,
-            "events": []
+            "events": [],
         }
-
 
     def decide_next_filename(self):
         globs = Path(".").glob("recording_*")
@@ -37,7 +36,6 @@ class MouseModuleRecorder:
         name = "recording_%d.zvt" % (n + 1)
         return name
 
-
     def record(self):
         print("Starting recording in 3 sec...")
         print("Press MIDDLE MOUSE button to stop recording.")
@@ -49,7 +47,6 @@ class MouseModuleRecorder:
 
         self.recording_data["events"] = recorded
         self.store_recordings(self.recording_data)
-
 
     def store_recordings(self, data):
         name = self.decide_next_filename()

@@ -18,15 +18,21 @@ except:
 import os, os.path, sys, time, inspect, subprocess
 from Framework.Utilities import CommonUtil, FileUtilities as FL
 from Framework.Utilities.decorators import logger
-from Framework.Built_In_Automation.Built_In_Utility.CrossPlatform import BuiltInUtilityFunction as FU
-from Framework.Built_In_Automation.Shared_Resources import BuiltInFunctionSharedResources as Shared_Resources
+from Framework.Built_In_Automation.Built_In_Utility.CrossPlatform import (
+    BuiltInUtilityFunction as FU,
+)
+from Framework.Built_In_Automation.Shared_Resources import (
+    BuiltInFunctionSharedResources as Shared_Resources,
+)
 from Framework.Utilities.CommonUtil import (
     passed_tag_list,
     failed_tag_list,
     skipped_tag_list,
 )  # Allowed return strings, used to normalize pass/fail
 from Framework.Built_In_Automation.Shared_Resources import LocateElement
-from Framework.Built_In_Automation.Desktop.RecordPlayback.ChoosePlaybackModule import ChoosePlaybackModule
+from Framework.Built_In_Automation.Desktop.RecordPlayback.ChoosePlaybackModule import (
+    ChoosePlaybackModule,
+)
 
 # Disable pyautogui failsafe when moving to top left corner
 gui.FAILSAFE = False
@@ -44,8 +50,12 @@ positions = ("left", "right", "centre", "center")
 
 # Recall dependency, if not already set
 dependency = None
-if Shared_Resources.Test_Shared_Variables("dependency"):  # Check if driver is already set in shared variables
-    dependency = Shared_Resources.Get_Shared_Variables("dependency")  # Retreive appium driver
+if Shared_Resources.Test_Shared_Variables(
+    "dependency"
+):  # Check if driver is already set in shared variables
+    dependency = Shared_Resources.Get_Shared_Variables(
+        "dependency"
+    )  # Retreive appium driver
 else:
     raise ValueError("No dependency set - Cannot run")
 
@@ -63,13 +73,13 @@ if Shared_Resources.Test_Shared_Variables("file_attachment"):
 
 @logger
 def get_driver():
-    """ Returns pyautogui as the driver for compatibility with other modules """
+    """Returns pyautogui as the driver for compatibility with other modules"""
     return gui
 
 
 @logger
 def getCoordinates(element, position):
-    """ Return coordinates of attachment's centre """
+    """Return coordinates of attachment's centre"""
 
     sModuleInfo = inspect.currentframe().f_code.co_name + " : " + MODULE_NAME
 
@@ -82,10 +92,14 @@ def getCoordinates(element, position):
         position = position.lower().strip()
 
         if position not in positions:
-            CommonUtil.ExecLog(sModuleInfo, "Position must be one of: %s" % positions, 3)
+            CommonUtil.ExecLog(
+                sModuleInfo, "Position must be one of: %s" % positions, 3
+            )
             return "zeuz_failed"
     except Exception:
-        return CommonUtil.Exception_Handler(sys.exc_info(), None, "Error parsing coordinates")
+        return CommonUtil.Exception_Handler(
+            sys.exc_info(), None, "Error parsing coordinates"
+        )
 
     # Perform calculations
     try:
@@ -102,12 +116,14 @@ def getCoordinates(element, position):
             return "zeuz_failed", ""
         return int(result_x), int(result_y)
     except Exception:
-        return CommonUtil.Exception_Handler(sys.exc_info(), None, "Error calculating coordinates")
+        return CommonUtil.Exception_Handler(
+            sys.exc_info(), None, "Error calculating coordinates"
+        )
 
 
 @logger
 def get_exec_from_icon(file_name):
-    """ Read the Exec line from a Linux icon file """
+    """Read the Exec line from a Linux icon file"""
 
     sModuleInfo = inspect.currentframe().f_code.co_name + " : " + MODULE_NAME
 
@@ -141,7 +157,7 @@ def get_exec_from_icon(file_name):
 
 @logger
 def Enter_Text(data_set):
-    """ Insert text """
+    """Insert text"""
 
     sModuleInfo = inspect.currentframe().f_code.co_name + " : " + MODULE_NAME
 
@@ -152,14 +168,18 @@ def Enter_Text(data_set):
         for row in data_set:
             if "action" in row[1]:
                 text_value = row[2]
-            if row[1] == "element parameter":  # Indicates we should find the element instead of assuming we have keyboard focus
+            if (
+                row[1] == "element parameter"
+            ):  # Indicates we should find the element instead of assuming we have keyboard focus
                 element_parameter = True
 
         if text_value == "":
             CommonUtil.ExecLog(sModuleInfo, "Could not find value for this action", 3)
             return "zeuz_failed"
     except:
-        return CommonUtil.Exception_Handler(sys.exc_info(), None, "Error parsing data set")
+        return CommonUtil.Exception_Handler(
+            sys.exc_info(), None, "Error parsing data set"
+        )
 
     # Perform action
     try:
@@ -180,7 +200,11 @@ def Enter_Text(data_set):
                 except:
                     True
                 if Element is None:
-                    CommonUtil.ExecLog(sModuleInfo, "Could not find element.  Waiting and Trying again .... ", 2)
+                    CommonUtil.ExecLog(
+                        sModuleInfo,
+                        "Could not find element.  Waiting and Trying again .... ",
+                        2,
+                    )
                 else:
                     break
                 time.sleep(sleep_in_sec)
@@ -194,7 +218,9 @@ def Enter_Text(data_set):
             if x in failed_tag_list:  # Error reason logged by Get_Element
                 CommonUtil.ExecLog(sModuleInfo, "Error calculating coordinates", 3)
                 return "zeuz_failed"
-            CommonUtil.ExecLog(sModuleInfo, "Image coordinates on screen %d x %d" % (x, y), 0)
+            CommonUtil.ExecLog(
+                sModuleInfo, "Image coordinates on screen %d x %d" % (x, y), 0
+            )
             gui.click(x, y)  # Single click
         else:
             CommonUtil.ExecLog(
@@ -205,7 +231,9 @@ def Enter_Text(data_set):
 
         # Enter text
         gui.typewrite(text_value)
-        CommonUtil.ExecLog(sModuleInfo, "Successfully set the value of to text to: %s" % text_value, 1)
+        CommonUtil.ExecLog(
+            sModuleInfo, "Successfully set the value of to text to: %s" % text_value, 1
+        )
         return "passed"
 
     except Exception:
@@ -236,7 +264,7 @@ def execute_hotkey(data_set) -> str:
 
         Find all valid string to pass into hotkey() from link below:
         https://pyautogui.readthedocs.io/en/latest/keyboard.html#the-hotkey-function
-    
+
     Returns:
         "passed" if successful.
         "zeuz_failed" otherwise.
@@ -255,9 +283,17 @@ def execute_hotkey(data_set) -> str:
                     count = int(right)
                 except:
                     count = 1
-                    CommonUtil.ExecLog(sModuleInfo, "Count is set to 1", 2,)
+                    CommonUtil.ExecLog(
+                        sModuleInfo,
+                        "Count is set to 1",
+                        2,
+                    )
     except:
-        CommonUtil.ExecLog(sModuleInfo, "Couldn't  parse data_set", 3,)
+        CommonUtil.ExecLog(
+            sModuleInfo,
+            "Couldn't  parse data_set",
+            3,
+        )
         return "zeuz_failed"
 
     try:
@@ -290,11 +326,11 @@ def move_mouse_cursor(data_set) -> str:
 
     Args:
         data_set:
-          
+
           move mouse cursor     desktop action          100, 100 (x, y - int, int)
           relative              optional parameter      true (bool)
           duration              optional parameter      2.5 (float)
-    
+
     Returns:
         "passed" if successful.
         "zeuz_failed" otherwise.
@@ -455,7 +491,7 @@ def Wait_For_Element_Pyautogui(data_set):
 
 @logger
 def close_program(data_set):
-    """ Exit a running program via process kill """
+    """Exit a running program via process kill"""
 
     sModuleInfo = inspect.currentframe().f_code.co_name + " : " + MODULE_NAME
 
@@ -537,7 +573,7 @@ def close_program(data_set):
 
 @logger
 def Click_Element(data_set):
-    """ Single or double mouse click on element """
+    """Single or double mouse click on element"""
 
     sModuleInfo = inspect.currentframe().f_code.co_name + " : " + MODULE_NAME
 
@@ -635,7 +671,7 @@ def Click_Element(data_set):
 
 @logger
 def check_for_element(data_set):
-    """ Tests whether or not an element is visible on screen """
+    """Tests whether or not an element is visible on screen"""
 
     sModuleInfo = inspect.currentframe().f_code.co_name + " : " + MODULE_NAME
 
@@ -683,7 +719,7 @@ def check_for_element(data_set):
 
 @logger
 def launch_program(data_set):
-    """ Execute a program or desktop icon """
+    """Execute a program or desktop icon"""
     # If a linux desktop icon filename is specified, then it will read the file, and extract the Exec line to execute it directly
     # Anything else is executed, including if it's an attachment
 
@@ -694,7 +730,9 @@ def launch_program(data_set):
         file_name = data_set[0][2]  # Get filename from data set
         Command = ""
         if file_name == "":
-            CommonUtil.ExecLog(sModuleInfo, "Value field empty. Expected filename or full file path", 3)
+            CommonUtil.ExecLog(
+                sModuleInfo, "Value field empty. Expected filename or full file path", 3
+            )
             return "zeuz_failed"
     except:
         errMsg = "Error parsing data set"
@@ -780,7 +818,7 @@ def launch_program(data_set):
 
 @logger
 def teardown(data_set):
-    """ Cleanup automation """
+    """Cleanup automation"""
 
     # Cleanup shared variables
     Shared_Resources.Clean_Up_Shared_Variables()
@@ -789,7 +827,7 @@ def teardown(data_set):
 
 @logger
 def Drag_Element(data_set):
-    """ Drag element from source to destination
+    """Drag element from source to destination
 
     Action: Drag an element to a specific coordinates
     Field	        Sub Field	        Value
@@ -935,7 +973,7 @@ def Drag_Element(data_set):
 
 @logger
 def navigate_listbox(data_set):
-    """ Scroll listbox until image element is found or timeout is hit
+    """Scroll listbox until image element is found or timeout is hit
 
     Action: Finding element from dropdown list
     Field	        Sub Field	        Value
@@ -1055,9 +1093,7 @@ def playback_recorded_events(data_set):
         playback_chooser = ChoosePlaybackModule(filepath)
         playback_chooser.play(speed_factor=speed_factor)
 
-        CommonUtil.ExecLog(
-            sModuleInfo, "DONE playing back events.", 1
-        )
+        CommonUtil.ExecLog(sModuleInfo, "DONE playing back events.", 1)
         return "passed"
 
     except Exception:

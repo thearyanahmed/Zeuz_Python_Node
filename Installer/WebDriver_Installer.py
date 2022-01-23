@@ -1,6 +1,7 @@
 import os
 import sys
 from pathlib import Path
+
 sys.path.append("..")
 
 from Framework.Utilities import CommonUtil, ConfigModule
@@ -25,40 +26,52 @@ except:
 #     print("Press any key or [ENTER] to exit.")
 #     input()
 
-location = Path(os.getcwd()).parent/"Framework"/"settings.conf"
+location = Path(os.getcwd()).parent / "Framework" / "settings.conf"
+
+
 def update():
     try:
         path = ChromeDriverManager().install()
         print("Downloaded Chrome driver into:", path)
-        ConfigModule.add_config_value("Selenium_driver_paths", "chrome_path", path, location)
+        ConfigModule.add_config_value(
+            "Selenium_driver_paths", "chrome_path", path, location
+        )
     except:
         print(sys.exc_info())
 
     try:
         path = GeckoDriverManager().install()
         print("Downloaded Firefox driver into:", path)
-        ConfigModule.add_config_value("Selenium_driver_paths", "firefox_path", path, location)
+        ConfigModule.add_config_value(
+            "Selenium_driver_paths", "firefox_path", path, location
+        )
     except:
         print(sys.exc_info())
 
     try:
         path = EdgeChromiumDriverManager().install()
         print("Downloaded Edge driver into:", path)
-        ConfigModule.add_config_value("Selenium_driver_paths", "edge_path", path, location)
+        ConfigModule.add_config_value(
+            "Selenium_driver_paths", "edge_path", path, location
+        )
     except:
         print(sys.exc_info())
 
     try:
         path = OperaDriverManager().install()
         print("Downloaded Opera driver into:", path)
-        ConfigModule.add_config_value("Selenium_driver_paths", "opera_path", path, location)
+        ConfigModule.add_config_value(
+            "Selenium_driver_paths", "opera_path", path, location
+        )
     except:
         print(sys.exc_info())
 
     try:
         path = IEDriverManager().install()
         print("Downloaded Internet Explorer driver into:", path)
-        ConfigModule.add_config_value("Selenium_driver_paths", "ie_path", path, location)
+        ConfigModule.add_config_value(
+            "Selenium_driver_paths", "ie_path", path, location
+        )
     except:
         print(sys.exc_info())
 
@@ -74,22 +87,34 @@ def update_old(pathname):
                 download_root=driver_download_path, link_path=pathname
             )
             if __name__ == "__main__":
-                print("Specify the version number of %s driver and press [Enter].\n" % name +
-                      "Press [Enter] for the latest version of %s driver \n" % name +
-                      "Press [Space] + [Enter] to skip the downloading of %s driver " % name
-                      )
+                print(
+                    "Specify the version number of %s driver and press [Enter].\n"
+                    % name
+                    + "Press [Enter] for the latest version of %s driver \n" % name
+                    + "Press [Space] + [Enter] to skip the downloading of %s driver "
+                    % name
+                )
                 version = input()
                 if len(version) == 0:
-                    print("Downloading the latest version of %s driver. Please wait a bit..." % name)
+                    print(
+                        "Downloading the latest version of %s driver. Please wait a bit..."
+                        % name
+                    )
                     driver.download_and_install()
                 elif version == " ":
                     print("Skipping download of %s" % name)
                     continue
                 else:
-                    print("Downloading the %s version of %s driver. Please wait a bit..." % (version, name))
+                    print(
+                        "Downloading the %s version of %s driver. Please wait a bit..."
+                        % (version, name)
+                    )
                     driver.download_and_install(version)
             else:
-                print("Downloading the latest version of %s driver. Please wait a bit..." % name)
+                print(
+                    "Downloading the latest version of %s driver. Please wait a bit..."
+                    % name
+                )
                 driver.download_and_install()
         except RuntimeError:
             print("Skipping download of %s" % name)
@@ -102,6 +127,7 @@ def main():
     # print("Starting update. Drivers will be placed in the following directory:")
     # print("> %s" % PYTHON_SCRIPTS_DIR)
     update()
+
 
 if __name__ == "__main__":
     main()

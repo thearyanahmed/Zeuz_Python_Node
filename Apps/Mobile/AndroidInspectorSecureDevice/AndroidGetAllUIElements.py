@@ -9,12 +9,22 @@ string_raw = output_str.replace(">", "> \n")
 # pretty_string = indent(string_raw)
 xml_tree = ET.fromstring(output.decode()[56:-33])
 xml_str = ""
+
+
 def traverse(parent, parethesis=0):
     global xml_str
-    xml_str += "\n" + "  "*parethesis + "<div " + "".join('%s="%s" ' % (i, parent.attrib[i]) for i in parent.attrib) + ">"
+    xml_str += (
+        "\n"
+        + "  " * parethesis
+        + "<div "
+        + "".join('%s="%s" ' % (i, parent.attrib[i]) for i in parent.attrib)
+        + ">"
+    )
     for each in parent:
-        traverse(each, parethesis+1)
-    xml_str += "\n" + "  "*parethesis + "</div>"
+        traverse(each, parethesis + 1)
+    xml_str += "\n" + "  " * parethesis + "</div>"
+
+
 traverse(xml_tree)
 print(xml_str)
 with open("App2.xml", "w") as f:

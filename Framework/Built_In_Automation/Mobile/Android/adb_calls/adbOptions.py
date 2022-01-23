@@ -220,7 +220,7 @@ def get_device_manufacturer(serial=""):
 
 @logger
 def get_device_imei_info(serial=""):
-    """ Returns the device's IMEI """
+    """Returns the device's IMEI"""
     # Output: IMEI as a string
 
     sModuleInfo = inspect.currentframe().f_code.co_name + " : " + MODULE_NAME
@@ -295,7 +295,7 @@ def get_device_complete_info():
 
 @logger
 def get_devices():
-    """ Retrieves a list of connected devices in the format of "SERIAL_NO STATE" and returns as a list """
+    """Retrieves a list of connected devices in the format of "SERIAL_NO STATE" and returns as a list"""
     # State may be "device" if connected and we can talk to it, or "unauthorized" if we can't talk to it
 
     sModuleInfo = inspect.currentframe().f_code.co_name + " : " + MODULE_NAME
@@ -323,7 +323,7 @@ def get_devices():
 
 @logger
 def is_android_connected(serial=""):
-    """ Return True/False if at least one device is connected """
+    """Return True/False if at least one device is connected"""
 
     sModuleInfo = inspect.currentframe().f_code.co_name + " : " + MODULE_NAME
 
@@ -531,7 +531,7 @@ def get_package_name(serial=""):
 
 @logger
 def wake_android(serial=""):
-    """ Sends the wakeup keypress and a swipe up gesture to try to unlock the device and get it to a usable state for automation """
+    """Sends the wakeup keypress and a swipe up gesture to try to unlock the device and get it to a usable state for automation"""
 
     sModuleInfo = inspect.currentframe().f_code.co_name + " : " + MODULE_NAME
     try:
@@ -577,7 +577,7 @@ def wake_android(serial=""):
 
 @logger
 def unlock_android(serial=""):
-    """ Attempt to enter password for locked phone """
+    """Attempt to enter password for locked phone"""
     # Caveat 1: Only works if device has PIN or PASSWORD, not if they use a pattern, or pattern as a fingerprint backup
     # Caveat 2: Only works if the user connects USB and unlocks the phone. Then, if the phone is locked, we still have an ADB connection, and can work with it.
 
@@ -675,7 +675,7 @@ def unlock_android(serial=""):
 
 @logger
 def Enter_Password_UIAutomator(password, serial=""):
-    """ This function can evolve a lot more. For time being we are just looking for button with text and clicking for UNLOCKING only"""
+    """This function can evolve a lot more. For time being we are just looking for button with text and clicking for UNLOCKING only"""
 
     sModuleInfo = inspect.currentframe().f_code.co_name + " : " + MODULE_NAME
     try:
@@ -727,7 +727,7 @@ def Enter_Password_UIAutomator(password, serial=""):
 
 @logger
 def unlock_android_app(serial=""):
-    """ Attempt to enter password for locked app.  It is up to the user to put proper logic to figure out if the app is password protected.  
+    """Attempt to enter password for locked app.  It is up to the user to put proper logic to figure out if the app is password protected.
     We will assume user have already checked that"""
 
     sModuleInfo = inspect.currentframe().f_code.co_name + " : " + MODULE_NAME
@@ -823,7 +823,7 @@ def check_if_device_is_unlocked(serial=""):
 
 @logger
 def swipe_android(x_start, y_start, x_end, y_end, duration=1000, serial=""):
-    """ Sends a swipe gesture to a device """
+    """Sends a swipe gesture to a device"""
 
     sModuleInfo = inspect.currentframe().f_code.co_name + " : " + MODULE_NAME
     try:
@@ -849,7 +849,7 @@ def swipe_android(x_start, y_start, x_end, y_end, duration=1000, serial=""):
 
 @logger
 def reset_android(serial=""):
-    """ Resets the specified device, or the only device connected """
+    """Resets the specified device, or the only device connected"""
 
     sModuleInfo = inspect.currentframe().f_code.co_name + " : " + MODULE_NAME
     try:
@@ -869,7 +869,7 @@ def reset_android(serial=""):
 
 @logger
 def reset_all_android():
-    """ Resets all connected devices """
+    """Resets all connected devices"""
 
     try:
         # Get list of all connected devices
@@ -886,7 +886,7 @@ def reset_all_android():
 
 @logger
 def execute_program(package_name, serial=""):
-    """ Executes an Android program """
+    """Executes an Android program"""
 
     try:
         if serial != "":

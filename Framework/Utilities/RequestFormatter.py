@@ -21,7 +21,9 @@ requests.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
 
 
 def form_uri(resource_path):
-    web_server_address = ConfigModule.get_config_value(AUTHENTICATION_CATEGORY, SERVER_ADDRESS_TAG)
+    web_server_address = ConfigModule.get_config_value(
+        AUTHENTICATION_CATEGORY, SERVER_ADDRESS_TAG
+    )
     base_server_address = web_server_address
     if len(resource_path) > 0:
         if resource_path[0] == "/":
@@ -44,7 +46,7 @@ def add_api_key_to_headers(kwargs):
         if "headers" in kwargs:
             kwargs["headers"][API_KEY_HEADER_NAME] = api_key
         else:
-            kwargs["headers"] = { API_KEY_HEADER_NAME: api_key }
+            kwargs["headers"] = {API_KEY_HEADER_NAME: api_key}
     return kwargs
 
 
@@ -122,12 +124,7 @@ def Head(resource_path, **kwargs):
     try:
         kwargs = add_api_key_to_headers(kwargs)
         uri = form_uri(resource_path)
-        return requests.head(
-            uri,
-            timeout=REQUEST_TIMEOUT,
-            verify=False,
-            **kwargs
-        )
+        return requests.head(uri, timeout=REQUEST_TIMEOUT, verify=False, **kwargs)
 
     except requests.exceptions.RequestException:
         print(

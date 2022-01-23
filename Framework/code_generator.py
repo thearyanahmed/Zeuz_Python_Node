@@ -75,7 +75,7 @@ def write_test_case_data_to_files(run_id, common, test_cases, output_dir):
             actions = step["Step actions"]
             del step["Step actions"]
 
-            step_name = ''.join(e for e in step["Step name"] if e.isalnum() or e == '_')
+            step_name = "".join(e for e in step["Step name"] if e.isalnum() or e == "_")
 
             code += f"""
 def test_{step_name}():
@@ -83,15 +83,18 @@ def test_{step_name}():
     Step_actions = {spaced_str(pretty(actions), 4)}
 """
 
-        code = FormatCode(code, style_config={
-            "based_on_style": "pep8",
-            "indent_width": 4,
-            "split_before_logical_operator": False,
-            "column_limit": 100,
-            "ALLOW_SPLIT_BEFORE_DICT_VALUE": False,
-            "COALESCE_BRACKETS": True,
-            "FORCE_MULTILINE_DICT": True,
-        })[0]
+        code = FormatCode(
+            code,
+            style_config={
+                "based_on_style": "pep8",
+                "indent_width": 4,
+                "split_before_logical_operator": False,
+                "column_limit": 100,
+                "ALLOW_SPLIT_BEFORE_DICT_VALUE": False,
+                "COALESCE_BRACKETS": True,
+                "FORCE_MULTILINE_DICT": True,
+            },
+        )[0]
 
         # Save code to file
         filename = f"test_case_{test_case['TestCase no']}.py"

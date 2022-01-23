@@ -54,7 +54,24 @@ temp_config = Path(
     )
 )
 
-common_modules = ["os", "sys", "platform", "time", "datetime", "random", "re", "pathlib", "json", "ast", "yaml", "csv", "xml", "xlwings", "requests", "sr"]
+common_modules = [
+    "os",
+    "sys",
+    "platform",
+    "time",
+    "datetime",
+    "random",
+    "re",
+    "pathlib",
+    "json",
+    "ast",
+    "yaml",
+    "csv",
+    "xml",
+    "xlwings",
+    "requests",
+    "sr",
+]
 
 passed_tag_list = [
     "Pass",
@@ -94,7 +111,11 @@ skip_list = ["step_data"]
 to_dlt_from_fail_reason = " : Test Step Failed"
 
 load_testing = False
-performance_report = {"data": [], "individual_stats": {"slowest": 0, "fastest": float("inf")}, "status_counts": {}}
+performance_report = {
+    "data": [],
+    "individual_stats": {"slowest": 0, "fastest": float("inf")},
+    "status_counts": {},
+}
 
 # Holds the previously logged message (used for prevention of duplicate logs simultaneously)
 previous_log_line = None
@@ -174,7 +195,7 @@ def parse_value_into_object(val):
     try:
         # val2 = ast.literal_eval(val)  # previous method
         # encoding and decoding is for handling escape characters such as \a \1 \2
-        val2 = ast.literal_eval(val.encode('unicode_escape').decode())
+        val2 = ast.literal_eval(val.encode("unicode_escape").decode())
         if not (val.startswith("(") and val.endswith(")")) and isinstance(val2, tuple):
             # We are preventing "1,2" >> (1,2) (str to tuple conversion without first brackets)
             pass
@@ -189,7 +210,7 @@ def parse_value_into_object(val):
             except:
                 try:
                     if val.startswith("#ZeuZ_map_code#") and val in ZeuZ_map_code:
-                        #ToDo: find a way to convert the datatype to str or list
+                        # ToDo: find a way to convert the datatype to str or list
                         val = ZeuZ_map_code[val]
                 except:
                     pass
@@ -213,13 +234,17 @@ def prettify(key, val, color=None):
         expression = "%s = %s" % (key, json.dumps(val, indent=2, sort_keys=True))
         print(color + expression)
         if key not in dont_prettify_on_server:
-            ws.log("VARIABLE", 4, expression.replace("\n", "<br>").replace(" ", "&nbsp;"))
+            ws.log(
+                "VARIABLE", 4, expression.replace("\n", "<br>").replace(" ", "&nbsp;")
+            )
             # 4 means console log which is Magenta color in server console
     except:
         expression = "%s = %s" % (key, val)
         print(color + expression)
         if key not in dont_prettify_on_server:
-            ws.log("VARIABLE", 4, expression.replace("\n", "<br>").replace(" ", "&nbsp;"))
+            ws.log(
+                "VARIABLE", 4, expression.replace("\n", "<br>").replace(" ", "&nbsp;")
+            )
 
 
 def Add_Folder_To_Current_Test_Case_Log(src):
@@ -342,10 +367,11 @@ def Result_Analyzer(sTestStepReturnStatus, temp_q):
 
 
 def node_manager_json(data):
-    """ Generates a json file to communicate with node_manager"""
+    """Generates a json file to communicate with node_manager"""
     json_path = Path(os.path.abspath(__file__)).parent.parent.parent / "node_state.json"
     with open(json_path, "w") as f:
         json.dump(data, f)
+
 
 node_manager_json(
     {
@@ -353,7 +379,7 @@ node_manager_json(
         "report": {
             "zip": None,
             "directory": None,
-        }
+        },
     }
 )
 report_json_time = 0.0
@@ -368,7 +394,9 @@ def CreateJsonReport(logs=None, stepInfo=None, TCInfo=None, setInfo=None):
         global all_logs_json, report_json_time, tc_error_logs, passed_after_rerun
         start = time.perf_counter()
         if logs or stepInfo or TCInfo or setInfo:
-            log_id = ConfigModule.get_config_value("sectionOne", "sTestStepExecLogId", temp_config)
+            log_id = ConfigModule.get_config_value(
+                "sectionOne", "sTestStepExecLogId", temp_config
+            )
             if not log_id:
                 return
             log_id_vals = log_id.split("|")
@@ -391,10 +419,14 @@ def CreateJsonReport(logs=None, stepInfo=None, TCInfo=None, setInfo=None):
                         while count <= -1:
                             fail_reason_str += tc_error_logs[count]
                             if count != -1:
-                                fail_reason_str += "\n---------------------------------------------\n"
+                                fail_reason_str += (
+                                    "\n---------------------------------------------\n"
+                                )
                             count += 1
                     elif passed_after_rerun:
-                        fail_reason_str = "** Test case Failed on first run but Passed when Rerun **"
+                        fail_reason_str = (
+                            "** Test case Failed on first run but Passed when Rerun **"
+                        )
                         passed_after_rerun = False
                     testcase_info["execution_detail"]["failreason"] = fail_reason_str
                     return
@@ -423,7 +455,7 @@ def CreateJsonReport(logs=None, stepInfo=None, TCInfo=None, setInfo=None):
                     "details": sDetails,
                     "tstamp": now,
                     "loglevel": iLogLevel,
-                    "logid": log_id
+                    "logid": log_id,
                 }
                 if "log" in step_info:
                     step_info["log"].append(log_info)
@@ -431,7 +463,7 @@ def CreateJsonReport(logs=None, stepInfo=None, TCInfo=None, setInfo=None):
                     step_info["log"] = [log_info]
         elif stepInfo:
             pass
-        report_json_time += (time.perf_counter() - start)
+        report_json_time += time.perf_counter() - start
     except:
         debug_code_error(sys.exc_info())
 
@@ -440,18 +472,30 @@ def clear_logs_from_report(send_log_file_only_for_fail, rerun_on_fail, sTestCase
     global all_logs_json
     for step in all_logs_json[runid_index]["test_cases"][tc_index]["steps"]:
         del step["actions"]
-        if send_log_file_only_for_fail and not rerun_on_fail and sTestCaseStatus == "Passed" and "log" in step:
+        if (
+            send_log_file_only_for_fail
+            and not rerun_on_fail
+            and sTestCaseStatus == "Passed"
+            and "log" in step
+        ):
             del step["log"]
 
 
 def ExecLog(
-    sModuleInfo, sDetails, iLogLevel=1, _local_run="", sStatus="", force_write=False, variable=None
+    sModuleInfo,
+    sDetails,
+    iLogLevel=1,
+    _local_run="",
+    sStatus="",
+    force_write=False,
+    variable=None,
 ):
     # Do not log anything if load testing is going on and we're not forced to write logs
     if load_testing and not force_write:
         return
 
-    if not print_execlog: return    # For bypass_bug() function dont print logs
+    if not print_execlog:
+        return  # For bypass_bug() function dont print logs
 
     # Read from settings file
     debug_mode = ConfigModule.get_config_value("RunDefinition", "debug_mode")
@@ -574,7 +618,9 @@ def ExecLog(
             if upload_on_fail and rerun_on_fail and not rerunning_on_fail:
                 pass
             else:
-                CreateJsonReport(logs=(log_id, now, iLogLevel, status, sModuleInfo, sDetails))
+                CreateJsonReport(
+                    logs=(log_id, now, iLogLevel, status, sModuleInfo, sDetails)
+                )
 
             all_logs[all_logs_count] = {
                 "logid": log_id,
@@ -640,6 +686,7 @@ def clear_all_logs():
 def PhysicalAvailableMemory():
     try:
         import psutil
+
         return (int(str(psutil.virtual_memory().available))) / (1024 * 1024)
 
     except Exception as e:
@@ -653,7 +700,7 @@ screen_capture_driver, screen_capture_type = (
 
 
 def set_screenshot_vars(shared_variables):
-    """ Save screen capture type and selenium/appium driver objects as global variables, so TakeScreenShot() can access them """
+    """Save screen capture type and selenium/appium driver objects as global variables, so TakeScreenShot() can access them"""
     # We can't import Shared Variables due to cyclic imports causing local runs to break, so this is the work around
     # Known issue: This function is called by Sequential_Actions(). Thus, Maindriver can't take screenshots until this is set
     sModuleInfo = inspect.currentframe().f_code.co_name + " : " + MODULE_NAME
@@ -682,15 +729,24 @@ def set_screenshot_vars(shared_variables):
 
 
 def TakeScreenShot(function_name, local_run=False):
-    """ Puts TakeScreenShot into a thread, so it doesn't block test case execution """
+    """Puts TakeScreenShot into a thread, so it doesn't block test case execution"""
     # if debug_status: return     # Todo: Comment this line out
     try:
-        if upload_on_fail and rerun_on_fail and not rerunning_on_fail and not debug_status:
+        if (
+            upload_on_fail
+            and rerun_on_fail
+            and not rerunning_on_fail
+            and not debug_status
+        ):
             return
         sModuleInfo = inspect.currentframe().f_code.co_name + " : " + MODULE_NAME
         # Read values from config file
-        take_screenshot_settings = ConfigModule.get_config_value("RunDefinition", "take_screenshot")
-        image_folder = ConfigModule.get_config_value("sectionOne", "screen_capture_folder", temp_config)
+        take_screenshot_settings = ConfigModule.get_config_value(
+            "RunDefinition", "take_screenshot"
+        )
+        image_folder = ConfigModule.get_config_value(
+            "sectionOne", "screen_capture_folder", temp_config
+        )
 
         try:
             if not os.path.exists(image_folder):
@@ -708,16 +764,28 @@ def TakeScreenShot(function_name, local_run=False):
             or Method is None
         ):
             ExecLog(
-                sModuleInfo, "Skipping screenshot due to screenshot or local_run setting", 0
+                sModuleInfo,
+                "Skipping screenshot due to screenshot or local_run setting",
+                0,
             )
             return
         ExecLog(
             "",
-            "********** Capturing Screenshot for Action: %s Method: %s **********" % (function_name, Method),
+            "********** Capturing Screenshot for Action: %s Method: %s **********"
+            % (function_name, Method),
             4,
         )
-        image_name = "Step#" + current_step_no + "_Action#" + current_action_no + "_" + str(function_name)
-        thread = executor.submit(Thread_ScreenShot, function_name, image_folder, Method, Driver, image_name)
+        image_name = (
+            "Step#"
+            + current_step_no
+            + "_Action#"
+            + current_action_no
+            + "_"
+            + str(function_name)
+        )
+        thread = executor.submit(
+            Thread_ScreenShot, function_name, image_folder, Method, Driver, image_name
+        )
         SaveThread("screenshot", thread)
 
     except:
@@ -732,7 +800,7 @@ def pil_image_to_bytearray(img):
 
 
 def Thread_ScreenShot(function_name, image_folder, Method, Driver, image_name):
-    """ Capture screen of mobile or desktop """
+    """Capture screen of mobile or desktop"""
     sModuleInfo = inspect.currentframe().f_code.co_name + " : " + MODULE_NAME
     chars_to_remove = [
         r"?",
@@ -752,8 +820,16 @@ def Thread_ScreenShot(function_name, image_folder, Method, Driver, image_name):
     trans_table = str.maketrans(
         dict.fromkeys("".join(chars_to_remove))
     )  # python3 version of translate
-    ImageName = os.path.join(image_folder, (image_name.translate(trans_table)).strip().replace(" ", "_") + ".png")
-    ExecLog(sModuleInfo, "Capturing screen on %s, with driver: %s, and saving to %s" % (str(Method), str(Driver), ImageName), 0)
+    ImageName = os.path.join(
+        image_folder,
+        (image_name.translate(trans_table)).strip().replace(" ", "_") + ".png",
+    )
+    ExecLog(
+        sModuleInfo,
+        "Capturing screen on %s, with driver: %s, and saving to %s"
+        % (str(Method), str(Driver), ImageName),
+        0,
+    )
     try:
         # Capture screenshot of desktop
         if Method == "desktop":
@@ -765,9 +841,7 @@ def Thread_ScreenShot(function_name, image_folder, Method, Driver, image_name):
                 image.save(ImageName, format="PNG")  # Save to disk
 
         # Exit if we don't have a driver yet (happens when Test Step is set to mobile/web, but we haven't setup the driver)
-        elif Driver == None and (
-            Method == "mobile" or Method == "web"
-        ):
+        elif Driver == None and (Method == "mobile" or Method == "web"):
             ExecLog(
                 sModuleInfo,
                 "Can't capture screen, driver not available for type: %s, or invalid driver: %s"
@@ -810,20 +884,23 @@ def Thread_ScreenShot(function_name, image_folder, Method, Driver, image_name):
         else:
             ExecLog(
                 "",
-                "********** Screen couldn't be captured for Action: %s Method: %s **********" % (function_name, Method),
+                "********** Screen couldn't be captured for Action: %s Method: %s **********"
+                % (function_name, Method),
                 4,
             )
     except selenium.common.exceptions.WebDriverException:
         ExecLog(
             "",
-            "********** Screen couldn't be captured for Action: %s Method: %s because webdriver not found or started **********" % (function_name, Method),
+            "********** Screen couldn't be captured for Action: %s Method: %s because webdriver not found or started **********"
+            % (function_name, Method),
             4,
         )
     except Exception:
         # traceback.print_exc()
         ExecLog(
             "",
-            "********** Screen couldn't be captured for Action: %s Method: %s **********" % (function_name, Method),
+            "********** Screen couldn't be captured for Action: %s Method: %s **********"
+            % (function_name, Method),
             4,
         )
 
@@ -863,13 +940,13 @@ def TimeStamp(format):
 
 
 def set_exit_mode(emode):
-    """ Sets a value in the temp config file to tell sequential actions to exit, if set to true """
+    """Sets a value in the temp config file to tell sequential actions to exit, if set to true"""
     # Set by the user via the GUI
     ConfigModule.add_config_value("sectionOne", "exit_script", str(emode), temp_config)
 
 
 def check_offline():
-    """ Checks the value set in the temp config file to tell sequential actions to exit, if set to true """
+    """Checks the value set in the temp config file to tell sequential actions to exit, if set to true"""
     # Set by the user via the GUI
     value = ConfigModule.get_config_value("sectionOne", "exit_script", temp_config)
     if value == "True":
@@ -879,7 +956,7 @@ def check_offline():
 
 
 def Delete_from_list(List, to_del):
-    """ This function can delete multiple elements from list with O(N) complexity """
+    """This function can delete multiple elements from list with O(N) complexity"""
     if not to_del:
         return List
     to_del.sort()
@@ -917,18 +994,24 @@ class MachineInfo:
         Set node_id from node_cli Command Line Interface and returns local userid
         """
         try:
-            node_id_file_path = Path(os.path.abspath(__file__).split("Framework")[0]) / "node_id.conf"
+            node_id_file_path = (
+                Path(os.path.abspath(__file__).split("Framework")[0]) / "node_id.conf"
+            )
             if os.path.isfile(node_id_file_path):
                 ConfigModule.clean_config_file(node_id_file_path)
                 ConfigModule.add_section("UniqueID", node_id_file_path)
                 custom_id = custom_id.lower()[:10]
-                ConfigModule.add_config_value("UniqueID", "id", custom_id, node_id_file_path)
+                ConfigModule.add_config_value(
+                    "UniqueID", "id", custom_id, node_id_file_path
+                )
             else:
                 f = open(node_id_file_path, "w")
                 f.close()
                 ConfigModule.add_section("UniqueID", node_id_file_path)
                 custom_id = custom_id.lower()[:10]
-                ConfigModule.add_config_value("UniqueID", "id", custom_id, node_id_file_path)
+                ConfigModule.add_config_value(
+                    "UniqueID", "id", custom_id, node_id_file_path
+                )
         except Exception:
             ErrorMessage = "Unable to set create a Node key.  Please check class MachineInfo() in commonutil"
             return Exception_Handler(sys.exc_info(), None, ErrorMessage)
@@ -1036,16 +1119,16 @@ def debug_code_error(exc_info):
     exc_type, exc_obj, exc_tb = exc_info
     fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
     Error_Detail = (
-            (str(exc_type).replace("type ", "Error Type: "))
-            + ";"
-            + "Error Message: "
-            + str(exc_obj)
-            + ";"
-            + "File Name: "
-            + fname
-            + ";"
-            + "Line: "
-            + str(exc_tb.tb_lineno)
+        (str(exc_type).replace("type ", "Error Type: "))
+        + ";"
+        + "Error Message: "
+        + str(exc_obj)
+        + ";"
+        + "File Name: "
+        + fname
+        + ";"
+        + "Line: "
+        + str(exc_tb.tb_lineno)
     )
     print(Error_Detail)
 
@@ -1085,7 +1168,7 @@ def path_parser(path: str) -> str:
             path = path.replace("~", os.path.expanduser("~"), 1)
 
         path = path.split(os.sep)
-        new_path = ''
+        new_path = ""
         for a in path:
             final = a
             if a.startswith("*"):
@@ -1094,14 +1177,22 @@ def path_parser(path: str) -> str:
                 w = list(os.walk(new_path))[0]
                 w = w[1] + w[2]
                 for j in w:
-                    if a.startswith("**") and name.lower() in j.lower() and j.endswith(extension):
+                    if (
+                        a.startswith("**")
+                        and name.lower() in j.lower()
+                        and j.endswith(extension)
+                    ):
                         final = j
                         break
                     elif a.startswith("*") and name in j and j.endswith(extension):
                         final = j
                         break
                 else:
-                    ExecLog(sModuleInfo, "No file_path or directory was found with: %s" % inp_path, 3)
+                    ExecLog(
+                        sModuleInfo,
+                        "No file_path or directory was found with: %s" % inp_path,
+                        3,
+                    )
                     raise Exception
 
             new_path = new_path + final + os.sep

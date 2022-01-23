@@ -1,8 +1,11 @@
 import sys
 from pathlib import Path
+
 sys.path.append(str(Path("../../")))
 
-from Framework.Built_In_Automation.Sequential_Actions.sequential_actions import Sequential_Actions
+from Framework.Built_In_Automation.Sequential_Actions.sequential_actions import (
+    Sequential_Actions,
+)
 from Framework.Utilities.All_Device_Info import get_all_connected_device_info
 from Framework.Utilities.CommonUtil import parse_value_into_object
 import json
@@ -12,7 +15,7 @@ if __name__ == "__main__":
         device_info = get_all_connected_device_info()
         debug_actions = []
         for i in input("Enter debug actions with spaces").split(" "):
-            if i == '0':
+            if i == "0":
                 debug_actions = None
                 break
             debug_actions.append(i)
@@ -43,5 +46,5 @@ if __name__ == "__main__":
             _run_time_params=run_time_params,
             _dependency=final_dependency,
             debug_actions=debug_actions,
-            _device_info=device_info
+            _device_info=device_info,
         )

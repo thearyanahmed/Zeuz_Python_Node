@@ -32,7 +32,7 @@ def check_latest_received_email(
     select_mailbox,
     subject_to_check,
     sender_mail_to_check,
-    sender_name_to_check
+    sender_name_to_check,
 ):
     # Gmail requires to generate One-Time App Password
     # https://security.google.com/settings/security/apppasswords
@@ -105,7 +105,11 @@ def check_latest_received_email(
     sender_mail_from_response = email.utils.parseaddr(mail["sender"])[-1]
     sender_name_from_response = email.utils.parseaddr(mail["sender"])[0]
 
-    msg = "Sender name: %s\nSubject: %s\nSender email: %s" % (sender_name_from_response, mail["subject"], sender_mail_from_response)
+    msg = "Sender name: %s\nSubject: %s\nSender email: %s" % (
+        sender_name_from_response,
+        mail["subject"],
+        sender_mail_from_response,
+    )
     CommonUtil.ExecLog("", msg, 5)
 
     result = False
@@ -117,7 +121,10 @@ def check_latest_received_email(
         result = True
     elif sender_mail_to_check:
         return False
-    if sender_name_to_check and sender_name_to_check.lower().strip() == sender_name_from_response.lower():
+    if (
+        sender_name_to_check
+        and sender_name_to_check.lower().strip() == sender_name_from_response.lower()
+    ):
         result = True
     elif sender_name_to_check:
         return False
@@ -190,112 +197,125 @@ class RandomEmail1SecMail:
     sources: 1secmail api services
     """
 
-
     @staticmethod
-    def generateRandomUserName():        #this function used for generating random username
+    def generateRandomUserName():  # this function used for generating random username
         sModuleInfo = inspect.currentframe().f_code.co_name + " : " + MODULE_NAME
-        name = string.ascii_lowercase + string.digits #name with letters and digits
-        username = ''.join(random.choice(name) for i in range(10)) #randomly generating username
+        name = string.ascii_lowercase + string.digits  # name with letters and digits
+        username = "".join(
+            random.choice(name) for i in range(10)
+        )  # randomly generating username
         return username
 
     @staticmethod
-    def extract(newMail): #this function is used for getting username and domain part from modified api
+    def extract(
+        newMail,
+    ):  # this function is used for getting username and domain part from modified api
         sModuleInfo = inspect.currentframe().f_code.co_name + " : " + MODULE_NAME
-        getUserName = re.search(r'login=(.*)&',newMail).group(1) #parseUsername part
-        getDomain = re.search(r'domain=(.*)', newMail).group(1) #parseDomainname part
+        getUserName = re.search(r"login=(.*)&", newMail).group(1)  # parseUsername part
+        getDomain = re.search(r"domain=(.*)", newMail).group(1)  # parseDomainname part
         return [getUserName, getDomain]
 
     @staticmethod
-    def create_random_email_address(): #this function is used for creating random email address
+    def create_random_email_address():  # this function is used for creating random email address
         sModuleInfo = inspect.currentframe().f_code.co_name + " : " + MODULE_NAME
-        API = 'https://www.1secmail.com/api/v1/' #1secmail api for creating random email
-        domainList = ['1secmail.com', '1secmail.net', '1secmail.org'] # 1secmail domain list
-        domain = random.choice(domainList) #randomly selecting a domain
-        newMail = f"{API}?login={RandomEmail1SecMail.generateRandomUserName()}&domain={domain}" #generateRandomUserName() return random username and call api to create
+        API = (
+            "https://www.1secmail.com/api/v1/"  # 1secmail api for creating random email
+        )
+        domainList = [
+            "1secmail.com",
+            "1secmail.net",
+            "1secmail.org",
+        ]  # 1secmail domain list
+        domain = random.choice(domainList)  # randomly selecting a domain
+        newMail = f"{API}?login={RandomEmail1SecMail.generateRandomUserName()}&domain={domain}"  # generateRandomUserName() return random username and call api to create
         reqMail = requests.get(newMail)
-        mail = f"{RandomEmail1SecMail.extract(newMail)[0]}@{RandomEmail1SecMail.extract(newMail)[1]}" #extract(newMail) return list[username,domain_name]
+        mail = f"{RandomEmail1SecMail.extract(newMail)[0]}@{RandomEmail1SecMail.extract(newMail)[1]}"  # extract(newMail) return list[username,domain_name]
         return mail
 
     @staticmethod
-    def checkMails(newMail): #this function is used for getting all the inbox mails for that random email
+    def checkMails(
+        newMail,
+    ):  # this function is used for getting all the inbox mails for that random email
         sModuleInfo = inspect.currentframe().f_code.co_name + " : " + MODULE_NAME
-        API = 'https://www.1secmail.com/api/v1/' #1secmail api
-        var_mails=[]
-        reqLink = f'{API}?action=getMessages&login={newMail.split("@")[0]}&domain={newMail.split("@")[1]}' #Api for getting mail list
+        API = "https://www.1secmail.com/api/v1/"  # 1secmail api
+        var_mails = []
+        reqLink = f'{API}?action=getMessages&login={newMail.split("@")[0]}&domain={newMail.split("@")[1]}'  # Api for getting mail list
         req = requests.get(reqLink).json()
         length = len(req)
         if length == 0:
-            return {newMail:[]}
+            return {newMail: []}
         else:
             idList = []
             for i in req:
-                for k,v in i.items():
-                    if k == 'id':
+                for k, v in i.items():
+                    if k == "id":
                         mailId = v
-                        idList.append(mailId) #collecting all mailid which is in Inbox
+                        idList.append(mailId)  # collecting all mailid which is in Inbox
 
             for i in idList:
                 var_mail_info = {}
-                msgRead = f'{API}?action=readMessage&login={newMail.split("@")[0]}&domain={newMail.split("@")[1]}&id={i}' #api for collect msgbody using mailid
+                msgRead = f'{API}?action=readMessage&login={newMail.split("@")[0]}&domain={newMail.split("@")[1]}&id={i}'  # api for collect msgbody using mailid
                 req = requests.get(msgRead).json()
-                var_mail_info['id']=i
-                for k,v in req.items(): #sepating elements from mail
-                    if k == 'from':
+                var_mail_info["id"] = i
+                for k, v in req.items():  # sepating elements from mail
+                    if k == "from":
                         sender = v
-                        var_mail_info['sender']=sender
-                    elif k == 'subject':
+                        var_mail_info["sender"] = sender
+                    elif k == "subject":
                         subject = v
-                        var_mail_info['subject']=subject
-                    elif k == 'date':
+                        var_mail_info["subject"] = subject
+                    elif k == "date":
                         date = v
-                        var_mail_info['date']=date
-                    elif k == 'textBody':
+                        var_mail_info["date"] = date
+                    elif k == "textBody":
                         content = v
-                        var_mail_info['content']=content
+                        var_mail_info["content"] = content
                 var_mails.append(var_mail_info)
 
-            return {newMail:var_mails}
+            return {newMail: var_mails}
 
     @staticmethod
-    def deleteMail(newMail): #this function is used for delete that random email
-        url = 'https://www.1secmail.com/mailbox'
+    def deleteMail(newMail):  # this function is used for delete that random email
+        url = "https://www.1secmail.com/mailbox"
         data = {
-            'action': 'deleteMailbox',
-            'login': f'{newMail.split("@")[0]}',
-            'domain': f'{newMail.split("@")[1]}'
+            "action": "deleteMailbox",
+            "login": f'{newMail.split("@")[0]}',
+            "domain": f'{newMail.split("@")[1]}',
         }
         req = requests.post(url, data=data)
-        if req.status_code==200:
+        if req.status_code == 200:
             return True
         return False
 
 
 def delete_mail(
-        imap_host,
-        imap_user,
-        select_mailbox,
-        imap_pass,
-        subject_to_check,
-        text,
-        sender_email,
-        receiver_email,
-        flagged_email,
-        check_email,
-        exact_date,
-        after_date,
-        before_date,
-        wait=10.0
+    imap_host,
+    imap_user,
+    select_mailbox,
+    imap_pass,
+    subject_to_check,
+    text,
+    sender_email,
+    receiver_email,
+    flagged_email,
+    check_email,
+    exact_date,
+    after_date,
+    before_date,
+    wait=10.0,
 ):
     sModuleInfo = inspect.currentframe().f_code.co_name + " : " + MODULE_NAME
 
     # time.sleep(5)
 
-    with MailBox(imap_host).login(imap_user, imap_pass, initial_folder=select_mailbox) as mailboxi:
+    with MailBox(imap_host).login(
+        imap_user, imap_pass, initial_folder=select_mailbox
+    ) as mailboxi:
 
         clauses = []
 
         def gt(dt):
-            dt = datetime.strptime(dt, '%Y-%m-%d')
+            dt = datetime.strptime(dt, "%Y-%m-%d")
             return dt
 
         if subject_to_check:
@@ -334,44 +354,50 @@ def delete_mail(
 
         mail_list = []
         for mail in all_mails:
-            mail_list.append({
-                "uid": mail.uid,
-                "from": mail.from_,
-                "subject": mail.subject,
-                "to": mail.to,
-                "text": mail.text,
-                "html": mail.html,
-            })
+            mail_list.append(
+                {
+                    "uid": mail.uid,
+                    "from": mail.from_,
+                    "subject": mail.subject,
+                    "to": mail.to,
+                    "text": mail.text,
+                    "html": mail.html,
+                }
+            )
 
-        try: log_msg = json.dumps(mail_list, indent=2)
-        except: log_msg = str(mail_list)
+        try:
+            log_msg = json.dumps(mail_list, indent=2)
+        except:
+            log_msg = str(mail_list)
         CommonUtil.ExecLog(sModuleInfo, "Deleting the following mails:" + log_msg, 1)
         mailboxi.delete([mail["uid"] for mail in mail_list])
 
 
 def save_mail(
-        imap_host,
-        imap_user,
-        select_mailbox,
-        imap_pass,
-        subject_to_check,
-        text,
-        sender_email,
-        receiver_email,
-        flagged_email,
-        check_email,
-        exact_date,
-        after_date,
-        before_date,
-        wait
+    imap_host,
+    imap_user,
+    select_mailbox,
+    imap_pass,
+    subject_to_check,
+    text,
+    sender_email,
+    receiver_email,
+    flagged_email,
+    check_email,
+    exact_date,
+    after_date,
+    before_date,
+    wait,
 ):
     # time.sleep(5)
-    with MailBox(imap_host).login(imap_user, imap_pass, initial_folder=select_mailbox) as mailboxi:
+    with MailBox(imap_host).login(
+        imap_user, imap_pass, initial_folder=select_mailbox
+    ) as mailboxi:
 
         clauses = []
 
         def gt(dt):
-            dt = datetime.strptime(dt, '%Y-%m-%d')
+            dt = datetime.strptime(dt, "%Y-%m-%d")
             return dt
 
         if subject_to_check:
@@ -410,5 +436,14 @@ def save_mail(
 
         value = []
         for msg in all_mails:
-            value.append({"Sender": msg.from_, "Receiver": msg.to, "Subject": msg.subject, "Date": msg.date, "Text": msg.text, "htmlBody": msg.html})
+            value.append(
+                {
+                    "Sender": msg.from_,
+                    "Receiver": msg.to,
+                    "Subject": msg.subject,
+                    "Date": msg.date,
+                    "Text": msg.text,
+                    "htmlBody": msg.html,
+                }
+            )
         return value

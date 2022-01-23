@@ -1,12 +1,14 @@
 import sys
 from pathlib import Path
 import traceback
+
 sys.path.append(str(Path("../../")))
 
 from Framework.Utilities import ConfigModule
 from Framework import MainDriverApi
 from Framework.Utilities.All_Device_Info import get_all_connected_device_info
 import json, os
+
 top_path = os.path.dirname(os.getcwd())
 drivers_path = os.path.join(top_path, "Drivers")
 sys.path.append(drivers_path)
@@ -48,8 +50,8 @@ def main():
         # Gather data about all the test cases
         i = 0
         for test_case in Json_data["TestCases"]:
-            TestCaseLists.append(["TESTCASE %s" % (i+1), "automated", i + 1])
-            all_test_case_detail.append([['DN08', test_case["Title"], 'DN09', 'DN10']])
+            TestCaseLists.append(["TESTCASE %s" % (i + 1), "automated", i + 1])
+            all_test_case_detail.append([["DN08", test_case["Title"], "DN09", "DN10"]])
             all_TestStepsList.append([])
             Set_dataset.append([])
             Set_meta_data.append([])
@@ -57,7 +59,20 @@ def main():
             for step in test_case["Steps"]:
                 Set_dataset[i].append([])
                 Set_meta_data[i].append([["DN06", False, 59]])
-                all_TestStepsList[i].append([6279, step["Step name"], 1, 'Built_In_Driver', 'automated', False, True, 'Sequential Actions', 'Built_In_Driver', False])
+                all_TestStepsList[i].append(
+                    [
+                        6279,
+                        step["Step name"],
+                        1,
+                        "Built_In_Driver",
+                        "automated",
+                        False,
+                        True,
+                        "Sequential Actions",
+                        "Built_In_Driver",
+                        False,
+                    ]
+                )
                 k = 0
                 for action in step["Step actions"]:
                     Set_dataset[i][j].append([])
@@ -67,8 +82,16 @@ def main():
                 j += 1
             i += 1
 
-        local_run_dataset["final_dependency"] = Json_data["TestCases"][0]["dependency"] if "dependency" in Json_data["TestCases"][0] else {}
-        local_run_dataset["final_run_params"] = Json_data["TestCases"][0]["run_time_params"] if "run_time_params" in Json_data["TestCases"][0] else {}
+        local_run_dataset["final_dependency"] = (
+            Json_data["TestCases"][0]["dependency"]
+            if "dependency" in Json_data["TestCases"][0]
+            else {}
+        )
+        local_run_dataset["final_run_params"] = (
+            Json_data["TestCases"][0]["run_time_params"]
+            if "run_time_params" in Json_data["TestCases"][0]
+            else {}
+        )
         local_run_dataset["Set_dataset"] = Set_dataset
         local_run_dataset["TestCaseLists"] = TestCaseLists
         local_run_dataset["Set_meta_data"] = Set_meta_data
@@ -84,7 +107,7 @@ def main():
         result = MainDriverApi.main(
             device_dict=device_info,
             user_info_object=user_info_object,
-            local_run_dataset=local_run_dataset
+            local_run_dataset=local_run_dataset,
         )
 
         return result

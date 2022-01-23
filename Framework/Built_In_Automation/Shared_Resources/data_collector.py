@@ -42,7 +42,9 @@ class DataCollector:
                     if k in filters:
                         filters[k].append(v)
                     else:
-                        filters[k] = [v,]
+                        filters[k] = [
+                            v,
+                        ]
 
                 # Boolean list of whether a particular filter matched or not
                 matched_list = []
@@ -58,7 +60,7 @@ class DataCollector:
                     should_allow = True
 
                 if should_allow:
-                    val = data[_pattern[:_pattern.find("|")]]
+                    val = data[_pattern[: _pattern.find("|")]]
                     self._collect_pattern(collector, pattern, pos + 1, val)
             elif _pattern == "_all_":
                 for key in data:
@@ -125,67 +127,45 @@ def main():
     ref_data = {
         "data": {
             "filteredDevices": {
-            "deviceSummaries": [
-                {
-                "id": 5,
-                "cryptoPrimitives": []
-                },
-                {
-                "id": 96,
-                "cryptoPrimitives": []
-                }
-            ],
-            "filterCategories": [
-                {
-                "categoryName": "Crypto",
-                "filterGroups": [
+                "deviceSummaries": [
+                    {"id": 5, "cryptoPrimitives": []},
+                    {"id": 96, "cryptoPrimitives": []},
+                ],
+                "filterCategories": [
                     {
-                    "groupName": "Strength",
-                    "searchTerm": "abc",
-                    "filters": [
-                        {
-                        "name": "BROKEN",
-                        "value": 10
-                        },
-                        {
-                        "name": "MISUSED",
-                        "value": 0
-                        },
-                        {
-                        "name": "STANDARDIZED_QSC",
-                        "value": 0
-                        }
-                    ]
-                    },
-                    {
-                    "groupName": "Protocol",
-                    "searchTerm": "xyz",
-                    "filters": [
-                        {
-                        "name": "TLS 1.2",
-                        "value": 3
-                        },
-                        {
-                        "name": "TLS 1.3",
-                        "value": 4
-                        }
-                    ]
+                        "categoryName": "Crypto",
+                        "filterGroups": [
+                            {
+                                "groupName": "Strength",
+                                "searchTerm": "abc",
+                                "filters": [
+                                    {"name": "BROKEN", "value": 10},
+                                    {"name": "MISUSED", "value": 0},
+                                    {"name": "STANDARDIZED_QSC", "value": 0},
+                                ],
+                            },
+                            {
+                                "groupName": "Protocol",
+                                "searchTerm": "xyz",
+                                "filters": [
+                                    {"name": "TLS 1.2", "value": 3},
+                                    {"name": "TLS 1.3", "value": 4},
+                                ],
+                            },
+                        ],
                     }
-                ]
-                }
-            ]
+                ],
             }
         }
-        }
+    }
 
     collector = []
 
     collector_patterns = (
-        '''data,filteredDevices,filterCategories,_all_,filterGroups,_all_,filters|groupName:Protocol||searchTerm:xyz|,_all_,name''',
+        """data,filteredDevices,filterCategories,_all_,filterGroups,_all_,filters|groupName:Protocol||searchTerm:xyz|,_all_,name""",
     )
 
-    key_patterns = (
-    )
+    key_patterns = ()
 
     data_collector = DataCollector()
     print("Pattern collector")

@@ -1,6 +1,8 @@
 import pickle
 from typing import Dict, Any
-from Framework.Built_In_Automation.Desktop.RecordPlayback.MouseModulePlayback import MouseModulePlayback
+from Framework.Built_In_Automation.Desktop.RecordPlayback.MouseModulePlayback import (
+    MouseModulePlayback,
+)
 
 
 """
@@ -24,16 +26,15 @@ recording_data = {
 
 
 def load_recording_data_from_file(filepath) -> Dict[str, Any]:
-        with open(filepath, "rb") as f:
-            data = pickle.load(f)
-            return data
+    with open(filepath, "rb") as f:
+        data = pickle.load(f)
+        return data
 
 
 class ChoosePlaybackModule:
     def __init__(self, filepath) -> None:
         self.data = None
         self.playback_class = self.choose(filepath=filepath)
-
 
     def choose(self, filepath) -> MouseModulePlayback:
         """
@@ -44,7 +45,6 @@ class ChoosePlaybackModule:
         self.data = load_recording_data_from_file(filepath)
         if self.data["recorder_type"] == "mousemodule":
             return MouseModulePlayback
-
 
     def play(self, speed_factor):
         playback = self.playback_class(self.data)

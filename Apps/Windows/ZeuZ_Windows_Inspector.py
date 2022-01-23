@@ -17,15 +17,18 @@ import xml.etree.ElementTree as ET
 new_line = True
 import clr, System
 import tkinter
+
 executor = concurrent.futures.ThreadPoolExecutor()
 
 screen_title = "ZeuZ Windows Inspector"
 os.system("title " + screen_title)
-dll_path = os.getcwd().split("Apps")[0] + "Framework" + os.sep + "windows_dll_files" + os.sep
+dll_path = (
+    os.getcwd().split("Apps")[0] + "Framework" + os.sep + "windows_dll_files" + os.sep
+)
 clr.AddReference(dll_path + "UIAutomationClient")
 clr.AddReference(dll_path + "UIAutomationTypes")
 clr.AddReference(dll_path + "UIAutomationProvider")
-clr.AddReference( "System.Windows.Forms")
+clr.AddReference("System.Windows.Forms")
 x, y = -1, -1
 path_priority = 0
 xml_str = ""
@@ -34,7 +37,9 @@ from System.Windows.Automation import *
 
 # Suppress the InsecureRequestWarning since we use verify=False parameter.
 from urllib3.exceptions import InsecureRequestWarning
+
 requests.packages.urllib3.disable_warnings(category=InsecureRequestWarning)
+
 
 def ExecLog(sModuleInfo, sDetails, iLogLevel):
     if iLogLevel == 1:
@@ -51,8 +56,11 @@ def ExecLog(sModuleInfo, sDetails, iLogLevel):
     info = f"{sModuleInfo}\t\n"
     print(line_color + f"{status.upper()} - {info}{sDetails}")
 
+
 def Exception_Handler(exec_info):
-    sModuleInfo_Local = inspect.currentframe().f_code.co_name + " : " + inspect.getmodulename(__file__)
+    sModuleInfo_Local = (
+        inspect.currentframe().f_code.co_name + " : " + inspect.getmodulename(__file__)
+    )
     exc_type, exc_obj, exc_tb = exec_info
     Error_Type = (
         (str(exc_type).replace("type ", ""))
@@ -71,6 +79,7 @@ def Exception_Handler(exec_info):
     sModuleInfo = Function_Name + ":" + File_Name
     ExecLog(sModuleInfo, "Following exception occurred: %s" % (Error_Detail), 3)
 
+
 def _found2(Element):
     try:
         left = Element.Left
@@ -84,6 +93,7 @@ def _found2(Element):
         print(sys.exc_info())
         return False
 
+
 def create_index2(index_trace: dict, element):
     NameE = element.Name
     ClassE = element.ClassName
@@ -91,24 +101,35 @@ def create_index2(index_trace: dict, element):
     LocalizedControlTypeE = element.LocalizedControlType
 
     s = 'automationid="%s"' % AutomationE
-    if s in index_trace: index_trace[s] += 1
-    else: index_trace[s] = 0
+    if s in index_trace:
+        index_trace[s] += 1
+    else:
+        index_trace[s] = 0
 
     s = 'name="%s"' % NameE
-    if s in index_trace: index_trace[s] += 1
-    else: index_trace[s] = 0
+    if s in index_trace:
+        index_trace[s] += 1
+    else:
+        index_trace[s] = 0
 
     s = 'name="%s",control="%s"' % (NameE, LocalizedControlTypeE)
-    if s in index_trace: index_trace[s] += 1
-    else: index_trace[s] = 0
+    if s in index_trace:
+        index_trace[s] += 1
+    else:
+        index_trace[s] = 0
 
     s = 'class="%s"' % ClassE
-    if s in index_trace: index_trace[s] += 1
-    else: index_trace[s] = 0
+    if s in index_trace:
+        index_trace[s] += 1
+    else:
+        index_trace[s] = 0
 
     s = 'name="%s",class="%s"' % (NameE, ClassE)
-    if s in index_trace: index_trace[s] += 1
-    else: index_trace[s] = 0
+    if s in index_trace:
+        index_trace[s] += 1
+    else:
+        index_trace[s] = 0
+
 
 def create_path2(index_trace: dict, element):
     NameE = element.Name
@@ -133,15 +154,27 @@ def create_path2(index_trace: dict, element):
         return s + ">" + "\n" if new_line else ""
 
     if NameE and s in index_trace:
-        return s_name + ">" + ',index="%s">' % (index_trace[s_name] + 1) + "\n" if new_line else ""
+        return (
+            s_name + ">" + ',index="%s">' % (index_trace[s_name] + 1) + "\n"
+            if new_line
+            else ""
+        )
     if ClassE and s in index_trace:
-        return s_class + ">" + ',index="%s">' % (index_trace[s_class] + 1) + "\n" if new_line else ""
+        return (
+            s_class + ">" + ',index="%s">' % (index_trace[s_class] + 1) + "\n"
+            if new_line
+            else ""
+        )
 
     # if s_name not in index_trace:
     #     return s_name + ">" + "\n" if new_line else ""
     if s_name_control not in index_trace:
         return s_name_control + ">" + "\n" if new_line else ""
-    return s_name_control + ',index="%s">' % (index_trace[s_name_control] + 1) + "\n" if new_line else ""
+    return (
+        s_name_control + ',index="%s">' % (index_trace[s_name_control] + 1) + "\n"
+        if new_line
+        else ""
+    )
 
 
 def _child_search2(ParentElement):
@@ -167,7 +200,8 @@ def _child_search2(ParentElement):
         Exception_Handler(sys.exc_info())
         return ""
 
-class node():
+
+class node:
     def __init__(self, element):
         self.Name = element.Current.Name
         self.ClassName = element.Current.ClassName
@@ -185,14 +219,17 @@ class node():
             self.Bottom = -1
             self.Top = -1
 
-        self.parent = None      # Implement it later
+        self.parent = None  # Implement it later
         self.children = []
+
 
 def copy_tree2(Children, ParentElement):
     try:
         Children.append(node(ParentElement))
         Node = Children[-1]
-        child_elements = ParentElement.FindAll(TreeScope.Children, Condition.TrueCondition)
+        child_elements = ParentElement.FindAll(
+            TreeScope.Children, Condition.TrueCondition
+        )
         if child_elements.Count == 0:
             return
         for each_child in child_elements:
@@ -200,18 +237,23 @@ def copy_tree2(Children, ParentElement):
     except:
         Exception_Handler(sys.exc_info())
 
+
 global_root = None
+
+
 def close(e):
-    global x,y
+    global x, y
     x = e.x
     y = e.y
     global_root.quit()
+
+
 def showPIL(pilImage):
     root = tkinter.Tk()
     global global_root
     global_root = root
     w, h = root.winfo_screenwidth(), root.winfo_screenheight()
-    print(w,h)
+    print(w, h)
     root.overrideredirect(1)
     root.geometry("%dx%d+0+0" % (w, h))
     root.focus_set()
@@ -219,18 +261,19 @@ def showPIL(pilImage):
     root.bind("<Escape>", close, root)
     root.bind("<ButtonPress>", close, root)
 
-    canvas = tkinter.Canvas(root,width=w,height=h)
+    canvas = tkinter.Canvas(root, width=w, height=h)
     canvas.pack()
-    canvas.configure(background='black')
+    canvas.configure(background="black")
     imgWidth, imgHeight = pilImage.size
     if imgWidth > w or imgHeight > h:
-        ratio = min(w/imgWidth, h/imgHeight)
-        imgWidth = int(imgWidth*ratio)
-        imgHeight = int(imgHeight*ratio)
-        pilImage = pilImage.resize((imgWidth,imgHeight), Image.ANTIALIAS)
+        ratio = min(w / imgWidth, h / imgHeight)
+        imgWidth = int(imgWidth * ratio)
+        imgHeight = int(imgHeight * ratio)
+        pilImage = pilImage.resize((imgWidth, imgHeight), Image.ANTIALIAS)
     image = ImageTk.PhotoImage(pilImage)
-    imagesprite = canvas.create_image(w/2,h/2,image=image)
+    imagesprite = canvas.create_image(w / 2, h / 2, image=image)
     root.mainloop()
+
 
 def main2():
     try:
@@ -239,12 +282,14 @@ def main2():
         # time.sleep(5)
         start = time.time()
         Root = node(AutomationElement.RootElement)
-        all_windows = AutomationElement.RootElement.FindAll(TreeScope.Children, Condition.TrueCondition)
+        all_windows = AutomationElement.RootElement.FindAll(
+            TreeScope.Children, Condition.TrueCondition
+        )
         if all_windows.Count == 0:
             return
         print("Enter between 1-%s to select a window" % all_windows.Count)
         for i in range(len(all_windows)):
-            print("%s. %s" % (i+1, all_windows[i].Current.Name))
+            print("%s. %s" % (i + 1, all_windows[i].Current.Name))
         dur = time.time() - start
         idx = input()
         start = time.time()
@@ -252,7 +297,7 @@ def main2():
             idx = int(idx.strip())
         except:
             return Exception_Handler(sys.exc_info())
-        window = all_windows[idx-1]
+        window = all_windows[idx - 1]
         window_name = window.Current.Name
         Root.children.append(node(window))
         all_elements = window.FindAll(TreeScope.Children, Condition.TrueCondition)
@@ -270,11 +315,12 @@ def main2():
         showPIL(image)
         print("tkinter close")
         print("************ YOUR Exact Path *************")
-        if x>=0 and y>=0:
+        if x >= 0 and y >= 0:
             res = _child_search(Root)[:-2] + "\n"
             print(res)
     except:
         Exception_Handler(sys.exc_info())
+
 
 def _found(Element):
     try:
@@ -289,6 +335,7 @@ def _found(Element):
         print(sys.exc_info())
         return False
 
+
 def create_index(index_trace: dict, element):
     NameE = element.Current.Name
     ClassE = element.Current.ClassName
@@ -296,24 +343,35 @@ def create_index(index_trace: dict, element):
     LocalizedControlTypeE = element.Current.LocalizedControlType
 
     s = 'automationid="%s"' % AutomationE
-    if s in index_trace: index_trace[s] += 1
-    else: index_trace[s] = 0
+    if s in index_trace:
+        index_trace[s] += 1
+    else:
+        index_trace[s] = 0
 
     s = 'name="%s"' % NameE
-    if s in index_trace: index_trace[s] += 1
-    else: index_trace[s] = 0
+    if s in index_trace:
+        index_trace[s] += 1
+    else:
+        index_trace[s] = 0
 
     s = 'name="%s",control="%s"' % (NameE, LocalizedControlTypeE)
-    if s in index_trace: index_trace[s] += 1
-    else: index_trace[s] = 0
+    if s in index_trace:
+        index_trace[s] += 1
+    else:
+        index_trace[s] = 0
 
     s = 'class="%s"' % ClassE
-    if s in index_trace: index_trace[s] += 1
-    else: index_trace[s] = 0
+    if s in index_trace:
+        index_trace[s] += 1
+    else:
+        index_trace[s] = 0
 
     s = 'name="%s",class="%s"' % (NameE, ClassE)
-    if s in index_trace: index_trace[s] += 1
-    else: index_trace[s] = 0
+    if s in index_trace:
+        index_trace[s] += 1
+    else:
+        index_trace[s] = 0
+
 
 def create_path(index_trace: dict, element, window_cond=False):
     NameE = element.Current.Name
@@ -324,8 +382,10 @@ def create_path(index_trace: dict, element, window_cond=False):
     if window_cond:
         config = configparser.ConfigParser()
         config.read("..\..\Framework\settings.conf")
-        try: window_name = config.get("Inspector", "Window")
-        except: window_name = ""
+        try:
+            window_name = config.get("Inspector", "Window")
+        except:
+            window_name = ""
         if window_name:
             s_name = '**name="%s"' % window_name
         else:
@@ -350,28 +410,54 @@ def create_path(index_trace: dict, element, window_cond=False):
     global path_priority
     path_priority = 2
     if NameE and s in index_trace:
-        return s_name + ',index="%s">' % (index_trace[s_name] + 1) + "\n" if new_line else ""
+        return (
+            s_name + ',index="%s">' % (index_trace[s_name] + 1) + "\n"
+            if new_line
+            else ""
+        )
     if ClassE and s in index_trace:
-        return s_class + ',index="%s">' % (index_trace[s_class] + 1) + "\n" if new_line else ""
+        return (
+            s_class + ',index="%s">' % (index_trace[s_class] + 1) + "\n"
+            if new_line
+            else ""
+        )
 
     # if s_name not in index_trace:
     #     return s_name + ">" + "\n" if new_line else ""
     if s_name_control not in index_trace:
         return s_name_control + ">" + "\n" if new_line else ""
-    return s_name_control + ',index="%s">' % (index_trace[s_name_control] + 1) + "\n" if new_line else ""
+    return (
+        s_name_control + ',index="%s">' % (index_trace[s_name_control] + 1) + "\n"
+        if new_line
+        else ""
+    )
 
 
 element_plugin = False
-findall_time = 0; findall_count = 0; each_findall_time = []
+findall_time = 0
+findall_count = 0
+each_findall_time = []
+
+
 def _child_search(ParentElement, level, parenthesis=1):
     try:
         path = ""
         global xml_str, element_plugin, findall_time, findall_count
         start = time.perf_counter()
-        child_elements = ParentElement.FindAll(TreeScope.Children, Condition.TrueCondition)
-        temp_findall_time = time.perf_counter()-start
+        child_elements = ParentElement.FindAll(
+            TreeScope.Children, Condition.TrueCondition
+        )
+        temp_findall_time = time.perf_counter() - start
         global each_findall_time
-        each_findall_time += [[temp_findall_time/child_elements.Count if child_elements.Count>0 else -1, temp_findall_time, child_elements.Count]]
+        each_findall_time += [
+            [
+                temp_findall_time / child_elements.Count
+                if child_elements.Count > 0
+                else -1,
+                temp_findall_time,
+                child_elements.Count,
+            ]
+        ]
         findall_time += temp_findall_time
         findall_count += 1
         # child_elements.Count>0 and temp_findall_time/child_elements.Count>2.5
@@ -382,10 +468,38 @@ def _child_search(ParentElement, level, parenthesis=1):
         temp = ""
         found = False
         for each_child in child_elements:
-            elem_name = each_child.Current.Name.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace('"', "&quot;").replace("'", "&apos;").replace(r"\Automation_Solutionz\Zeuz_Node\Public_Node\Zeuz_Python_Node\Apps\W", "xyz")
-            elem_automationid = each_child.Current.AutomationId.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace('"', "&quot;").replace("'", "&apos;")
-            elem_class = each_child.Current.ClassName.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace('"', "&quot;").replace("'", "&apos;")
-            elem_control = each_child.Current.LocalizedControlType.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace('"', "&quot;").replace("'", "&apos;")
+            elem_name = (
+                each_child.Current.Name.replace("&", "&amp;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;")
+                .replace('"', "&quot;")
+                .replace("'", "&apos;")
+                .replace(
+                    r"\Automation_Solutionz\Zeuz_Node\Public_Node\Zeuz_Python_Node\Apps\W",
+                    "xyz",
+                )
+            )
+            elem_automationid = (
+                each_child.Current.AutomationId.replace("&", "&amp;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;")
+                .replace('"', "&quot;")
+                .replace("'", "&apos;")
+            )
+            elem_class = (
+                each_child.Current.ClassName.replace("&", "&amp;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;")
+                .replace('"', "&quot;")
+                .replace("'", "&apos;")
+            )
+            elem_control = (
+                each_child.Current.LocalizedControlType.replace("&", "&amp;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;")
+                .replace('"', "&quot;")
+                .replace("'", "&apos;")
+            )
             try:
                 left = str(each_child.Current.BoundingRectangle.Left)
                 right = str(each_child.Current.BoundingRectangle.Right)
@@ -395,29 +509,43 @@ def _child_search(ParentElement, level, parenthesis=1):
                 left, right, top, bottom = "", "", "", ""
             end_div = False
             if level >= No_of_level_to_skip:
-                xml_str += "\n" + "  "*parenthesis + '<div Name="%s" AutomationId="%s" ClassName="%s" LocalizedControlType="%s"' % \
-                (elem_name, elem_automationid, elem_class, elem_control) + ' Left="%s" Right="%s" Top="%s" Bottom="%s">' % (left, right, top, bottom)
+                xml_str += (
+                    "\n"
+                    + "  " * parenthesis
+                    + '<div Name="%s" AutomationId="%s" ClassName="%s" LocalizedControlType="%s"'
+                    % (elem_name, elem_automationid, elem_class, elem_control)
+                    + ' Left="%s" Right="%s" Top="%s" Bottom="%s">'
+                    % (left, right, top, bottom)
+                )
                 end_div = True
             if _found(each_child) and not found:
                 if not level >= No_of_level_to_skip:
-                    xml_str += "\n" + "  " * parenthesis + '<div Name="%s" AutomationId="%s" ClassName="%s" LocalizedControlType="%s"' % \
-                   (elem_name, elem_automationid, elem_class, elem_control) + ' Left="%s" Right="%s" Top="%s" Bottom="%s">' % (left, right, top, bottom)
+                    xml_str += (
+                        "\n"
+                        + "  " * parenthesis
+                        + '<div Name="%s" AutomationId="%s" ClassName="%s" LocalizedControlType="%s"'
+                        % (elem_name, elem_automationid, elem_class, elem_control)
+                        + ' Left="%s" Right="%s" Top="%s" Bottom="%s">'
+                        % (left, right, top, bottom)
+                    )
                     end_div = True
                 path += create_path(index_trace, each_child)
                 found = True
                 if not element_plugin:
                     xml_len = len(xml_str)
             if not temp and found:
-                temp = _child_search(each_child, level+1, parenthesis+1)
+                temp = _child_search(each_child, level + 1, parenthesis + 1)
             elif level >= No_of_level_to_skip:
-                _child_search(each_child, level+1, parenthesis+1)
+                _child_search(each_child, level + 1, parenthesis + 1)
             if not found:
                 create_index(index_trace, each_child)
             if end_div:
-                xml_str += "\n" + "  "*parenthesis + "</div>"
+                xml_str += "\n" + "  " * parenthesis + "</div>"
 
         if found and not element_plugin:
-            xml_str = xml_str[:xml_len-1] + ' zeuz="aiplugin"' + xml_str[xml_len-1:]
+            xml_str = (
+                xml_str[: xml_len - 1] + ' zeuz="aiplugin"' + xml_str[xml_len - 1 :]
+            )
             element_plugin = True
         return path + temp
 
@@ -425,17 +553,24 @@ def _child_search(ParentElement, level, parenthesis=1):
         print(sys.exc_info())
         return ""
 
+
 server = ""
 api_key = ""
 auth = ""
+
+
 def Authenticate():
     global server, api_key
     config = configparser.ConfigParser()
     config.read("..\..\Framework\settings.conf")
-    try: api_key = config.get("Authentication", "api-key")
-    except: api_key = ""
-    try: server = config.get("Authentication", "server_address")
-    except: server = ""
+    try:
+        api_key = config.get("Authentication", "api-key")
+    except:
+        api_key = ""
+    try:
+        server = config.get("Authentication", "server_address")
+    except:
+        server = ""
     while not server or not api_key:
         server = input("Provide Server Address: ")
         api_key = input("Provide API-Key: ")
@@ -445,39 +580,39 @@ def Authenticate():
         url += "api/auth/token/verify?api_key=" + api_key
         return executor.submit(requests.get, url, verify=False)
 
+
 def Upload(auth_thread, window_name):
     try:
         global auth
         if not auth:
             auth = auth_thread.result().json()["token"]
-        Authorization = 'Bearer ' + auth
+        Authorization = "Bearer " + auth
         url = server + "/" if server[-1] != "/" else server
         url += "api/contents/"
-        content = json.dumps({
-            'html': xml_str,
-            "exact_path": {"path": path, "priority": path_priority},
-            "window_name": window_name
-        })
+        content = json.dumps(
+            {
+                "html": xml_str,
+                "exact_path": {"path": path, "priority": path_priority},
+                "window_name": window_name,
+            }
+        )
 
-        payload = json.dumps({
-            "content": content,
-            "source": "windows"
-        })
-        headers = {
-            'Authorization': Authorization,
-            'Content-Type': 'application/json'
+        payload = json.dumps({"content": content, "source": "windows"})
+        headers = {"Authorization": Authorization, "Content-Type": "application/json"}
 
-        }
-
-        response = requests.request("POST", url, headers=headers, data=payload, verify=False)
+        response = requests.request(
+            "POST", url, headers=headers, data=payload, verify=False
+        )
         response = response.json()
         del response["content"]
         print(response)
     except:
         Exception_Handler(sys.exc_info())
         ExecLog("", "Could not upload Element identifiers xml", 3)
-        try: print(response)
-        except: pass
+        try:
+            print(response)
+        except:
+            pass
 
 
 def sibling_found(each):
@@ -507,13 +642,16 @@ def sibling_search(ParentElement):
 def Remove_coordinate(root):
     for each in root:
         att = each.attrib
-        del att["Left"]; del att["Right"]; del att["Top"]; del att["Bottom"]
+        del att["Left"]
+        del att["Right"]
+        del att["Top"]
+        del att["Bottom"]
         Remove_coordinate(each)
 
 
 def debugger_is_active() -> bool:
     """Return if the debugger is currently active"""
-    gettrace = getattr(sys, 'gettrace', lambda : None)
+    gettrace = getattr(sys, "gettrace", lambda: None)
     return gettrace() is not None
 
 
@@ -535,16 +673,23 @@ def main():
             if debugger_is_active():
                 input("Press Enter to Continue")
             else:
-                os.system('pause')
+                os.system("pause")
             print("Hover over the Element and press control")
-            path = ""; xml_str = ""; path_priority = 0; element_plugin = False; findall_time = 0; findall_count = 0
+            path = ""
+            xml_str = ""
+            path_priority = 0
+            element_plugin = False
+            findall_time = 0
+            findall_count = 0
             keyboard.wait("ctrl")
             x, y = pyautogui.position()
 
             print("Searching for the Element identifier")
 
             start = time.perf_counter()
-            windows = AutomationElement.RootElement.FindAll(TreeScope.Children, Condition.TrueCondition)
+            windows = AutomationElement.RootElement.FindAll(
+                TreeScope.Children, Condition.TrueCondition
+            )
             if windows.Count == 0:
                 return
             for window in windows:
@@ -559,7 +704,9 @@ def main():
             path += _child_search(window, 0)[:-2] + "\n"
             xml_str += "\n" + "</body>"
 
-            xml_str = xml_str.encode('ascii', 'ignore').decode()        # ignore characters which are not ascii presentable
+            xml_str = xml_str.encode(
+                "ascii", "ignore"
+            ).decode()  # ignore characters which are not ascii presentable
 
             print("************* Exact Path *************")
             print(path)
@@ -567,11 +714,13 @@ def main():
             # print("Path priority =", path_priority, "\n\n")
             with open("Element.xml", "w") as f:
                 f.write(xml_str)
-            element_time = round(time.perf_counter()-start, 3)
+            element_time = round(time.perf_counter() - start, 3)
             sibling_time = 0
-            try: autoit.win_activate(screen_title)
-            except: pass
-            sibling = pyautogui.confirm('Do you want SIBLING?')
+            try:
+                autoit.win_activate(screen_title)
+            except:
+                pass
+            sibling = pyautogui.confirm("Do you want SIBLING?")
             root = ET.fromstring(xml_str)
             if sibling.strip().lower() == "ok":
                 print("Hover over the SIBLING and press control")
@@ -589,17 +738,28 @@ def main():
 
             start = time.perf_counter()
             Upload(auth_thread, window_name)
-            Upload_time = round(time.perf_counter()-start, 3)
+            Upload_time = round(time.perf_counter() - start, 3)
 
             print("\nElement searching time =", element_time, "sec")
             print("Sibling searching time =", sibling_time, "sec")
             print("Coordinate remove time =", Remove_coordinate_time, "sec")
             print("Uploading to API  time =", Upload_time, "sec")
-            print("start_findall time =", round(findall_time, 3), "sec", "Findall count =", findall_count)
-            print("each__findall_time (Each_Element_find_time, finall_time, child_count)")
+            print(
+                "start_findall time =",
+                round(findall_time, 3),
+                "sec",
+                "Findall count =",
+                findall_count,
+            )
+            print(
+                "each__findall_time (Each_Element_find_time, finall_time, child_count)"
+            )
             from operator import itemgetter
+
             global each_findall_time
-            each_findall_time = sorted(each_findall_time, key=itemgetter(0), reverse=True)
+            each_findall_time = sorted(
+                each_findall_time, key=itemgetter(0), reverse=True
+            )
             # for i in each_findall_time:
             #     print(i)
             # break

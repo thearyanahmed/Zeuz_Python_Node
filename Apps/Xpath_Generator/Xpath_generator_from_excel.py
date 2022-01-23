@@ -1,6 +1,9 @@
 import xlwings as xw
 import pathlib
+
 driver_type = "selenium"
+
+
 def _construct_query(step_data_set, web_element_object=False):
     """
     first find out if in our dataset user is using css or xpath.  If they are using css or xpath, they cannot use any
@@ -49,7 +52,7 @@ def _construct_query(step_data_set, web_element_object=False):
             and sibling_ref_exits == False
             and web_element_object == False
         ):
-            """  If  there are no child or parent as reference, then we construct the xpath differently"""
+            """If  there are no child or parent as reference, then we construct the xpath differently"""
             # first we collect all rows with element parameter only
             xpath_element_list = _construct_xpath_list(element_parameter_list)
             return (_construct_xpath_string_from_list(xpath_element_list), "xpath")
@@ -59,7 +62,7 @@ def _construct_query(step_data_set, web_element_object=False):
             and parent_ref_exits == False
             and sibling_ref_exits == False
         ):
-            """  If  There is child but making sure no parent or sibling
+            """If  There is child but making sure no parent or sibling
             //<child_tag>[child_parameter]/ancestor::<element_tag>[element_parameter]
             """
             xpath_child_list = _construct_xpath_list(child_parameter_list)
@@ -80,7 +83,7 @@ def _construct_query(step_data_set, web_element_object=False):
             and sibling_ref_exits == False
             and (driver_type == "appium" or driver_type == "selenium")
         ):
-            """  
+            """
             parent as a reference
             '//<parent tag>[<parent attributes>]/descendant::<target element tag>[<target element attribute>]'
             """
@@ -119,7 +122,7 @@ def _construct_query(step_data_set, web_element_object=False):
             and sibling_ref_exits == True
             and (driver_type == "appium" or driver_type == "selenium")
         ):
-            """  for siblings, we need parent, siblings and element.  Siblings cannot be used with just element
+            """for siblings, we need parent, siblings and element.  Siblings cannot be used with just element
             xpath_format = '//<sibling_tag>[<sibling_element>]/ancestor::<immediate_parent_tag>[<immediate_parent_element>]//<target_tag>[<target_element>]'
             """
             xpath_sibling_list = _construct_xpath_list(sibling_parameter_list)
@@ -145,7 +148,7 @@ def _construct_query(step_data_set, web_element_object=False):
             and sibling_ref_exits == False
             and (driver_type == "xml")
         ):
-            """  If  There is parent but making sure no child"""
+            """If  There is parent but making sure no child"""
             xpath_parent_list = _construct_xpath_list(parent_parameter_list)
             parent_xpath_string = _construct_xpath_string_from_list(xpath_parent_list)
             # For xml we just put parent first and element later
@@ -165,6 +168,7 @@ def _construct_query(step_data_set, web_element_object=False):
             return False, False
     except Exception as e:
         print(e)
+
 
 def _construct_xpath_list(parameter_list, add_dot=False):
     """
@@ -242,9 +246,10 @@ def _construct_xpath_string_from_list(xpath_list):
     except Exception as e:
         print(e)
 
+
 if __name__ == "__main__":
     path = pathlib.Path(__file__).parent
-    path = path/"dataset.xlsx"
+    path = path / "dataset.xlsx"
     wb = xw.Book(path)
     sheet = wb.sheets["Sheet1"]
     expand = "table"
@@ -253,7 +258,9 @@ if __name__ == "__main__":
         cell_data = sheet.range(cell_range).expand(expand).value
         # print(cell_data)
         # wb.save()
-        data = cell_data[1:] if cell_data[0][1].strip().lower() == "middle" else cell_data
+        data = (
+            cell_data[1:] if cell_data[0][1].strip().lower() == "middle" else cell_data
+        )
         result = _construct_query(data)[0]
         print(result)
         print("[To get new Xpath change and save the exel file and press ENTER]")

@@ -138,7 +138,8 @@ def handle_db_exception(sModuleInfo, e):
             "If you're using IP address to connect,"
             "make sure the only IP address is provided (without http/https)."
             "Example: 127.0.0.1",
-            3)
+            3,
+        )
         return CommonUtil.Exception_Handler(sys.exc_info())
 
 
@@ -154,6 +155,7 @@ def db_get_connection():
 
     try:
         import pyodbc
+
         db_con = None
 
         # Alias for Shared_Resources.Get_Shared_Variables
@@ -183,7 +185,7 @@ def db_get_connection():
                 password=db_password,
                 database=db_name,
                 host=db_host,
-                port=db_port
+                port=db_port,
             )
         elif "mysql" in db_type:
             import mysql.connector
@@ -194,7 +196,7 @@ def db_get_connection():
                 password=db_password,
                 database=db_name,
                 host=db_host,
-                port=db_port
+                port=db_port,
             )
         elif "mariadb" in db_type:
             import mariadb
@@ -205,26 +207,22 @@ def db_get_connection():
                 password=db_password,
                 database=db_name,
                 host=db_host,
-                port=db_port
+                port=db_port,
             )
         elif "oracle" in db_type:
             import cx_Oracle
 
             # https://cx-oracle.readthedocs.io/en/latest/api_manual/module.html#cx_Oracle.makedsn
-            if db_sid != 'zeuz_failed':
+            if db_sid != "zeuz_failed":
+                dsn = cx_Oracle.makedsn(host=db_host, port=db_port, sid=db_sid)
+            elif db_service_name != "zeuz_failed":
                 dsn = cx_Oracle.makedsn(
-                    host=db_host,
-                    port=db_port,
-                    sid=db_sid
-                )
-            elif db_service_name != 'zeuz_failed':
-                dsn = cx_Oracle.makedsn(
-                    host=db_host,
-                    port=db_port,
-                    service_name=db_service_name
+                    host=db_host, port=db_port, service_name=db_service_name
                 )
             else:
-                CommonUtil.ExecLog(sModuleInfo, "Either db_sid or db_service must be provide.", 3)
+                CommonUtil.ExecLog(
+                    sModuleInfo, "Either db_sid or db_service must be provide.", 3
+                )
                 return "zeuz_failed"
 
             # Connect to db
@@ -299,7 +297,9 @@ def connect_to_db(data_set):
             if left == DB_ODBC_DRIVER:
                 sr.Set_Shared_Variables(DB_ODBC_DRIVER, right)
 
-        CommonUtil.ExecLog(sModuleInfo, "Trying to establish connection to the database.", 1)
+        CommonUtil.ExecLog(
+            sModuleInfo, "Trying to establish connection to the database.", 1
+        )
         db_get_connection()
 
         return "passed"
@@ -339,7 +339,7 @@ def db_select(data_set):
         if variable_name is None:
             CommonUtil.ExecLog(sModuleInfo, "Variable name must be provided.", 3)
             return "zeuz_failed"
-        
+
         if query is None:
             CommonUtil.ExecLog(sModuleInfo, "SQL query must be provided.", 3)
             return "zeuz_failed"
@@ -395,57 +395,57 @@ def select_from_db(data_set):
     try:
         table_name = None
         query = None
-        where=None
-        columns=None
-        variable_name=None
-        group_by=None
-        order_by=None
-        order=" "
+        where = None
+        columns = None
+        variable_name = None
+        group_by = None
+        order_by = None
+        order = " "
 
         for left, mid, right in data_set:
             if "table" in left.lower():
                 # Get the and query, and remove any whitespaces
-                table_name= right.strip()
-            if left.lower()=="where":
-                where=right.strip()
+                table_name = right.strip()
+            if left.lower() == "where":
+                where = right.strip()
             if "action" in mid.lower():
                 variable_name = right.strip()
             if "group" in left.lower():
-                group_by=right.split(',')
+                group_by = right.split(",")
             if "order" in left.lower():
-                order_by=right.split(',')
+                order_by = right.split(",")
 
             if "columns" in left.lower():
-                if right=="" or right=="*":
-                    columns=["*"]
-                columns=right.split(',')
+                if right == "" or right == "*":
+                    columns = ["*"]
+                columns = right.split(",")
 
         if variable_name is None:
             CommonUtil.ExecLog(sModuleInfo, "Variable name must be provided.", 3)
             return "zeuz_failed"
 
-        query="select "
+        query = "select "
         for index in range(len(columns)):
-            query+=columns[index]+" "
-            if(index!=(len(columns)-1)):
-                query+=","
+            query += columns[index] + " "
+            if index != (len(columns) - 1):
+                query += ","
 
-        query+="from "+table_name
+        query += "from " + table_name
         if where is not None:
-            query+=" where "+where
+            query += " where " + where
 
-        if group_by is not  None:
-            query+=" group by "
+        if group_by is not None:
+            query += " group by "
             for index in range(len(group_by)):
-                query+=group_by[index]+" "
-                if(index!=(len(group_by)-1)):
-                    query+=","
+                query += group_by[index] + " "
+                if index != (len(group_by) - 1):
+                    query += ","
 
         if order_by is not None:
             query += " order by "
             for index in range(len(order_by)):
                 query += order_by[index] + " "
-                if (index != (len(order_by) - 1)):
+                if index != (len(order_by) - 1):
                     query += ","
 
         CommonUtil.ExecLog(sModuleInfo, "Executing query:\n%s." % query, 1)
@@ -503,20 +503,20 @@ def insert_into_db(data_set):
     try:
         table_name = None
         query = None
-        values=None
-        columns=None
-        variable_name=None
+        values = None
+        columns = None
+        variable_name = None
 
         for left, mid, right in data_set:
             if "table" in left.lower():
                 # Get the and query, and remove any whitespaces
-                table_name= right.strip()
+                table_name = right.strip()
             if "values" in left.lower():
-                values=right.split(',')
+                values = right.split(",")
             if "action" in mid:
                 variable_name = right.strip()
             if "columns" in left.lower():
-                columns=right.split(',')
+                columns = right.split(",")
 
         if variable_name is None:
             CommonUtil.ExecLog(sModuleInfo, "Variable name must be provided.", 3)
@@ -524,13 +524,13 @@ def insert_into_db(data_set):
 
         query = "insert into " + table_name + " ( "
         for index in range(len(columns)):
-            query += columns[index]+" "
-            if index != len(columns)-1:
+            query += columns[index] + " "
+            if index != len(columns) - 1:
                 query += ","
         query += ") values ("
         for index in range(len(values)):
             query += values[index] + " "
-            if (index != (len(values) - 1)):
+            if index != (len(values) - 1):
                 query += ","
         query += " ) "
 
@@ -576,7 +576,6 @@ def delete_from_db(data_set):
     :return: string: "passed" or "zeuz_failed" depending on the outcome
     """
 
-
     sModuleInfo = inspect.currentframe().f_code.co_name + " : " + MODULE_NAME
 
     try:
@@ -598,9 +597,9 @@ def delete_from_db(data_set):
             CommonUtil.ExecLog(sModuleInfo, "Variable name must be provided.", 3)
             return "zeuz_failed"
 
-        query = "delete from "+ table_name
+        query = "delete from " + table_name
         if where is not None:
-            query +=" where "+where
+            query += " where " + where
 
         CommonUtil.ExecLog(sModuleInfo, "Executing query:\n%s." % query, 1)
 
@@ -653,36 +652,36 @@ def update_into_db(data_set):
     try:
         table_name = None
         query = None
-        where=None
-        columns=None
-        values=None
-        variable_name=None
+        where = None
+        columns = None
+        values = None
+        variable_name = None
 
         for left, mid, right in data_set:
             if "table" in left.lower():
                 # Get the and query, and remove any whitespaces
-                table_name= right.strip()
-            if left=="where":
-                where=right.strip()
+                table_name = right.strip()
+            if left == "where":
+                where = right.strip()
             if "action" in mid:
                 variable_name = right.strip()
             if "columns" in left.lower():
-                columns=right.split(',')
+                columns = right.split(",")
             if "values" in left.lower():
-                values=right.split(',')
+                values = right.split(",")
 
         if variable_name is None:
             CommonUtil.ExecLog(sModuleInfo, "Variable name must be provided.", 3)
             return "zeuz_failed"
 
-        query="update "+table_name+" set "
+        query = "update " + table_name + " set "
         for index in range(len(columns)):
-            query+=columns[index]+"= "
-            query+=values[index]+" "
-            if(index!=(len(columns)-1)):
-                query+=","
+            query += columns[index] + "= "
+            query += values[index] + " "
+            if index != (len(columns) - 1):
+                query += ","
         if where is not None:
-            query+=" where "+where
+            query += " where " + where
 
         CommonUtil.ExecLog(sModuleInfo, "Executing query:\n%s." % query, 1)
 
@@ -738,11 +737,11 @@ def db_non_query(data_set):
 
             if "action" in mid:
                 variable_name = right.strip()
-        
+
         if variable_name is None:
             CommonUtil.ExecLog(sModuleInfo, "Variable name must be provided.", 3)
             return "zeuz_failed"
-        
+
         if query is None:
             CommonUtil.ExecLog(sModuleInfo, "SQL query must be provided.", 3)
             return "zeuz_failed"

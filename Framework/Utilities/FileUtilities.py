@@ -67,12 +67,13 @@ def CreateFile(sFilePath):
 
 
 def ZipFile(source, zip_destination, arcname=""):
-    """ Zips and compress a given file like .json NOT FOLDER"""
+    """Zips and compress a given file like .json NOT FOLDER"""
     try:
         import zipfile
+
         if not arcname:
             arcname = os.path.basename(source)
-        with zipfile.ZipFile(zip_destination, 'w', zipfile.ZIP_DEFLATED) as zipf:
+        with zipfile.ZipFile(zip_destination, "w", zipfile.ZIP_DEFLATED) as zipf:
             zipf.write(source, arcname=arcname)
     except Exception as e:
         print("Exception :", e)
